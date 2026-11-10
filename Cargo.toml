@@ -1,0 +1,20 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+# no_std-Hygiene: core/alloc statt std, wo möglich
+std_instead_of_core = "forbid"
+std_instead_of_alloc = "forbid"
+alloc_instead_of_core = "forbid"
+# Keine Panics in Bibliotheksfunktionen (Fehler als Result)
+unwrap_used = "forbid"
+panic = "forbid"
