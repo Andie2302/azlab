@@ -1,6 +1,7 @@
 # Phase 2 – Zahlentypen (Detailplan)
 
-Status: **zur Freigabe**. Erst nach Freigabe entsteht Code.
+Status: **zur Freigabe** – wartet auf den ersten Prüflauf von Phase 1
+(`scripts/pruefen.sh`). Erst nach Freigabe entsteht Code.
 
 ## Ziel
 
@@ -224,8 +225,8 @@ Alle Erwartungswerte sind exakt von Hand herleitbar oder Identitäten.
 Nach jedem Schritt ein Commit; Prüflauf durch den Menschen mindestens nach
 Schritt A und am Ende.
 
-## Annahmen, die mit der Freigabe bestätigt werden
+## Festlegungen
 
-- F12: `/` ist Rechtsdivision `a * b⁻¹`.
-- F13: Hauptzweige wie C99.
+- `/` ist Rechtsdivision `a * b⁻¹` (entschieden).
+- Hauptzweige wie C99 (entschieden).
 - `Dual`/`DualN`/`Complex`-Felder sind öffentlich (`re`, `eps`, `im`).

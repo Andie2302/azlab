@@ -35,7 +35,8 @@ der KI. Zuerst diese Datei lesen, dann [todo/README.md](todo/README.md).
 
 ## Weitere Festlegungen
 
-- Nur stable Rust.
+- Nur stable Rust; die Mindestversion darf bis zur neuesten stabilen Version gehen.
+- Gearbeitet wird direkt auf `master`.
 - Plan, Doku-Kommentare und Commit-Nachrichten auf Deutsch; Bezeichner englisch.
 - Neue Abhängigkeiten und Features zuerst in
   `todo/03-features-abhaengigkeiten.md` eintragen.

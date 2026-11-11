@@ -55,4 +55,8 @@ Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 | Trait-Umbau | Basis-Trait `Algebra` unter `Ring`; `from_f64` in `Field` |
 | Dual-Vergleich | nur der Wert zählt, Ableitungsanteil wird ignoriert |
 | Komplexe Zahlen | eigener Typ `Complex<T>` plus Umwandlung von/nach Cayley-Dickson |
+| Division nicht-kommutativer Typen | `a / b` ist Rechtsdivision `a · b⁻¹` |
+| Komplexe Zweige | Hauptzweige wie C99 |
+| Rust-Mindestversion | darf bis zur jeweils neuesten stabilen Version gehen (Stand: 1.99.1); bei Bedarf anheben |
+| Arbeitszweig | `master` |
 | Quaternion-Rotationen | Kern in Phase 2, Matrizen/Euler-Winkel in Phase 3/5 |

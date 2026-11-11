@@ -33,8 +33,9 @@ Trait-Hierarchie gehört azmath selbst, damit sie frei erweiterbar bleibt.
 
 ## Toolchain
 
-- Nur stable Rust, Edition 2024 (mindestens 1.85; `rust-version` wird im
-  Workspace gesetzt).
+- Nur stable Rust, Edition 2024. `rust-version` im Workspace steht derzeit
+  auf 1.85 und darf bei Bedarf bis zur neuesten stabilen Version angehoben
+  werden (Stand: 1.99.1).
 - `f16`/`f128`: sobald stabil, über dieselben Makros wie `f32`/`f64`
   anbinden. Dafür ist ein Backend nötig, das diese Typen kann.
 - Folgen von „nur stable“: keine Größenarithmetik in const generics, keine
