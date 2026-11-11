@@ -7,21 +7,24 @@ auf denen alles Weitere steht.
 
 ## Phase 0 – Workspace und Gerüst
 
-- [ ] `Cargo.toml` (Workspace): `[workspace.dependencies]`, `version`, `rust-version`
-- [ ] `crates/azmath/Cargo.toml`: Features `libm`, `std`, `alloc`; `[lints] workspace = true`
-- [ ] `lib.rs`: Crate-Doku, `#![no_std]`, Modul-Deklarationen (siehe Frage F2)
+- [x] `Cargo.toml` (Workspace): `[workspace.dependencies]`, `version`, `rust-version`
+- [x] `crates/azmath/Cargo.toml`: Features `libm`, `std`, `alloc`; `[lints] workspace = true`
+- [x] `lib.rs`: Crate-Doku, `#![no_std]`, Modul-Deklarationen (siehe Frage F2)
 - [ ] Regeln aus `lib.rs` zusätzlich in `todo/README.md` (erledigt) – Verbleib im Quelltext klären
 - [ ] Prüfmatrix als Skript oder CI (siehe 05-qualitaet.md, Frage F6)
 
 ## Phase 1 – Skalar-Traits und Backend
 
-- [ ] `Ring`, `Field` (`recip`, `powi`)
-- [ ] `Real` (Ordnung, `abs`, Konstanten, `from_f64`)
-- [ ] `Elementary`, `RealElementary`
+Stand: als Entwurf im Code vorhanden, **vom Menschen noch zu prüfen**
+(Prüfmatrix in 05-qualitaet.md). `Conjugate` fehlt noch.
+
+- [x] `Ring`, `Field` (`recip`, `powi`)
+- [x] `Real` (Ordnung, `abs`, Konstanten, `from_f64`)
+- [x] `Elementary`, `RealElementary`
 - [ ] `Conjugate`
-- [ ] Implementierungen für `f32`, `f64`; `Ring` für vorzeichenbehaftete Ganzzahlen
-- [ ] Backend `libm`, Backend `std`, Auswahl mit Rangfolge
-- [ ] Tests: generische Testfunktionen, die für jeden Typ und jedes Backend laufen
+- [x] Implementierungen für `f32`, `f64`; `Ring` für vorzeichenbehaftete Ganzzahlen
+- [x] Backend `libm`, Backend `std`, Auswahl mit Rangfolge
+- [x] Tests: generische Testfunktionen, die für jeden Typ und jedes Backend laufen
 
 Ergebnis: Vertrag, gegen den alle späteren Algorithmen geschrieben werden.
 

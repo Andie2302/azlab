@@ -1,6 +1,25 @@
 [package]
 name = "azmath"
-version = "0.1.0"
-edition = "2024"
+description = "Reine Mathematik-Bibliothek (no_std, ohne alloc) als Fundament für azlab"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# Standard: no_std ohne alloc, Elementarfunktionen über libm (offene Frage F1).
+default = ["libm"]
+# Rechen-Backends für Elementarfunktionen (sqrt, exp, sin, ...).
+# Sind mehrere aktiv, gilt die Rangfolge std > libm. Ohne Backend fehlen nur
+# die Implementierungen von `Elementary`/`RealElementary` für f32/f64.
+libm = ["dep:libm"]
+std = ["alloc"]
+# Alles, was Heap-Speicher braucht (dynamische Matrizen, Tensoren, Tape-Autodiff).
+alloc = []
 
 [dependencies]
+libm = { workspace = true, optional = true }
+
+[lints]
+workspace = true

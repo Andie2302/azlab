@@ -3,9 +3,18 @@ resolver = "3"
 members = ["crates/*"]
 
 [workspace.package]
+version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 publish = false
+
+# Zentrale Versionsverwaltung: Crates referenzieren Abhängigkeiten nur über
+# `workspace = true`, damit es pro Abhängigkeit genau eine Version gibt.
+[workspace.dependencies]
+azmath = { path = "crates/azmath", default-features = false }
+libm = { version = "0.2", default-features = false }
+
 [workspace.lints.rust]
 unsafe_code = "forbid"
 missing_docs = "warn"
