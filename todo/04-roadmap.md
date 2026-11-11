@@ -11,7 +11,7 @@ auf denen alles Weitere steht.
 - [x] `crates/azmath/Cargo.toml`: Features `libm`, `std`, `alloc`; `[lints] workspace = true`
 - [x] `lib.rs`: Crate-Doku, `#![no_std]`, Modul-Deklarationen (Frage F2 entschieden)
 - [x] Regeln in `CLAUDE.md` und `todo/README.md`
-- [ ] Prüfmatrix als Skript oder CI (siehe 05-qualitaet.md, Frage F6)
+- [x] Prüfmatrix als Skript `scripts/pruefen.sh` (ungetestet, erster Lauf durch den Menschen)
 
 ## Phase 1 – Skalar-Traits und Backend
 
@@ -30,9 +30,13 @@ Ergebnis: Vertrag, gegen den alle späteren Algorithmen geschrieben werden.
 
 ## Phase 2 – Zahlentypen
 
+Detailplan: [phase-2-zahlentypen.md](phase-2-zahlentypen.md) – wartet auf Freigabe.
+
+- [ ] Trait-Umbau: `Algebra`, `Commutative`, `Conjugate`; `from_f64` nach `Field`
+
 - [ ] `Complex<T>` inkl. `Elementary`
 - [ ] `Dual<T>` inkl. aller Skalar-Traits (erste Ableitung)
-- [ ] `DualN<T, N>` (Gradient), zweite Ableitungen (`HyperDual` oder Schachtelung)
+- [ ] `DualN<T, N>` (Gradient); zweite Ableitungen über Schachtelung `Dual<Dual<T>>`
 - [ ] `CayleyDickson<A>`, Oktonionen als Probe
 - [ ] `Quaternion<T>` mit Rotationen, Slerp, Umwandlungen
 
@@ -49,10 +53,13 @@ Ergebnis: Vertrag, gegen den alle späteren Algorithmen geschrieben werden.
 - [ ] Polynomauswertung (Horner), Tschebyschow
 - [ ] Bisektion, Sekante, Newton, Brent
 - [ ] Gleichungen höherer Ordnung: Formeln Grad 2–4, alle Polynom-Nullstellen (komplex), reelle Nullstellen im Intervall
+- [ ] Intervallarithmetik `Interval<T>` mit Rundung nach außen (für beweisbar konservative Tests, z. B. CCD)
 - [ ] Newton für Systeme (Jacobi-Matrix über `DualN`), Dämpfung und Liniensuche
 - [ ] `derivative`, `gradient`, `jacobian` als Autodiff-Hilfen
 
-Meilenstein: **ausreichend für ein IAPWS-95-Crate.**
+Meilenstein: **ausreichend für ein IAPWS-95-Crate** und, zusammen mit
+Phase 3, für PBD/XPBD-Gewebe mit kontinuierlicher Kollisionserkennung in
+`azphysics`.
 
 ## Phase 5 – Lie-Theorie
 
@@ -94,9 +101,8 @@ Meilenstein: **ausreichend für ein Navier-Stokes-Crate.**
 - [ ] Assemblierung in dünnbesetzte Matrizen, Randbedingungen
 - [ ] Referenzprobleme: Poisson, lineare Elastizität
 
-Meilenstein: **ausreichend für ein Gewebesimulations-Crate** (zusammen mit
-Phase 10 für zweite Ableitungen und Optimierung; Kollisionsgeometrie siehe
-Frage F9).
+Meilenstein: **ausreichend für Gewebe- und Festkörpermodelle auf
+Finite-Elemente-Basis.**
 
 ## Phase 10 – Rückwärts-Autodiff und Optimierung
 

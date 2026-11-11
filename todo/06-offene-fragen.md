@@ -2,51 +2,25 @@
 
 Entschiedene Fragen stehen in der Tabelle in [README.md](README.md).
 
-## F6 – Prüfmatrix: Skript, CI oder beides?
+## F12 – Division bei nicht-kommutativen Typen
 
-Da die KI nichts ausführt, braucht es einen bequemen Weg für den Menschen:
-ein Shell-Skript im Repo, eine GitHub-Actions-CI oder beides.
+Für Quaternionen ist `a / b` nicht eindeutig. Vorschlag: der Operator `/`
+bedeutet immer Rechtsdivision `a * b⁻¹`; für die andere Reihenfolge schreibt
+man `b.recip() * a` aus.
 
-Empfehlung: beides; CI führt dasselbe Skript aus.
+Entscheidung: _offen_ (im Detailplan Phase 2 so angenommen)
 
-Entscheidung: _offen_
+## F13 – Zweige der komplexen Funktionen
 
-## F7 – Ganzzahlen in den Traits
+Vorschlag: Hauptzweige wie in C99/IEEE (Schnitt von `ln` und `sqrt` entlang
+der negativen reellen Achse, `arg` in (−π, π]).
 
-Vorzeichenbehaftete Ganzzahlen implementieren im Entwurf bereits `Ring`.
-Brauchen vorzeichenlose Typen eine eigene Stufe ohne Negation (`Semiring`)?
+Entscheidung: _offen_ (im Detailplan Phase 2 so angenommen)
 
-Empfehlung: erst bei Bedarf.
+## F14 – Intervallarithmetik und Rust-Version
 
-Entscheidung: _offen_
+Beweisbar konservative Kollisionstests brauchen Rundung nach außen. Auf
+stable geht das über `next_up`/`next_down` (ab Rust 1.86). Dafür müsste
+`rust-version` von 1.85 auf 1.86 steigen. In Ordnung?
 
-## F9 – Geometrie für Kollisionen
-
-Gewebe-Kollision braucht Geometrie-Bausteine: Abstand Punkt–Dreieck und
-Kante–Kante, Schnitt-Tests, kontinuierliche Kollisionserkennung (führt auf
-kubische Gleichungen), räumliche Suchstrukturen. Gehört das in azmath oder
-in ein eigenes Crate (z. B. `azgeom`) auf azmath?
-
-Empfehlung: eigenes Crate. azmath liefert dafür Vektoren, Polynom-Nullstellen
-und Intervall-Hilfen; Suchstrukturen sind keine reine Mathematik.
-
-Entscheidung: _offen_
-
-## F10 – Welches Verfahren ist mit dem „Durchbruch“ gemeint?
-
-Vermutung: *Incremental Potential Contact* (IPC, 2020) für
-durchdringungsfreie Kontakte bei Gewebe und Festkörpern; bei Flüssigkeiten
-kämen u. a. Material-Point-Methoden in Frage. Die Antwort bestimmt, welche
-Löser zuerst gebraucht werden (IPC: Newton mit Liniensuche, dünnbesetzte
-symmetrische Löser, zweite Ableitungen über Autodiff).
-
-Entscheidung: _offen_
-
-## F11 – Finite Elemente ohne Heap
-
-Unstrukturierte Netze haben zur Laufzeit bestimmte Größen. Vorschlag: Netz
-und Systemmatrix als Sichten auf Puffer des Aufrufers (läuft ohne `alloc`),
-bequeme besitzende Typen nur hinter `alloc`. Netzerzeugung (Meshing) ist kein
-Ziel von azmath.
-
-Entscheidung: _offen_
+Entscheidung: _offen_ (betrifft erst Phase 4)

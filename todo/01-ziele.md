@@ -6,8 +6,12 @@
 - `azmath` ist das Fundament. Fachliche Crates bauen darauf auf und hängen
   nie umgekehrt voneinander ab, ohne dass es hier geplant ist.
 - Mögliche spätere Crates (nur zur Einordnung, noch nicht geplant):
-  Stoffdaten (IAPWS-95), Strömung (Navier-Stokes), Gewebesimulation
-  (Kleidung inkl. Kollision), Robotik, KI.
+  - `azphysics`: Physik-Simulationen in Untermodulen – Kollisionsgeometrie
+    (Abstände, Schnitt-Tests, kontinuierliche Kollisionserkennung,
+    Suchstrukturen), Gewebe (PBD/XPBD, Abstoßungskräfte), Strömung
+    (Navier-Stokes). Start als ein Crate; wird ein Untermodul zu groß oder
+    bekommt eigene Abhängigkeiten, wird es ausgelagert.
+  - Stoffdaten (IAPWS-95), Robotik, KI.
 
 ## Ziele von azmath
 
@@ -35,7 +39,7 @@
 |-----------|--------------------|
 | IAPWS-95 | Elementarfunktionen, Polynom-/Reihenauswertung, Autodiff (Ableitungen der Helmholtz-Energie), Nullstellen- und Newton-Löser für Systeme |
 | Navier-Stokes | Vektoren/Matrizen, Gitter-/Tensor-Sichten auf Puffer, Differenzen-/Volumen-Operatoren, dünnbesetzte und iterative lineare Löser, Mehrgitter, Zeitintegration |
-| Gewebesimulation mit Kollision | Vektoren, implizite Zeitintegration, dünnbesetzte symmetrische Löser, Newton mit Liniensuche, zweite Ableitungen (Autodiff), kubische Nullstellen, Finite Elemente auf Dreiecksnetzen |
+| Gewebesimulation mit Kollision (PBD/XPBD, CCD) | kleine Vektoren/Matrizen fester Größe, robuste Nullstellen kubischer Polynome im Intervall (CCD Vertex-Face und Edge-Edge), Intervallarithmetik für beweisbar konservative Tests, Zeitintegration; für Varianten mit Finite Elementen zusätzlich dünnbesetzte Löser |
 | Robotik | Quaternionen, Lie-Gruppen SO(3)/SE(3), Lie-Algebren mit Klammer, exp/log, Jacobi-Matrizen |
 | KI | Tensoren, Matrizen, Autodiff (vorwärts und rückwärts), Optimierer |
 | Physik allgemein | komplexe Zahlen, Cayley-Dickson-Algebren, ODE-Löser, Quadratur, Interpolation |

@@ -2,8 +2,16 @@
 
 ## Wer prüft
 
-Die KI führt keinen Code aus (Regel 4). Alle Befehle unten führt der Mensch
-aus oder eine CI, die der Mensch eingerichtet hat.
+Die KI führt von sich aus keinen Code aus (Regel 4 in `CLAUDE.md`). Der
+Mensch startet lokal
+
+```bash
+scripts/pruefen.sh
+```
+
+und pusht die erzeugte Datei `pruefung/ergebnis.txt` (und ggf. das
+aktualisierte `Cargo.lock`). Die KI liest das Ergebnis und pflegt das Skript,
+wenn Features oder Crates dazukommen.
 
 ## Prüfmatrix
 

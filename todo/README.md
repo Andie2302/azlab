@@ -3,20 +3,10 @@
 Dieser Ordner ist die verbindliche Planung des Workspace. **Code entsteht erst,
 wenn der zugehörige Abschnitt hier geplant und freigegeben ist.**
 
-## Regeln (aus `crates/azmath/src/lib.rs`, gelten für den ganzen Workspace)
+## Regeln
 
-1. Alles, was nicht hinter Feature-Flags steht, MUSS in `no_std` ohne Features laufen.
-2. Neuer Rust-Stil: nirgends `mod.rs`; in `lib.rs` steht kein Code (erlaubt: Doku, Deklarationen, `pub use`, crate-weite Attribute/Feature-Schalter).
-3. Erst planen (Abhängigkeiten, Feature-Flags, Ziele, Nicht-Ziele), dann Code. Gilt besonders für KI.
-4. KI führt von sich aus keinen Code aus – nicht zum Testen, nicht zum Rechnen, nicht zum Prüfen.
-5. Bei Fragen sofort nachfragen, auch bei mehreren.
-
-Folgerungen für die Zusammenarbeit:
-
-- Prüfbefehle (`cargo test`, `cargo clippy`, ...) führt der Mensch aus; die KI
-  nennt nur, was zu prüfen ist (siehe [05-qualitaet.md](05-qualitaet.md)).
-- Zahlenwerte in Tests (Referenzwerte) stammen aus zitierten Quellen, nicht
-  aus KI-Rechnungen.
+Die Projektregeln stehen ausschließlich in [`CLAUDE.md`](../CLAUDE.md) im
+Wurzelverzeichnis.
 
 ## Dokumente
 
@@ -28,6 +18,7 @@ Folgerungen für die Zusammenarbeit:
 | [04-roadmap.md](04-roadmap.md) | Phasen mit Aufgabenlisten | Entwurf |
 | [05-qualitaet.md](05-qualitaet.md) | Tests, Prüfmatrix, Doku | Entwurf |
 | [06-offene-fragen.md](06-offene-fragen.md) | Entscheidungen, die noch fehlen | offen |
+| [phase-2-zahlentypen.md](phase-2-zahlentypen.md) | Detailplan Phase 2 | zur Freigabe |
 
 Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 
@@ -55,4 +46,13 @@ Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 | PDE-Umfang | Gitterverfahren **und** Finite Elemente |
 | Crate-Schnitt | ein Crate `azmath`, Schichten als Module |
 | Quaternionen | eigener Typ `Quaternion<T>` plus generische Cayley-Dickson-Konstruktion |
-| Ort der Regeln | `CLAUDE.md` im Wurzelverzeichnis und hier |
+| Ort der Regeln | nur `CLAUDE.md` im Wurzelverzeichnis |
+| Prüfmatrix | Shell-Skript `scripts/pruefen.sh`; der Mensch führt es lokal aus und pusht `pruefung/ergebnis.txt` |
+| Vorzeichenlose Ganzzahlen | vorerst nicht in den Traits |
+| Kollisionsgeometrie | nicht in azmath, sondern im späteren Crate `azphysics` |
+| Heap in Simulationen/FEM | erlaubt, wo die Simulation ihn braucht, aber immer hinter Feature-Flag |
+| Gewebe-Verfahren | PBD/XPBD, kontinuierliche Kollisionserkennung (Vertex-Face, Edge-Edge), Abstoßungskräfte |
+| Trait-Umbau | Basis-Trait `Algebra` unter `Ring`; `from_f64` in `Field` |
+| Dual-Vergleich | nur der Wert zählt, Ableitungsanteil wird ignoriert |
+| Komplexe Zahlen | eigener Typ `Complex<T>` plus Umwandlung von/nach Cayley-Dickson |
+| Quaternion-Rotationen | Kern in Phase 2, Matrizen/Euler-Winkel in Phase 3/5 |
