@@ -137,8 +137,14 @@ Finite-Elemente-Basis.**
 
 ## Phase 10 – Rückwärts-Autodiff und Optimierung
 
-- [ ] Tape mit fester Kapazität, wachsendes Tape (`alloc`)
-- [ ] Gradientenabstieg, (L-)BFGS, Levenberg-Marquardt, Nelder-Mead
+Umgesetzt und geprüft (volle Prüfmatrix grün). Module `autodiff`, `optim`.
+
+- [x] `Tape` mit fester Kapazität (ohne Heap), `GrowTape` (Feature `alloc`)
+- [x] `Var`: implementiert alle Skalar-Traits, läuft durch jeden generischen Algorithmus
+- [x] `reverse_gradient` als bequemer Einstieg
+- [x] Gradientenabstieg, BFGS, L-BFGS (Verlauf fester Länge, ohne Heap)
+- [x] Nelder-Mead
+- [x] Levenberg-Marquardt, auch mit automatischer Jacobi-Matrix
 
 Meilenstein: **ausreichend für KI-Grundlagen.**
 
