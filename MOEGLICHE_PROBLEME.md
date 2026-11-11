@@ -17,8 +17,6 @@
 
 
 
-# Diese Punkte würde ich als Nächstes korrigieren:
-
 **1. Rückwärts-Autodiff verwechselt Variablen verschiedener Bänder**
 
 In [`var.rs`](https://github.com/Andie2302/azlab/blob/40e018cbdbe27e97b886571a095099fea72b9680/crates/azmath/src/autodiff/var.rs) werden nur die Knotenindizes weitergereicht. Ob zwei Variablen tatsächlich zum selben Band gehören, wird nicht geprüft.
@@ -90,3 +88,77 @@ grün.
 Die Zusage in der Doku von `max_abs` („läuft weder über noch unter“) gilt
 jetzt, weil nicht mehr summiert wird.
 
+
+# Ein spontaner Reviewer hat gemeldet:
+
+**Ja, die zuletzt gemeldeten Probleme sind im neuen Stand gezielt korrigiert.** Bandidentität und Löschgenerationen werden geprüft, Normen dividieren direkt durch den Maßstab, Newton prüft nach dem Schritt auf Endlichkeit, und `det()` verlangt jetzt `Commutative`.
+
+Ich habe die Änderungen bis [`75b06a8`](https://github.com/Andie2302/azlab/commit/75b06a892a55245feca742bfa35a38240014ea53) gelesen. Das eingecheckte Prüfprotokoll zeigt mit allen Features **118 bestandene Tests und fünf Dokumentationstests**, dazu erfolgreiche Clippy- und Embedded-Builds. Eigene Testläufe habe ich nicht ausgeführt; die folgenden Befunde stammen aus der Codeprüfung.
+
+**Vier konkrete Lücken sehe ich noch:**
+
+**1. LU: Der vorab berechnete Kehrwert kann weiterhin überlaufen**
+
+In [`Lu::solve`](https://github.com/Andie2302/azlab/blob/75b06a892a55245feca742bfa35a38240014ea53/crates/azmath/src/linalg/decomp/lu.rs) steht:
+
+```rust
+x[i] = row[i].recip() * rest;
+```
+
+Für dieses System ist die Lösung genau 1:
+
+```rust
+let a = Matrix::new([[1e-320_f64]]);
+let b = Vector::new([1e-320_f64]);
+```
+
+Der Kehrwert des Diagonalelements wird jedoch unendlich, wodurch auch die berechnete Lösung unendlich wird. Dasselbe Muster steht in `MatrixView::lu_solve`.
+
+Für kommutative Skalare hilft direkte Division. Für Quaternionen muss dabei die Reihenfolge erhalten bleiben: Gesucht ist `diagonal⁻¹ · rest`, weshalb ein allgemeiner Austausch gegen `rest / diagonal` nicht korrekt wäre.
+
+**2. Komplexe Division: `z / z` kann NaN ergeben**
+
+In der [komplexen Division](https://github.com/Andie2302/azlab/blob/75b06a892a55245feca742bfa35a38240014ea53/crates/azmath/src/number/complex/ops.rs) kann trotz Smith-Verfahren der Nenner überlaufen:
+
+```rust
+let z = Complex::new(1e308_f64, 1e308);
+let result = z / z; // Erwartet: 1 + 0i
+```
+
+Hier werden sowohl der Nenner als auch der Zähler des Realteils unendlich. Das ergibt NaN. Die Dokumentationszusage „vermeidet Überlauf, solange das Ergebnis darstellbar ist“ ist daher zu stark. Es braucht zusätzliche Skalierung.
+
+**3. SVD: Einheitliches Skalieren schützt nicht vor stark unterschiedlichen Spaltengrößen**
+
+Deine Korrektur behebt das vorherige Gegenbeispiel. Bei dieser Matrix bleiben allerdings Quadratsummen kleiner Spalten problematisch:
+
+```rust
+Matrix::new([
+    [1.0_f64, 0.0,    0.0],
+    [0.0,     1e-200, 1e-200],
+    [0.0,     0.0,    1e-200],
+])
+```
+
+Der globale Maßstab ist 1. Für die beiden kleinen Spalten werden `alpha`, `beta` und `gamma` durch Unterlauf null. Die [SVD](https://github.com/Andie2302/azlab/blob/75b06a892a55245feca742bfa35a38240014ea53/crates/azmath/src/linalg/decomp/svd.rs) überspringt deren Rotation, obwohl sie nicht orthogonal sind. Entsprechend stimmen die kleinen Singulärwerte und die zugehörigen linken Singulärvektoren nicht.
+
+Hier helfen Skalierung innerhalb jedes Spaltenpaars und eine geschützte Korrelationsberechnung. Die bisherigen Tests verändern den **gemeinsamen Maßstab** einer Matrix; ergänzen würde ich Tests mit **unterschiedlichen Größenordnungen innerhalb derselben Matrix**.
+
+**4. Spezielle Funktionen: Große endliche Argumente können NaN liefern**
+
+[`erf` und `erfc`](https://github.com/Andie2302/azlab/blob/75b06a892a55245feca742bfa35a38240014ea53/crates/azmath/src/special/error_function.rs) bilden zunächst `x * x`. Bei `1e200_f64` entsteht unendlich. Die anschließende Gamma-Berechnung enthält dann unter anderem `∞ − ∞` und liefert NaN.
+
+Für diese Eingabe sollten die gerundeten Ergebnisse sein:
+
+```rust
+erf(1e200_f64)  // 1.0
+erfc(1e200_f64) // 0.0
+```
+
+Die Grenzwerte für unendliche Argumente sollten in `gamma_p`/`gamma_q` ausdrücklich behandelt werden.
+
+**Zwei weitere Verbesserungen lohnen sich:**
+
+- **Mindestversion prüfen:** Du deklarierst Rust 1.86, das Prüfprotokoll verwendet 1.97. Ergänze einen Build mit 1.86, damit die zugesagte Mindestversion tatsächlich abgesichert ist.
+- **Unvollständige Gammafunktionen:** Reihe und Kettenbruch enden spätestens nach 500 Schritten, geben aber auch ohne erreichte Konvergenz kommentarlos einen Wert zurück. Hier wäre ein erkennbarer Fehler oder eine dokumentierte Einschränkung sinnvoll.
+
+Die bisherigen Reparaturen würde ich beibehalten. **Als Nächstes würde ich LU und komplexe Division korrigieren und anschließend die Tests um gemischte Größenordnungen erweitern.** Damit prüfst du eine andere Fehlerklasse als mit dem bloßen Vergrößern oder Verkleinern einer ganzen Matrix.
