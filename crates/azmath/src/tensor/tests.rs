@@ -186,7 +186,7 @@ mod owned {
                 let contract_ok = DTensor::<T, 2>::dot(ta.view(), tb.view()).is_ok_and(|square| {
                     contract(square.view(), 0, 1, &mut trace).is_ok()
                         && DTensor::<T, 0>::contract(square.view(), 0, 1)
-                            .is_ok_and(|t| t.shape() == [] && t.into_vec() == trace)
+                            .is_ok_and(|t| t.shape().is_empty() && t.into_vec() == trace)
                 });
 
                 // Falsche Zielstufe.
