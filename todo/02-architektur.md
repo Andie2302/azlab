@@ -27,7 +27,7 @@ Algorithmus nur fordert, was er braucht.
 | `Ring` | `+ - *`, `ZERO`, `ONE`; Multiplikation nicht zwingend kommutativ | Ganzzahlen, Gleitkomma, Complex, Quaternion |
 | `Field: Ring` | Division, `recip`, `powi` | Gleitkomma, Complex, Dual, Quaternion (Schiefkörper) |
 | `Elementary: Field` | `exp`, `ln`, `sqrt`, `sin`, `cos`, `tan`, Umkehr- und Hyperbelfunktionen, `powf` | Gleitkomma, Complex, Dual |
-| `Real: Field + Commutative + PartialOrd` | Ordnung, `abs`, `min`/`max`, Konstanten (`PI`, `E`, `EPSILON`), `from_f64` | Gleitkomma, Dual über Real |
+| `Real: Field + Commutative + Conjugate + PartialOrd` | Ordnung, `abs`, `min`/`max`, Konstanten (`PI`, `E`, `EPSILON`), `from_f64` | Gleitkomma, Dual über Real |
 | `RealElementary: Real + Elementary` | `atan2`, `hypot`, `cbrt`, `floor`/`ceil`/`round`/`trunc`, `mul_add` | Gleitkomma, Dual über Real |
 | `Conjugate` | Konjugation, Normquadrat | Complex, Quaternion, Cayley-Dickson; für reelle Typen die Identität |
 

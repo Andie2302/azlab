@@ -1,7 +1,23 @@
 # Phase 3 – Lineare Algebra fester Größe (Detailplan)
 
-Status: **freigegeben** (Ablauf: Plan schreiben, dann umsetzen; die KI darf
-nach jedem Schritt einmal Clippy und Tests laufen lassen).
+Status: **umgesetzt**. Von der KI nach jedem Schritt mit Standard-Features
+und ohne Features geprüft (Clippy und Tests); die volle Prüfmatrix über
+`scripts/pruefen.sh` steht noch aus.
+
+## Abweichungen vom Plan bei der Umsetzung
+
+- `Real` setzt jetzt auch `Conjugate<Real = Self>` voraus. So genügt in
+  generischem Code die Schranke `T: Real`, um Normen und Zerlegungen zu
+  nutzen.
+- Schritte A und B sowie D bis F sind jeweils in einem Commit
+  zusammengefasst.
+- Die internen Makros liegen in `src/macros.rs` statt in `src/number/`,
+  weil auch `linalg` sie braucht.
+- `Matrix` hat zusätzlich `rows`, `cols`, `as_rows` und `zip_map`;
+  `Vector` zusätzlich `IntoIterator` für Referenzen.
+- `Cholesky` und `Lu` bieten `inverse()`; `Lu::solve_matrix` löst mehrere
+  rechte Seiten.
+- Hilfsdatei `src/linalg/decomp/util.rs`.
 
 ## Ziel
 
