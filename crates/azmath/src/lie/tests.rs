@@ -75,7 +75,7 @@ fn so2<T: RealElementary>() {
     assert_eq!(g.adjoint(xi), xi);
     assert_eq!(xi.bracket(h.log()), So2Tangent::ZERO);
     assert_eq!(xi + xi, xi.scale(f(2.0)));
-    assert_eq!(xi - xi, So2Tangent::ZERO);
+    assert_eq!(xi - So2Tangent { angle: f(0.7) }, So2Tangent::ZERO);
     assert_eq!(-(-xi), xi);
 }
 

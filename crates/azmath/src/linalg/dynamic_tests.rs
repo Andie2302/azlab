@@ -27,7 +27,9 @@ fn check<T: Real>() {
             && view.get(0, 3).is_none()
             && view.data().len() == 9
     }));
-    assert!(MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4]));
+    // Dieselben Daten als 2 × 4: Die ersten acht Elemente, anders aufgeteilt.
+    let eight = data.get(..8).unwrap_or(&[]);
+    assert!(MatrixView::new(eight, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4]));
     assert!(matches!(MatrixView::new(&data, 2, 3), Err(LinalgError::DimensionMismatch)));
 
     let mut buffer = data;
