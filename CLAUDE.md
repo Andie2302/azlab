@@ -18,28 +18,22 @@ der KI. Zuerst diese Datei lesen, dann [todo/README.md](todo/README.md).
    Ordner `todo/` geplant und freigegeben sein – inklusive Abhängigkeiten,
    Feature-Flags, Zielen und Nicht-Zielen. Gilt ganz besonders für KI.
 
-4. **KI prüft, testet und führt absolut NICHTS aus, ohne vorher zu fragen.**
-   Ohne ausdrückliche Erlaubnis des Menschen für genau diesen Fall ist
-   verboten:
-   - Code ausführen: `cargo build`, `test`, `clippy`, `run`, `doc`, Skripte,
-     Testschleifen, Hintergrundprozesse.
-   - Hilfs-Agenten oder andere Sitzungen starten, die etwas prüfen.
-   - Ersatz-Prüfen: Tests oder Abläufe „von Hand“ oder im Kopf nachrechnen,
-     fertigen Code noch einmal prüfend durchgehen.
-   - Jede andere Form von Prüfen, Testen, Nachrechnen oder Verifizieren.
+4. **ABSOLUTES VERBOT JEDER PRÜFUNG, BERECHNUNG ODER SIMULATION DURCH DIE KI**
+   Die KI darf unter keinen Umständen aktiv werden, um Code, Logik oder Zahlen zu verifizieren. 
+   Ohne ausdrückliche, vorherige Einzelerlaubnis des Menschen ist **strikt verboten**:
+   - **Ausführen von Tools/Skripten**: `cargo build`, `test`, `clippy`, `run`, `doc`, Testschleifen, Hintergrundprozesse.
+   - **Agenten & Hilfssitzungen**: Starten anderer Instanzen oder Agenten zur Prüfung.
+   - **Mentales oder schriftliches Nachrechnen (STRICT NO-CALCULATION-RULE)**: 
+     - Es ist der KI **absolut untersagt**, mathematische Ausdrücke, Testergebnisse, Matrix-Operationen, Formeln oder numerische Werte „per Hand“, im Kopf oder im Ausgabetext auszurechnen, zu simulieren oder zu verifizieren.
+     - Wenn Testdaten, Erwartungswerte oder Berechnungen benötigt werden, darf die KI **keinerlei eigene Werte generieren**. Sie muss Platzhalter (z. B. `/* HIER_WERT_AUS_QUEELLE_EINTRAGEN */`) verwenden oder den Menschen explizit darum bitten, die exakten Zahlen bereitzustellen.
+   - **Prüfendes Durchgehen**: Fertigen Code gedanklich „durchzuspielen“, um zu schauen, ob er fehlerfrei ist.
+   - Die Erlaubnis gilt ausschließlich für den exakten, einmaligen Zweck und darf niemals übertragen werden.
 
-   Dazu gilt:
-   - Fragen heißt: vorher sagen, **was** geprüft werden soll, **wozu** und
-     **wie lange** es voraussichtlich dauert – und die Antwort abwarten.
-   - Eine Erlaubnis gilt nur für das, wofür sie gegeben wurde, nicht für
-     spätere Schritte oder Phasen.
-   - Normalfall: Die KI schreibt und pusht. Der Mensch führt
-     `scripts/pruefen.sh` lokal aus und pusht `pruefung/ergebnis.txt`. Die KI
-     liest das Ergebnis und behebt die gemeldeten Fehler.
-   - Dateien lesen, schreiben und Git-Befehle (commit, pull, push) sind
-     erlaubt.
-   - Hintergrund: Testschleifen, parallele Prüf-Agenten und stundenlang
-     laufende Skripte haben schon ganze Wochen-Kontingente verbraucht.
+   **Dazu gilt:**
+   - Fragen heißt: vorher sagen, **was** geprüft werden soll, **wozu** und **wie lange** es voraussichtlich dauert – und die Antwort abwarten.
+   - Normalfall: Die KI schreibt und pusht. Der Mensch führt `scripts/pruefen.sh` lokal aus und pusht `pruefung/ergebnis.txt`. Die KI liest das Ergebnis und behebt die gemeldeten Fehler.
+   - Dateien lesen, schreiben und Git-Befehle (`commit`, `pull`, `push`) sind erlaubt.
+   - Hintergrund: Testschleifen, parallele Prüf-Agenten und stundenlang laufende Skripte haben schon ganze Wochen-Kontingente verbraucht.
 
 5. **Bei Fragen sofort nachfragen**, auch wenn es mehrere sind.
 
@@ -48,7 +42,5 @@ der KI. Zuerst diese Datei lesen, dann [todo/README.md](todo/README.md).
 - Nur stable Rust; die Mindestversion darf bis zur neuesten stabilen Version gehen.
 - Gearbeitet wird direkt auf `master`.
 - Plan, Doku-Kommentare und Commit-Nachrichten auf Deutsch; Bezeichner englisch.
-- Neue Abhängigkeiten und Features zuerst in
-  `todo/03-features-abhaengigkeiten.md` eintragen.
-- Zahlenwerte in Tests stammen aus zitierten Quellen oder sind von Hand exakt
-  herleitbar, nicht von der KI ausgerechnet.
+- Neue Abhängigkeiten und Features zuerst in `todo/03-features-abhaengigkeiten.md` eintragen.
+- Zahlenwerte in Tests stammen aus zitierten Quellen oder sind von Hand exakt herleitbar, **niemals** von der KI ausgerechnet oder erfunden. Falls Werte fehlen, werden Platzhalter genutzt.
