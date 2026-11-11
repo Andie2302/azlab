@@ -120,10 +120,17 @@ Meilenstein: **ausreichend für ein Navier-Stokes-Crate.**
 
 ## Phase 9 – Finite Elemente
 
-- [ ] Netz-Sicht (Knoten, Elemente) auf Puffer des Aufrufers
-- [ ] Referenzelemente, Ansatzfunktionen, Quadraturregeln
-- [ ] Assemblierung in dünnbesetzte Matrizen, Randbedingungen
-- [ ] Referenzprobleme: Poisson, lineare Elastizität
+Umgesetzt und geprüft (volle Prüfmatrix grün). Modul `fem`.
+
+- [x] Netz als Knoten- und Elementliste des Aufrufers
+- [x] Elementmatrizen: Strecke, Dreieck, Viereck (bilinear, 2×2 Gauß), Tetraeder; Steifigkeit, Masse, Last
+- [x] Ebene lineare Elastizität auf dem Dreieck (Spannungs- und Verzerrungszustand)
+- [x] `ElementOperator`: zusammengesetzte Matrix als `LinearOperator` ohne Speicherung, ein oder mehrere Freiheitsgrade je Knoten
+- [x] Dirichlet-Randbedingungen über Maske und `lift`, rechte Seite über `assemble_load`
+- [x] Feature `alloc`: `assemble_csr`
+- [x] Referenzproblem: Poisson auf dem Einheitsquadrat mit Dreiecksnetz
+
+Nicht enthalten: Elemente höherer Ordnung, Elastizität in 3D, Netzerzeugung.
 
 Meilenstein: **ausreichend für Gewebe- und Festkörpermodelle auf
 Finite-Elemente-Basis.**

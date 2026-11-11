@@ -37,6 +37,7 @@ mod macros;
 
 pub mod autodiff;
 mod backend;
+pub mod fem;
 pub mod interp;
 pub mod interval;
 pub mod lie;
