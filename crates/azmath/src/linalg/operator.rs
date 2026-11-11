@@ -97,3 +97,47 @@ impl<T: Algebra> LinearOperator<T> for MatrixViewMut<'_, T> {
         self.as_view().apply(x, y)
     }
 }
+
+/// Die Abbildung `x ↦ identity·x + scale·A·x` zu einem quadratischen
+/// Operator `A`.
+///
+/// Damit entstehen aus einem Operator ohne Kopie verwandte Systeme, etwa
+/// `−Δ` (für die Poisson-Gleichung) oder `I − dt·Δ` (für einen impliziten
+/// Zeitschritt).
+#[derive(Debug)]
+pub struct AffineOperator<'a, A, T> {
+    operator: &'a A,
+    identity: T,
+    scale: T,
+}
+
+impl<'a, A, T> AffineOperator<'a, A, T> {
+    /// Erzeugt `identity·I + scale·operator`.
+    #[inline]
+    pub fn new(operator: &'a A, identity: T, scale: T) -> Self {
+        Self { operator, identity, scale }
+    }
+}
+
+impl<A: LinearOperator<T>, T: Algebra> LinearOperator<T> for AffineOperator<'_, A, T> {
+    #[inline]
+    fn rows(&self) -> usize {
+        self.operator.rows()
+    }
+
+    #[inline]
+    fn cols(&self) -> usize {
+        self.operator.cols()
+    }
+
+    fn apply(&self, x: &[T], y: &mut [T]) -> Result<(), LinalgError> {
+        if self.operator.rows() != self.operator.cols() {
+            return Err(LinalgError::DimensionMismatch);
+        }
+        self.operator.apply(x, y)?;
+        for (out, &input) in y.iter_mut().zip(x) {
+            *out = self.identity * input + self.scale * *out;
+        }
+        Ok(())
+    }
+}

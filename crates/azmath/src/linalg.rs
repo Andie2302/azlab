@@ -28,7 +28,7 @@ pub use decomp::{Cholesky, Lu, Qr};
 pub use dmatrix::DMatrix;
 pub use error::LinalgError;
 pub use matrix::Matrix;
-pub use operator::LinearOperator;
+pub use operator::{AffineOperator, LinearOperator};
 pub use sparse::CsrMatrix;
 pub use vector::Vector;
 pub use view::{MatrixView, MatrixViewMut};

@@ -103,11 +103,18 @@ Umgesetzt und geprüft (volle Prüfmatrix grün). Teil 1:
 
 ## Phase 8 – PDE auf Gittern
 
-- [ ] Regelmäßige Gitter als Sicht, Randbedingungen
-- [ ] Finite-Differenzen- und Finite-Volumen-Operatoren als `LinearOperator`
-- [ ] Linienmethode (Kopplung an die ODE-Löser)
-- [ ] Mehrgitter
-- [ ] Referenzprobleme: Poisson, Wärmeleitung, Advektion, Welle
+Umgesetzt und geprüft (volle Prüfmatrix grün). Modul `pde`.
+
+- [x] Regelmäßige Gitter (`UniformGrid`), Randbedingungen (`Boundary`: Dirichlet, Neumann, periodisch)
+- [x] Finite-Differenzen-Operatoren als `LinearOperator`: `Laplacian`, `Derivative` (zentral, vorwärts, rückwärts; die einseitigen Formeln sind die Aufwind- bzw. Finite-Volumen-Flüsse 1. Ordnung)
+- [x] Linienmethode: explizit über `ode::rk4_slice`/`euler_slice`, implizit über `pde::theta_step`
+- [x] Mehrgitter für die Poisson-Gleichung in 1D und 2D
+- [x] Referenzprobleme als Tests: Poisson, Wärmeleitung, Transport, Welle
+- [x] `AffineOperator` (`a·I + b·A`) in `linalg`
+
+Nicht enthalten: Finite-Volumen-Verfahren höherer Ordnung mit Limitern,
+Mehrgitter in 3D oder für andere Operatoren, nichtlineare PDE. Das gehört in
+die Fach-Crates bzw. kommt bei Bedarf.
 
 Meilenstein: **ausreichend für ein Navier-Stokes-Crate.**
 

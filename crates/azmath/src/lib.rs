@@ -43,6 +43,7 @@ pub mod lie;
 pub mod linalg;
 pub mod number;
 pub mod ode;
+pub mod pde;
 pub mod poly;
 pub mod quad;
 pub mod scalar;
