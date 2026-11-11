@@ -38,6 +38,7 @@ mod macros;
 pub mod autodiff;
 mod backend;
 pub mod fem;
+pub mod fft;
 pub mod interp;
 pub mod interval;
 pub mod lie;
@@ -50,6 +51,7 @@ pub mod poly;
 pub mod quad;
 pub mod scalar;
 pub mod solve;
+pub mod special;
 pub mod tensor;
 
 #[cfg(test)]
@@ -57,7 +59,7 @@ mod testutil;
 
 pub use linalg::{
     Cholesky, CsrMatrix, LinalgError, LinearOperator, Lu, Matrix, MatrixView, MatrixViewMut, Qr,
-    Vector,
+    Svd, SymmetricEigen, Vector,
 };
 pub use number::{CayleyDickson, Complex, Dual, DualN, Octonion, Quaternion};
 pub use interval::Interval;

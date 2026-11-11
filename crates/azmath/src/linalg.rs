@@ -23,7 +23,7 @@ mod view;
 #[cfg(test)]
 mod dynamic_tests;
 
-pub use decomp::{Cholesky, Lu, Qr};
+pub use decomp::{Cholesky, Lu, Qr, Svd, SymmetricEigen};
 #[cfg(feature = "alloc")]
 pub use dmatrix::DMatrix;
 pub use error::LinalgError;

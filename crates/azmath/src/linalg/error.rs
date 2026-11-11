@@ -12,6 +12,9 @@ pub enum LinalgError {
     NotPositiveDefinite,
     /// Die Größen passen nicht zusammen.
     DimensionMismatch,
+    /// Ein iteratives Verfahren (Eigenwerte, Singulärwerte) ist nicht
+    /// konvergiert.
+    NotConverged,
 }
 
 impl fmt::Display for LinalgError {
@@ -20,6 +23,7 @@ impl fmt::Display for LinalgError {
             Self::Singular => "Matrix ist singulär",
             Self::NotPositiveDefinite => "Matrix ist nicht positiv definit",
             Self::DimensionMismatch => "Größen passen nicht zusammen",
+            Self::NotConverged => "Verfahren ist nicht konvergiert",
         })
     }
 }
