@@ -1,11 +1,12 @@
 //! Der Trait [`Real`].
 
+use super::algebra::Commutative;
 use super::field::Field;
 
-/// Reelle Zahl: geordneter Körper mit Betrag und Konstanten.
+/// Reelle Zahl: geordneter, kommutativer Körper mit Betrag und Konstanten.
 ///
 /// Alles in diesem Trait ist ohne Rechen-Backend verfügbar.
-pub trait Real: Field + PartialOrd {
+pub trait Real: Field + Commutative + PartialOrd {
     /// Kreiszahl π.
     const PI: Self;
     /// Eulersche Zahl e.

@@ -7,8 +7,10 @@
 #[macro_use]
 mod macros;
 
+mod cayley_dickson;
 mod complex;
 mod dual;
 
+pub use cayley_dickson::{CayleyDickson, Octonion};
 pub use complex::Complex;
 pub use dual::{Dual, DualN};

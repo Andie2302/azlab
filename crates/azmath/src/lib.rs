@@ -36,5 +36,5 @@ pub mod scalar;
 #[cfg(test)]
 mod testutil;
 
-pub use number::{Complex, Dual, DualN};
+pub use number::{CayleyDickson, Complex, Dual, DualN, Octonion};
 pub use scalar::{Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring};
