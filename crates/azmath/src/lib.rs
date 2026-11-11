@@ -40,6 +40,6 @@ pub mod scalar;
 #[cfg(test)]
 mod testutil;
 
-pub use linalg::{LinalgError, Matrix, Vector};
+pub use linalg::{Cholesky, LinalgError, Lu, Matrix, Qr, Vector};
 pub use number::{CayleyDickson, Complex, Dual, DualN, Octonion, Quaternion};
 pub use scalar::{Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring};
