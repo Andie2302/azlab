@@ -16,6 +16,9 @@ mod util;
 #[cfg(test)]
 mod tests;
 
+pub(crate) use cholesky::cholesky_in_place;
+pub(crate) use lu::lu_in_place;
+
 pub use cholesky::Cholesky;
 pub use lu::Lu;
 pub use qr::Qr;

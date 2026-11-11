@@ -80,11 +80,16 @@ Meilenstein: **ausreichend für Robotik-Kinematik.**
 
 ## Phase 6 – Sichten, Tensoren, große Systeme
 
-- [ ] Matrix- und Tensor-Sichten auf Puffer des Aufrufers
-- [ ] `LinearOperator`, dünnbesetzte Formate (CSR) als Sicht
-- [ ] CG, BiCGSTAB, GMRES
-- [ ] Tensor-Grundoperationen (Kontraktion, äußeres Produkt, Umformen)
-- [ ] Feature `alloc`: `DMatrix`, `DTensor`
+Teil 1: [phase-6a-sichten-iterative-loeser.md](phase-6a-sichten-iterative-loeser.md) – umgesetzt, noch ungeprüft.
+Teil 2 (GMRES, Tensoren, `alloc`-Typen) folgt nach einem Prüflauf.
+
+- [x] Matrix-Sichten auf Puffer des Aufrufers (Teil 1)
+- [ ] Tensor-Sichten auf Puffer des Aufrufers (Teil 2)
+- [x] `LinearOperator`, dünnbesetzte Formate (CSR) als Sicht (Teil 1)
+- [x] CG, BiCGSTAB (Teil 1)
+- [ ] GMRES (Teil 2)
+- [ ] Tensor-Grundoperationen (Kontraktion, äußeres Produkt, Umformen) (Teil 2)
+- [ ] Feature `alloc`: `DMatrix`, `DTensor` (Teil 2)
 
 ## Phase 7 – ODE, Quadratur, Interpolation
 

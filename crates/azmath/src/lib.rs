@@ -45,7 +45,10 @@ pub mod solve;
 #[cfg(test)]
 mod testutil;
 
-pub use linalg::{Cholesky, LinalgError, Lu, Matrix, Qr, Vector};
+pub use linalg::{
+    Cholesky, CsrMatrix, LinalgError, LinearOperator, Lu, Matrix, MatrixView, MatrixViewMut, Qr,
+    Vector,
+};
 pub use number::{CayleyDickson, Complex, Dual, DualN, Octonion, Quaternion};
 pub use interval::Interval;
 pub use poly::Polynomial;

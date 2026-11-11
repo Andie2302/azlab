@@ -22,6 +22,7 @@ Wurzelverzeichnis.
 | [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) | Detailplan Phase 3 | umgesetzt und geprüft |
 | [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) | Detailplan Phase 4 | umgesetzt und geprüft |
 | [phase-5-lie-theorie.md](phase-5-lie-theorie.md) | Detailplan Phase 5 | umgesetzt, noch ungeprüft |
+| [phase-6a-sichten-iterative-loeser.md](phase-6a-sichten-iterative-loeser.md) | Detailplan Phase 6, Teil 1 | umgesetzt, noch ungeprüft |
 
 Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 
