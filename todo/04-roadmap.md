@@ -150,8 +150,19 @@ Meilenstein: **ausreichend für KI-Grundlagen.**
 
 ## Phase 11 – Ausbau
 
-- [ ] Eigenwerte, SVD
-- [ ] FFT
-- [ ] Weitere Backends
-- [ ] `f16`/`f128`, sobald stabil
-- [ ] Spezielle Funktionen (Gamma, Bessel, erf) nach Bedarf
+Umgesetzt und geprüft (volle Prüfmatrix grün), soweit auf stable möglich.
+
+- [x] Eigenwerte: symmetrisch mit Eigenvektoren (Jacobi), allgemein und komplex nur Eigenwerte (QR-Verfahren)
+- [x] Singulärwertzerlegung mit Rang, Konditionszahl, Pseudoinverse
+- [x] FFT (Zweierpotenzen) und direkte Fourier-Summe
+- [x] Spezielle Funktionen: Gamma, ln Gamma, Beta, unvollständige Gammafunktion, erf, erfc
+- [ ] Weitere Backends – kein Bedarf; die Schnittstelle dafür steht (`src/backend.rs`)
+- [ ] `f16`/`f128` – warten auf stable Rust
+- [ ] Bessel-Funktionen, Eigenvektoren allgemeiner Matrizen – nach Bedarf
+
+## Stand
+
+Alle Phasen 0 bis 11 sind umgesetzt. azmath besteht in jedem Stand auf
+`master` die Prüfmatrix (`scripts/pruefen.sh`): Tests und Clippy in fünf
+Feature-Kombinationen, Doku-Build und zwei Builds für ein Ziel ohne
+Betriebssystem. Die Beispiele der README laufen als Tests mit.

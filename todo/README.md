@@ -20,30 +20,17 @@ Code ändern. Als Entwurfsgrundsätze bleiben:
 
 | Datei | Inhalt | Status |
 |-------|--------|--------|
-| [01-ziele.md](01-ziele.md) | Ziele und Nicht-Ziele | Entwurf |
-| [02-architektur.md](02-architektur.md) | Schichten, Traits, Backend, Erweiterbarkeit | Entwurf |
-| [03-features-abhaengigkeiten.md](03-features-abhaengigkeiten.md) | Feature-Flags, Abhängigkeiten, Toolchain | Entwurf |
-| [04-roadmap.md](04-roadmap.md) | Phasen mit Aufgabenlisten | Entwurf |
-| [05-qualitaet.md](05-qualitaet.md) | Tests, Prüfmatrix, Doku | Entwurf |
-| [06-offene-fragen.md](06-offene-fragen.md) | Entscheidungen, die noch fehlen | offen |
-| [phase-2-zahlentypen.md](phase-2-zahlentypen.md) | Detailplan Phase 2 | umgesetzt und geprüft |
-| [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) | Detailplan Phase 3 | umgesetzt und geprüft |
-| [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) | Detailplan Phase 4 | umgesetzt und geprüft |
-| [phase-5-lie-theorie.md](phase-5-lie-theorie.md) | Detailplan Phase 5 | umgesetzt und geprüft |
-| [phase-6a-sichten-iterative-loeser.md](phase-6a-sichten-iterative-loeser.md) | Detailplan Phase 6, Teil 1 | umgesetzt und geprüft |
-| [phase-6b-gmres-tensoren-alloc.md](phase-6b-gmres-tensoren-alloc.md) | Detailplan Phase 6, Teil 2 | umgesetzt; Tests grün, ein Clippy-Befund behoben, Nachlauf offen |
-| [phase-7a-ode.md](phase-7a-ode.md) | Detailplan Phase 7, Teil 1 | umgesetzt, noch ungeprüft |
+| [01-ziele.md](01-ziele.md) | Ziele und Nicht-Ziele | gültig |
+| [02-architektur.md](02-architektur.md) | Schichten, Traits, Backend, Erweiterbarkeit | gültig; Dateistruktur siehe Quelltext |
+| [03-features-abhaengigkeiten.md](03-features-abhaengigkeiten.md) | Feature-Flags, Abhängigkeiten, Toolchain | gültig |
+| [04-roadmap.md](04-roadmap.md) | Phasen mit Aufgabenlisten | alle Phasen umgesetzt |
+| [05-qualitaet.md](05-qualitaet.md) | Tests, Prüfmatrix, Doku | gültig |
+| [06-offene-fragen.md](06-offene-fragen.md) | Entscheidungen, die noch fehlen | keine offen |
+| `phase-*.md` | Detailpläne der Phasen 2 bis 7 | umgesetzt und geprüft |
 
-Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
-
-## Ablauf pro Phase
-
-1. Phase in `04-roadmap.md` verfeinern: öffentliche API (Typen, Traits,
-   Signaturen), Dateien, Tests, Referenzquellen.
-2. Offene Fragen der Phase in `06-offene-fragen.md` klären.
-3. Freigabe durch den Menschen.
-4. Umsetzung, danach Prüfmatrix durch den Menschen.
-5. Roadmap abhaken, Status aktualisieren.
+Die Phasen 8 bis 11 und der zweite Teil von Phase 7 wurden ohne eigenen
+Detailplan umgesetzt; ihr Umfang steht in der Roadmap und in der Doku der
+Module.
 
 ## Bereits getroffene Entscheidungen
 

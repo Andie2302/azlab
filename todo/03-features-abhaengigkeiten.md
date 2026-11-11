@@ -7,7 +7,7 @@
 | *(keins)* | Skalar-Traits, Zahlentypen, lineare Algebra fester Größe, Löser – alles generisch | keine | `f32`/`f64` haben dann kein `Elementary` |
 | `libm` | Backend für Elementarfunktionen in `no_std` | `libm` (optional) | |
 | `std` | Backend über die Standardbibliothek; schaltet `alloc` mit ein | – | hat Vorrang vor `libm` |
-| `alloc` | besitzende dynamische Typen, wachsendes Autodiff-Tape | – | |
+| `alloc` | `DMatrix`, `DTensor`, `GrowTape`, `fem::assemble_csr` | – | alles andere bleibt ohne Heap nutzbar |
 
 Geplant, noch nicht festgelegt: weitere Backend-Features; `serde` (optional)
 für Zahlentypen; `nightly` gibt es nicht.

@@ -11,10 +11,10 @@ Fachliche Modelle – beispielsweise Stoffdaten, Physik oder Robotik – sollen
 später in eigenen Crates darauf aufbauen. azmath selbst enthält keine Einheiten,
 Stoffkonstanten oder Fachmodelle.
 
-> **Entwicklungsstand:** Das Projekt befindet sich im Aufbau. Derzeit enthält
-> der Workspace das Crate `azmath`. Die API kann sich noch ändern; eine
-> Veröffentlichung auf crates.io ist aktuell nicht vorgesehen
-> (`publish = false`).
+> **Entwicklungsstand:** Der Workspace enthält derzeit das Crate `azmath`.
+> Alle geplanten Bereiche von azmath sind umgesetzt und getestet. Die API
+> kann sich noch ändern; eine Veröffentlichung auf crates.io ist aktuell
+> nicht vorgesehen (`publish = false`).
 
 ## Grundsätze
 
@@ -35,20 +35,31 @@ Die Indexoperatoren von Vektoren und Matrizen folgen der Array-Konvention und
 können bei ungültigen Indizes eine Panic auslösen. Für geprüften Zugriff stehen
 `get` und `get_mut` bereit.
 
-## Bereits implementiert
+## Umfang
 
-| Bereich | Umfang |
-|---------|--------|
-| Skalar-Traits | `Algebra`, `Ring`, `Field`, `Commutative`, `Conjugate`, `Real`, `Elementary`, `RealElementary` |
-| Zahlentypen | `Complex<T>`, `Dual<T>`, `DualN<T, N>`, `CayleyDickson<A>`, `Octonion`, `Quaternion<T>` |
-| Rotationen | Quaternion-Rotationen, Interpolation mit Slerp und Umwandlungen |
-| Lineare Algebra | `Vector<T, N>`, `Matrix<T, R, C>`, Produkte, Normen, Transponieren und Adjungieren |
-| Matrixzerlegungen | LU mit Pivotisierung, Cholesky, QR, lineare Systeme, Determinante und Inverse |
-| Autodiff | Funktionswert und Ableitungen, Gradient, Jacobi- und Hesse-Matrix über Dualzahlen |
-| Nullstellen | Bisektion, Sekante, Newton, Newton mit Klammer, Brent |
-| Nichtlineare Systeme | Newton mit vorgegebener oder automatisch berechneter Jacobi-Matrix, Dämpfung und Liniensuche |
-| Polynome | Horner- und Tschebyschow-Auswertung, Formeln für Grad 2–4, komplexe Nullstellen mit Aberth-Ehrlich |
-| Intervalle | `Interval<T>` mit Rundung nach außen und reelle Polynom-Nullstellenisolation |
+| Bereich | Modul | Umfang |
+|---------|-------|--------|
+| Skalar-Traits | `scalar` | `Algebra`, `Ring`, `Field`, `Commutative`, `Conjugate`, `Real`, `Elementary`, `RealElementary` |
+| Zahlentypen | `number` | `Complex<T>`, `Dual<T>`, `DualN<T, N>`, `CayleyDickson<A>`, `Octonion`, `Quaternion<T>` mit Rotationen und Slerp |
+| Intervalle | `interval` | `Interval<T>` mit Rundung nach außen |
+| Lineare Algebra, feste Größe | `linalg` | `Vector<T, N>`, `Matrix<T, R, C>`, Produkte, Normen, Transponieren und Adjungieren |
+| Zerlegungen | `linalg` | LU, Cholesky, QR; lineare Systeme, Determinante, Inverse, Ausgleichsrechnung |
+| Eigenwerte, Singulärwerte | `linalg` | symmetrisch mit Eigenvektoren, allgemein nur Eigenwerte; Singulärwertzerlegung mit Pseudoinverse |
+| Lineare Algebra, Größe zur Laufzeit | `linalg` | `MatrixView`, `MatrixViewMut`, dünnbesetzte `CsrMatrix`, `LinearOperator`; mit `alloc` zusätzlich `DMatrix` |
+| Tensoren | `tensor` | `TensorView`, `TensorViewMut`, äußeres Produkt, Kontraktion, verallgemeinertes Produkt; mit `alloc` zusätzlich `DTensor` |
+| Lie-Theorie | `lie` | `So2`, `So3`, `Se2`, `Se3` mit `exp`, `log`, Adjungierter und Lie-Klammer |
+| Autodiff | `autodiff` | vorwärts über Dualzahlen (Ableitung, Gradient, Jacobi-, Hesse-Matrix), rückwärts über ein Band (`Tape`, `Var`) |
+| Nullstellen | `solve` | Bisektion, Sekante, Newton, Newton mit Klammer, Brent |
+| Gleichungssysteme | `solve` | Newton für nichtlineare Systeme; konjugierte Gradienten, BiCGSTAB und GMRES für große lineare Systeme |
+| Polynome | `poly` | Horner- und Tschebyschow-Auswertung, Formeln bis Grad 4, alle komplexen Nullstellen, lückenlose Einschließung reeller Nullstellen |
+| Differentialgleichungen | `ode` | Euler, RK4, Dormand-Prince mit Schrittweitensteuerung, implizites Euler-Verfahren, Trapezregel |
+| Partielle Differentialgleichungen | `pde` | regelmäßige Gitter, Laplace- und Ableitungsoperator mit Randbedingungen, impliziter Zeitschritt, Mehrgitter für die Poisson-Gleichung |
+| Finite Elemente | `fem` | Elementmatrizen für Strecke, Dreieck, Viereck, Tetraeder, ebene Elastizität; matrixfreier Operator; mit `alloc` Assemblierung nach CSR |
+| Quadratur | `quad` | Trapez- und Simpsonregel, Gauß-Legendre, adaptive Simpson-Quadratur |
+| Interpolation | `interp` | linear, kubische Splines, baryzentrische Polynominterpolation, Tschebyschow-Reihen |
+| Optimierung | `optim` | Gradientenabstieg, BFGS, L-BFGS, Nelder-Mead, Levenberg-Marquardt |
+| Fourier-Transformation | `fft` | schnelle Transformation für Zweierpotenzen, direkte Summe für jede Länge |
+| Spezielle Funktionen | `special` | Gamma-, Beta- und Fehlerfunktion, unvollständige Gammafunktion |
 
 Welche Zahlentypen ein Verfahren unterstützt, bestimmen seine Trait-Grenzen.
 Nicht jede Kombination aus Algorithmus und Zahlentyp ist sinnvoll oder verfügbar.
@@ -84,7 +95,7 @@ azmath = { path = "../azlab/crates/azmath" }
 | Standard: `libm` | `no_std` ohne Heap; Elementarfunktionen über die optionale Abhängigkeit `libm` |
 | `default-features = false` | Keine Abhängigkeiten; keine Implementierungen von `Elementary` und `RealElementary` für `f32`/`f64` |
 | `std` | Elementarfunktionen über `std`; aktiviert zusätzlich `alloc` |
-| `alloc` | Vorbereiteter Schalter für spätere Heap-basierte Typen; dynamische Matrizen und Tensoren sind noch geplant |
+| `alloc` | Zusätzliche Typen mit eigenem Speicher: `DMatrix`, `DTensor`, `GrowTape`, `assemble_csr`. Alles andere bleibt ohne Heap nutzbar |
 
 Sind `std` und `libm` gleichzeitig aktiv, verwendet azmath das
 `std`-Backend. Die Features bleiben additiv.
@@ -107,7 +118,7 @@ azmath = { git = "https://github.com/Andie2302/azlab.git", default-features = fa
 
 Die folgenden Beispiele zeigen die Verwendung in einer normalen Rust-Anwendung.
 `println!` gehört zur Anwendung; der mathematische Kern benötigt dafür kein
-`std`. Die Beispiele wurden für diese README nicht ausgeführt.
+`std`. Die Beispiele werden bei jedem Testlauf mit übersetzt und ausgeführt.
 
 ### Ein lineares Gleichungssystem lösen
 
@@ -183,15 +194,70 @@ Brent und die übrigen skalaren Nullstellenverfahren benötigen selbst kein
 Rechen-Backend. Eine übergebene Funktion kann je nach verwendeten Operationen
 dennoch eines benötigen.
 
+### Ein Anfangswertproblem lösen
+
+Das Dormand-Prince-Verfahren wählt seine Schrittweite selbst. Die Zahl der
+Gleichungen steht im Typ; hier die Schwingung `y'' = −y` als System.
+
+```rust
+use azmath::Vector;
+use azmath::ode::{OdeError, OdeOptions, dormand_prince};
+
+fn main() -> Result<(), OdeError<f64, 2>> {
+    let start = Vector::new([1.0_f64, 0.0]);
+    let end = dormand_prince(
+        |_t, y: Vector<f64, 2>| Vector::new([y[1], -y[0]]),
+        0.0,
+        start,
+        core::f64::consts::PI,
+        &OdeOptions::default(),
+    )?;
+
+    // Nach einer halben Periode: (−1, 0).
+    println!("y = {:?} nach {} Schritten", end.y, end.steps);
+    Ok(())
+}
+```
+
+### Eine Funktion minimieren
+
+BFGS braucht Funktionswert und Gradient. Der Gradient entsteht automatisch,
+wenn die Funktion generisch geschrieben ist.
+
+```rust
+use azmath::autodiff::gradient;
+use azmath::optim::bfgs;
+use azmath::scalar::Field;
+use azmath::{SolveError, Tolerance, Vector};
+
+fn rosenbrock<T: Field>(p: Vector<T, 2>) -> T {
+    let (a, b) = (T::ONE - p[0], p[1] - p[0] * p[0]);
+    a * a + T::from_f64(100.0) * b * b
+}
+
+fn main() -> Result<(), SolveError<Vector<f64, 2>, f64>> {
+    let tolerance = Tolerance::<f64>::default().with_max_iterations(1000);
+    let minimum = bfgs(
+        |x| gradient(rosenbrock, x),
+        Vector::new([-1.2, 1.0]),
+        &tolerance,
+    )?;
+
+    // Das Minimum liegt bei (1, 1).
+    println!("Minimum bei {:?}", minimum.x);
+    Ok(())
+}
+```
+
 ## Aufbau des Repositorys
 
 | Pfad | Inhalt |
 |------|--------|
 | [crates/azmath](crates/azmath) | Mathematische Kernbibliothek |
 | [todo](todo/README.md) | Ziele, Architektur, Entscheidungen und Detailpläne |
-| [scripts/pruefen.sh](scripts/pruefen.sh) | Lokale Prüfmatrix |
+| [scripts/pruefen.sh](scripts/pruefen.sh) | Prüfmatrix |
 | [pruefung/ergebnis.txt](pruefung/ergebnis.txt) | Eingechecktes Prüfprotokoll |
-| [CLAUDE.md](CLAUDE.md) | Verbindliche Projektregeln und Entwicklungsablauf |
+| [MOEGLICHE_PROBLEME.md](MOEGLICHE_PROBLEME.md) | Gemeldete Probleme und ihr Stand |
 
 ## Dokumentation und lokale Prüfung
 
@@ -201,7 +267,7 @@ Die API-Dokumentation lässt sich lokal erzeugen:
 cargo doc -p azmath --no-deps --all-features --open
 ```
 
-Für die vollständige Prüfmatrix führt der Entwickler im Repository aus:
+Die vollständige Prüfmatrix läuft mit:
 
 ```bash
 scripts/pruefen.sh
@@ -219,35 +285,30 @@ rustup target add thumbv7em-none-eabihf
 ```
 
 Das Ergebnis wird nach `pruefung/ergebnis.txt` geschrieben.
-Prüfläufe erfolgen gemäß den Projektregeln durch den Menschen; die Befehle
-hier dienen als Anleitung.
 
-## Geplanter Ausbau
+## Grenzen und möglicher Ausbau
 
-Die folgenden Bereiche sind geplant und noch nicht als fertige Funktionen
-verfügbar:
+Bewusst nicht enthalten oder noch offen:
 
-- Lie-Gruppen und Lie-Algebren für geometrische und robotische Anwendungen.
-- Matrix- und Tensor-Sichten auf Puffer, dünnbesetzte und iterative Löser.
-- Dynamische Matrizen und Tensoren hinter dem Feature `alloc`.
-- ODE-Verfahren, Quadratur und Interpolation.
-- PDE-Verfahren auf Gittern und Finite Elemente.
-- Rückwärts-Autodiff und Optimierung.
+- `f16` und `f128`: erst, wenn sie in stable Rust verfügbar sind.
+- Eigenvektoren allgemeiner (nicht symmetrischer) Matrizen.
+- Bessel-Funktionen und weitere spezielle Funktionen.
+- Finite Elemente höherer Ordnung, Elastizität in 3D, Netzerzeugung.
+- Vorkonditionierer für die iterativen Löser.
+- Elementarfunktionen auf Intervallen.
 
-Mögliche spätere Fach-Crates sollen darauf aufbauen. Dazu gehören beispielsweise
-Physik-Simulationen und Stoffdatenmodelle; sie sind derzeit kein Bestandteil von
-azmath.
+Fach-Crates sollen auf azmath aufbauen, etwa Physik-Simulationen
+(Kollisionsgeometrie, Gewebe, Strömung) und Stoffdatenmodelle. Sie sind kein
+Bestandteil von azmath.
 
 Details stehen in der [Roadmap](todo/04-roadmap.md), die Abgrenzung in den
 [Zielen und Nicht-Zielen](todo/01-ziele.md).
 
 ## Entwicklung
 
-Erweiterungen werden vor der Implementierung in `todo/` geplant und freigegeben.
-Neue Abhängigkeiten und Features werden dort ebenfalls dokumentiert.
-Dokumentation und Commit-Nachrichten sind deutsch, Bezeichner englisch.
-
-Die vollständigen Regeln stehen in [CLAUDE.md](CLAUDE.md).
+Entwurfsgrundsätze, Entscheidungen und Pläne stehen in [todo](todo/README.md).
+Dokumentation und Commit-Nachrichten sind deutsch, Bezeichner englisch. Jeder
+Stand auf `master` besteht `scripts/pruefen.sh`.
 
 ## Lizenz
 

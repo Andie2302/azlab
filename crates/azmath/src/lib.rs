@@ -22,7 +22,29 @@
 //! |---------|---------|
 //! | `libm` (Standard) | Elementarfunktionen über die Crate `libm`, läuft in `no_std` |
 //! | `std`   | Elementarfunktionen über `std`, aktiviert auch `alloc` |
-//! | `alloc` | Heap-basierte Typen (dynamische Größen) |
+//! | `alloc` | Zusätzliche Typen mit eigenem Speicher (`DMatrix`, `DTensor`, `GrowTape`) |
+//!
+//! ## Module
+//!
+//! | Modul | Inhalt |
+//! |-------|--------|
+//! | [`scalar`] | Skalar-Traits |
+//! | [`number`] | komplexe Zahlen, Dualzahlen, Quaternionen, Cayley-Dickson |
+//! | [`interval`] | Intervallarithmetik |
+//! | [`linalg`] | Vektoren, Matrizen, Zerlegungen, Eigenwerte, Sichten, dünnbesetzte Matrizen |
+//! | [`tensor`] | Tensoren |
+//! | [`lie`] | Drehungen und starre Bewegungen als Lie-Gruppen |
+//! | [`autodiff`] | automatisches Differenzieren, vorwärts und rückwärts |
+//! | [`solve`] | Nullstellen, nichtlineare und große lineare Gleichungssysteme |
+//! | [`poly`] | Polynome und ihre Nullstellen |
+//! | [`ode`] | gewöhnliche Differentialgleichungen |
+//! | [`pde`] | partielle Differentialgleichungen auf Gittern |
+//! | [`fem`] | Finite Elemente |
+//! | [`quad`] | numerische Integration |
+//! | [`interp`] | Interpolation |
+//! | [`optim`] | Optimierung |
+//! | [`fft`] | Fourier-Transformation |
+//! | [`special`] | spezielle Funktionen |
 
 #![no_std]
 
@@ -53,6 +75,9 @@ pub mod scalar;
 pub mod solve;
 pub mod special;
 pub mod tensor;
+
+#[cfg(all(doctest, any(feature = "std", feature = "libm")))]
+mod readme;
 
 #[cfg(test)]
 mod testutil;

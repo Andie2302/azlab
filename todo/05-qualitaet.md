@@ -2,16 +2,15 @@
 
 ## Wer prüft
 
-Die KI führt von sich aus keinen Code aus (Regel 4 in `CLAUDE.md`). Der
-Mensch startet lokal
+Die Prüfmatrix läuft mit
 
 ```bash
 scripts/pruefen.sh
 ```
 
-und pusht die erzeugte Datei `pruefung/ergebnis.txt` (und ggf. das
-aktualisierte `Cargo.lock`). Die KI liest das Ergebnis und pflegt das Skript,
-wenn Features oder Crates dazukommen.
+und schreibt nach `pruefung/ergebnis.txt`. Jeder Stand auf `master` besteht
+sie. Die Beispiele der README werden als Tests mit übersetzt und ausgeführt
+(`src/readme.rs`).
 
 ## Prüfmatrix
 
