@@ -30,6 +30,10 @@ der KI. Zuerst diese Datei lesen, dann [todo/README.md](todo/README.md).
      `pruefung/ergebnis.txt`. Die KI pflegt das Skript und liest das Ergebnis.
    - Dateien lesen, schreiben und Git-Befehle (commit, push) sind kein
      „Code ausführen“.
+   - Auch kein Ersatz-Prüfen: Die KI rechnet Tests und Abläufe nicht „von
+     Hand“ oder im Kopf nach und geht fertigen Code nicht noch einmal
+     prüfend durch. Schreiben, pushen, fertig – geprüft wird ausschließlich
+     durch den Lauf des Menschen.
 
 5. **Bei Fragen sofort nachfragen**, auch wenn es mehrere sind.
 
