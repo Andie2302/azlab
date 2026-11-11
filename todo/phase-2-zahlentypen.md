@@ -1,7 +1,25 @@
 # Phase 2 – Zahlentypen (Detailplan)
 
-Status: **zur Freigabe** – wartet auf den ersten Prüflauf von Phase 1
-(`scripts/pruefen.sh`). Erst nach Freigabe entsteht Code.
+Status: **umgesetzt** (Schritte A–E, je ein Commit). Von der KI nach jedem
+Schritt mit Standard-Features und ohne Features geprüft (Clippy und Tests);
+die volle Prüfmatrix über `scripts/pruefen.sh` steht noch aus.
+
+## Abweichungen vom Plan bei der Umsetzung
+
+- `Real` setzt jetzt `Commutative` voraus. Ohne das ließ sich nicht
+  ausdrücken, dass die Verdopplung einer reellen Algebra ein Körper ist.
+- `Dual` und `DualN` liegen gemeinsam in `src/number/dual/` und teilen sich
+  die Implementierung über Makros; einen Ordner `dual_n/` gibt es nicht.
+- `CayleyDickson` hat den Operator `/` (Rechtsdivision) auf jeder Stufe, also
+  auch für Oktonionen; `Field` bleibt auf Stufe 1 und 2 beschränkt.
+- `Quaternion` hat zusätzlich `inv()` und `sqrt()`.
+- `Complex` hat zusätzlich `mul_i()` und `mul_neg_i()`.
+- `Dual`/`DualN` implementieren `Conjugate` nicht; `constant`/`variable`
+  brauchen nur `T: Algebra` statt `T: Field`.
+- Die Umkehrfunktionen von `Complex` (`asin`, `acos`, ...) nutzen die
+  Lehrbuchformeln und sind nahe den Verzweigungsschnitten nicht auf die
+  letzte Stelle genau.
+- Für Tests gibt es das interne Modul `src/testutil.rs`.
 
 ## Ziel
 

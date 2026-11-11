@@ -5,6 +5,9 @@ use core::ops::{Div, DivAssign};
 
 /// Ring mit Division (Körper bzw. Schiefkörper).
 pub trait Field: Ring + Div<Output = Self> + DivAssign {
+    /// Wandelt eine `f64`-Konstante in diesen Typ um (ggf. mit Rundung).
+    fn from_f64(value: f64) -> Self;
+
     /// Kehrwert `1 / self`.
     #[inline]
     fn recip(self) -> Self {

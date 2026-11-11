@@ -30,6 +30,11 @@
 extern crate std;
 
 mod backend;
+pub mod number;
 pub mod scalar;
 
-pub use scalar::{Elementary, Field, Real, RealElementary, Ring};
+#[cfg(test)]
+mod testutil;
+
+pub use number::{CayleyDickson, Complex, Dual, DualN, Octonion, Quaternion};
+pub use scalar::{Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring};

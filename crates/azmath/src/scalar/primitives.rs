@@ -1,5 +1,7 @@
 //! Implementierungen der backend-freien Traits für die primitiven Typen.
 
+use super::algebra::{Algebra, Commutative};
+use super::conjugate::Conjugate;
 use super::field::Field;
 use super::real::Real;
 use super::ring::Ring;
@@ -7,10 +9,14 @@ use super::ring::Ring;
 macro_rules! impl_ring {
     ($zero:literal, $one:literal => $($t:ty),*) => {
         $(
-            impl Ring for $t {
+            impl Algebra for $t {
                 const ZERO: Self = $zero;
                 const ONE: Self = $one;
             }
+
+            impl Ring for $t {}
+
+            impl Commutative for $t {}
         )*
     };
 }
@@ -21,7 +27,29 @@ impl_ring!(0.0, 1.0 => f32, f64);
 macro_rules! impl_real {
     ($($t:ident),*) => {
         $(
-            impl Field for $t {}
+            impl Field for $t {
+                #[inline]
+                fn from_f64(value: f64) -> Self {
+                    value as $t
+                }
+            }
+
+            impl Conjugate for $t {
+                type Real = $t;
+
+                #[inline]
+                fn conj(self) -> Self {
+                    self
+                }
+                #[inline]
+                fn norm_sqr(self) -> Self {
+                    self * self
+                }
+                #[inline]
+                fn scale(self, factor: Self) -> Self {
+                    self * factor
+                }
+            }
 
             impl Real for $t {
                 const PI: Self = core::$t::consts::PI;
@@ -30,10 +58,6 @@ macro_rules! impl_real {
                 const INFINITY: Self = $t::INFINITY;
                 const NAN: Self = $t::NAN;
 
-                #[inline]
-                fn from_f64(value: f64) -> Self {
-                    value as $t
-                }
                 #[inline]
                 fn to_f64(self) -> f64 {
                     self as f64

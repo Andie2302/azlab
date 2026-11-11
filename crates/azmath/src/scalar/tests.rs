@@ -25,8 +25,15 @@ fn powi_uses_repeated_squaring() {
 fn real_basics() {
     assert_eq!(Real::abs(-2.5_f32), 2.5);
     assert_eq!(Real::max(1.0_f64, 2.0), 2.0);
-    assert_eq!(<f32 as Real>::from_f64(0.5), 0.5);
+    assert_eq!(<f32 as Field>::from_f64(0.5), 0.5);
     assert!(Real::is_nan(<f64 as Real>::NAN));
+}
+
+#[test]
+fn conjugate_is_identity_for_reals() {
+    assert_eq!(Conjugate::conj(-3.0_f64), -3.0);
+    assert_eq!(Conjugate::norm_sqr(-3.0_f64), 9.0);
+    assert_eq!(Conjugate::scale(2.0_f32, 4.0), 8.0);
 }
 
 #[cfg(any(feature = "std", feature = "libm"))]

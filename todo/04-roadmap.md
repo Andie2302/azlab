@@ -16,12 +16,12 @@ auf denen alles Weitere steht.
 ## Phase 1 – Skalar-Traits und Backend
 
 Stand: als Entwurf im Code vorhanden, **vom Menschen noch zu prüfen**
-(Prüfmatrix in 05-qualitaet.md). `Conjugate` fehlt noch.
+(Prüfmatrix in 05-qualitaet.md).
 
 - [x] `Ring`, `Field` (`recip`, `powi`)
 - [x] `Real` (Ordnung, `abs`, Konstanten, `from_f64`)
 - [x] `Elementary`, `RealElementary`
-- [ ] `Conjugate`
+- [x] `Conjugate` (mit Phase 2 umgesetzt)
 - [x] Implementierungen für `f32`, `f64`; `Ring` für vorzeichenbehaftete Ganzzahlen
 - [x] Backend `libm`, Backend `std`, Auswahl mit Rangfolge
 - [x] Tests: generische Testfunktionen, die für jeden Typ und jedes Backend laufen
@@ -30,15 +30,17 @@ Ergebnis: Vertrag, gegen den alle späteren Algorithmen geschrieben werden.
 
 ## Phase 2 – Zahlentypen
 
-Detailplan: [phase-2-zahlentypen.md](phase-2-zahlentypen.md) – wartet auf Freigabe.
+Detailplan: [phase-2-zahlentypen.md](phase-2-zahlentypen.md) – umgesetzt.
+Von der KI mit Standard-Features und ohne Features geprüft; die volle
+Prüfmatrix (`scripts/pruefen.sh`) steht noch aus.
 
-- [ ] Trait-Umbau: `Algebra`, `Commutative`, `Conjugate`; `from_f64` nach `Field`
+- [x] Trait-Umbau: `Algebra`, `Commutative`, `Conjugate`; `from_f64` nach `Field`
 
-- [ ] `Complex<T>` inkl. `Elementary`
-- [ ] `Dual<T>` inkl. aller Skalar-Traits (erste Ableitung)
-- [ ] `DualN<T, N>` (Gradient); zweite Ableitungen über Schachtelung `Dual<Dual<T>>`
-- [ ] `CayleyDickson<A>`, Oktonionen als Probe
-- [ ] `Quaternion<T>` mit Rotationen, Slerp, Umwandlungen
+- [x] `Complex<T>` inkl. `Elementary`
+- [x] `Dual<T>` inkl. aller Skalar-Traits (erste Ableitung)
+- [x] `DualN<T, N>` (Gradient); zweite Ableitungen über Schachtelung `Dual<Dual<T>>`
+- [x] `CayleyDickson<A>`, Oktonionen als Probe
+- [x] `Quaternion<T>` mit Rotationen, Slerp, Umwandlungen
 
 ## Phase 3 – Lineare Algebra fester Größe
 
