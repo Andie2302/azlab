@@ -16,6 +16,8 @@ pub trait Conjugate: Algebra {
     fn conj(self) -> Self;
     /// Quadrat der Norm, also `self * conj(self)` als reelle Zahl.
     fn norm_sqr(self) -> Self::Real;
+    /// Realteil.
+    fn real_part(self) -> Self::Real;
     /// Multiplikation jedes Anteils mit einer reellen Zahl.
     fn scale(self, factor: Self::Real) -> Self;
 }

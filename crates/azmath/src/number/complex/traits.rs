@@ -33,6 +33,11 @@ impl<T: Real> Conjugate for Complex<T> {
     }
 
     #[inline]
+    fn real_part(self) -> T {
+        self.re
+    }
+
+    #[inline]
     fn scale(self, factor: T) -> Self {
         self * factor
     }

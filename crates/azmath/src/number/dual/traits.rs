@@ -2,7 +2,7 @@
 
 use super::repr::{Dual, DualN};
 use super::tangent::Tangent;
-use crate::scalar::{Algebra, Commutative, Field, Real, Ring};
+use crate::scalar::{Algebra, Commutative, Conjugate, Field, Real, Ring};
 
 macro_rules! impl_dual_traits {
     ([$($gen:tt)*] $ty:ty, $eps:ty, $zero:expr) => {
@@ -25,6 +25,36 @@ macro_rules! impl_dual_traits {
             #[inline]
             fn from_f64(value: f64) -> Self {
                 Self { re: T::from_f64(value), eps: $zero }
+            }
+        }
+
+        /// Dualzahlen über reellen Zahlen sind selbst reell: Die Konjugation
+        /// hat keine Wirkung, Normen bleiben Dualzahlen und tragen die
+        /// Ableitung weiter.
+        impl<$($gen)*> Conjugate for $ty
+        where
+            T: Real,
+        {
+            type Real = Self;
+
+            #[inline]
+            fn conj(self) -> Self {
+                self
+            }
+
+            #[inline]
+            fn norm_sqr(self) -> Self {
+                self * self
+            }
+
+            #[inline]
+            fn real_part(self) -> Self {
+                self
+            }
+
+            #[inline]
+            fn scale(self, factor: Self) -> Self {
+                self * factor
             }
         }
 

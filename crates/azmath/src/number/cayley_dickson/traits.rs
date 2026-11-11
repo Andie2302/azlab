@@ -25,6 +25,11 @@ impl<A: Conjugate> Conjugate for CayleyDickson<A> {
     }
 
     #[inline]
+    fn real_part(self) -> A::Real {
+        self.a.real_part()
+    }
+
+    #[inline]
     fn scale(self, factor: A::Real) -> Self {
         Self::new(self.a.scale(factor), self.b.scale(factor))
     }

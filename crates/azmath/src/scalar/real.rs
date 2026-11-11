@@ -1,12 +1,16 @@
 //! Der Trait [`Real`].
 
 use super::algebra::Commutative;
+use super::conjugate::Conjugate;
 use super::field::Field;
 
 /// Reelle Zahl: geordneter, kommutativer Körper mit Betrag und Konstanten.
 ///
+/// Die Konjugation hat für reelle Zahlen keine Wirkung; sie ist trotzdem
+/// vorausgesetzt, damit reeller und komplexer Code dieselben Formeln nutzen.
+///
 /// Alles in diesem Trait ist ohne Rechen-Backend verfügbar.
-pub trait Real: Field + Commutative + PartialOrd {
+pub trait Real: Field + Commutative + Conjugate<Real = Self> + PartialOrd {
     /// Kreiszahl π.
     const PI: Self;
     /// Eulersche Zahl e.

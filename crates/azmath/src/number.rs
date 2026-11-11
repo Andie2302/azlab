@@ -4,9 +4,6 @@
 //! deshalb in jeden generischen Algorithmus einsetzen. Nichts in diesem Modul
 //! braucht Heap-Speicher.
 
-#[macro_use]
-mod macros;
-
 mod cayley_dickson;
 mod complex;
 mod dual;

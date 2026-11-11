@@ -1,4 +1,4 @@
-//! Interne Makros für die Operator-Implementierungen der Zahlentypen.
+//! Interne Makros für Operator-Implementierungen.
 
 /// Leitet einen zusammengesetzten Zuweisungsoperator (`+=`, ...) aus dem
 /// zugehörigen zweistelligen Operator ab. Optional mit `where`-Schranken.

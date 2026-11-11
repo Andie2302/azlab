@@ -39,6 +39,11 @@ impl<T: Real> Conjugate for Quaternion<T> {
     }
 
     #[inline]
+    fn real_part(self) -> T {
+        self.w
+    }
+
+    #[inline]
     fn scale(self, factor: T) -> Self {
         self * factor
     }

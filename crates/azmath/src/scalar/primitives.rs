@@ -46,6 +46,10 @@ macro_rules! impl_real {
                     self * self
                 }
                 #[inline]
+                fn real_part(self) -> Self {
+                    self
+                }
+                #[inline]
                 fn scale(self, factor: Self) -> Self {
                     self * factor
                 }
