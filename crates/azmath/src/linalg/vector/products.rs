@@ -1,31 +1,29 @@
 //! Produkte und Normen für [`Vector`].
 
 use super::repr::Vector;
-use crate::scalar::{Algebra, Conjugate, Elementary, Field, Real, RealElementary};
+use crate::scalar::{Algebra, Conjugate, Elementary, Real, RealElementary};
 
 /// Euklidische Norm einer Folge von Werten, gegen Über- und Unterlauf
-/// geschützt: Die Werte werden vor dem Quadrieren durch den größten Betrag
-/// geteilt.
+/// geschützt: Die Werte werden vor dem Quadrieren durch den größten
+/// Komponentenbetrag geteilt.
 pub(crate) fn scaled_norm<T: Conjugate>(values: impl Iterator<Item = T> + Clone) -> T::Real
 where
     T::Real: RealElementary,
 {
     let zero = <T::Real as Algebra>::ZERO;
-    let sum_of_squares = |factor: Option<T::Real>| {
-        values.clone().fold(zero, |acc, value| {
-            acc + factor.map_or(value, |f| value.scale(f)).norm_sqr()
-        })
-    };
-    let scale = values.clone().fold(zero, |largest, value| largest.max(value.abs_sum()));
+    let scale = values.clone().fold(zero, |largest, value| largest.max(value.max_abs()));
     if scale == zero {
         // Alles null – oder NaN, das die Maximumsuche übergeht; die
         // einfache Formel liefert in beiden Fällen das Richtige.
-        return sum_of_squares(None).sqrt();
+        return values.fold(zero, |acc, value| acc + value.norm_sqr()).sqrt();
     }
     if !scale.is_finite() {
         return scale;
     }
-    scale * sum_of_squares(Some(scale.recip())).sqrt()
+    // Direkt dividieren: Der Kehrwert eines sehr kleinen Maßstabs wäre
+    // nicht darstellbar.
+    let sum = values.fold(zero, |acc, value| acc + value.div_real(scale).norm_sqr());
+    scale * sum.sqrt()
 }
 
 impl<T: Algebra, const N: usize> Vector<T, N> {
@@ -94,8 +92,7 @@ where
     pub fn normalize(self) -> Option<Self> {
         let norm = self.norm();
         if norm > <T::Real as Algebra>::ZERO && norm.is_finite() {
-            let factor = norm.recip();
-            Some(self.map(|a| a.scale(factor)))
+            Some(self.map(|a| a.div_real(norm)))
         } else {
             None
         }

@@ -30,8 +30,13 @@ impl<A: Conjugate> Conjugate for CayleyDickson<A> {
     }
 
     #[inline]
-    fn abs_sum(self) -> A::Real {
-        self.a.abs_sum() + self.b.abs_sum()
+    fn max_abs(self) -> A::Real {
+        self.a.max_abs().max(self.b.max_abs())
+    }
+
+    #[inline]
+    fn div_real(self, divisor: A::Real) -> Self {
+        Self::new(self.a.div_real(divisor), self.b.div_real(divisor))
     }
 
     #[inline]

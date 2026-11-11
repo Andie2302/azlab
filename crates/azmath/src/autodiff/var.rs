@@ -1,6 +1,6 @@
 //! Die Variable des Rückwärtsmodus.
 
-use super::tape::{DETACHED, Record, TapeError};
+use super::tape::{DETACHED, POISONED, Record, TapeError};
 use crate::linalg::Vector;
 use crate::scalar::{
     Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring,
@@ -23,6 +23,7 @@ use core::ops::{Add, Div, Mul, Neg, Sub};
 pub struct Var<'t, T, R> {
     value: T,
     index: usize,
+    generation: u32,
     tape: Option<&'t R>,
 }
 
@@ -56,12 +57,12 @@ impl<'t, T: Algebra, R: Record<T>> Var<'t, T, R> {
     /// Neue unabhängige Variable auf dem Band `tape`.
     pub fn new(tape: &'t R, value: T) -> Self {
         let index = tape.push([DETACHED; 2], [T::ZERO; 2]);
-        Self { value, index, tape: Some(tape) }
+        Self { value, index, generation: tape.generation(), tape: Some(tape) }
     }
 
     /// Konstante: nimmt an der Rechnung teil, hat aber keine Ableitung.
     pub const fn constant(value: T) -> Self {
-        Self { value, index: DETACHED, tape: None }
+        Self { value, index: DETACHED, generation: 0, tape: None }
     }
 
     /// Der Wert.
@@ -69,39 +70,76 @@ impl<'t, T: Algebra, R: Record<T>> Var<'t, T, R> {
         self.value
     }
 
+    /// `true`, wenn die Variable zum aktuellen Stand ihres Bands gehört
+    /// (Konstanten immer).
+    fn is_current(self) -> bool {
+        self.tape.is_none_or(|tape| {
+            self.index != POISONED && self.generation == tape.generation()
+        })
+    }
+
+    /// Ungültiges Ergebnis: Der Wert stimmt, Ableitungen gibt es nicht.
+    fn poisoned(value: T, tape: &'t R) -> Self {
+        Self { value, index: POISONED, generation: tape.generation(), tape: Some(tape) }
+    }
+
     /// Ergebnis eines Schritts mit einem Vorgänger.
     fn unary(self, value: T, partial: T) -> Self {
-        match self.tape {
-            Some(tape) if self.index != DETACHED => {
-                Self { value, index: tape.push([self.index, DETACHED], [partial, T::ZERO]), tape: Some(tape) }
-            }
-            _ => Self { value, ..self },
+        let Some(tape) = self.tape else {
+            return Self::constant(value);
+        };
+        if !self.is_current() {
+            return Self::poisoned(value, tape);
         }
+        if self.index == DETACHED {
+            // Das Band war schon voll; es hat sich das gemerkt.
+            return Self { value, ..self };
+        }
+        let index = tape.push([self.index, DETACHED], [partial, T::ZERO]);
+        Self { value, index, generation: self.generation, tape: Some(tape) }
     }
 
     /// Ergebnis eines Schritts mit zwei Vorgängern.
     fn binary(self, other: Self, value: T, partial_self: T, partial_other: T) -> Self {
-        match self.tape.or(other.tape) {
-            Some(tape) => Self {
-                value,
-                index: tape.push([self.index, other.index], [partial_self, partial_other]),
-                tape: Some(tape),
-            },
-            None => Self::constant(value),
+        let tape = match (self.tape, other.tape) {
+            (None, None) => return Self::constant(value),
+            (Some(tape), None) | (None, Some(tape)) => tape,
+            (Some(tape), Some(second)) => {
+                if !core::ptr::eq(tape, second) {
+                    // Variablen verschiedener Bänder lassen sich nicht
+                    // gemeinsam ableiten.
+                    return Self::poisoned(value, tape);
+                }
+                tape
+            }
+        };
+        if !self.is_current() || !other.is_current() {
+            return Self::poisoned(value, tape);
         }
+        let index = tape.push([self.index, other.index], [partial_self, partial_other]);
+        Self { value, index, generation: tape.generation(), tape: Some(tape) }
     }
 
     /// Ableitungen dieses Werts nach den Variablen `wrt`, in einem
     /// Rückwärtsdurchlauf.
     ///
-    /// Fehler, wenn das Band zu klein war oder eine Variable nicht zu ihm
-    /// gehört.
+    /// Fehler, wenn das Band zu klein war oder eine beteiligte Variable
+    /// nicht zu ihm gehört: von einem anderen Band, älter als dessen letztes
+    /// `clear`, oder aus solchen Variablen berechnet.
     pub fn gradient<const K: usize>(self, wrt: [Self; K]) -> Result<[T; K], TapeError> {
         let mut out = [T::ZERO; K];
         let Some(tape) = self.tape.or_else(|| wrt.iter().find_map(|v| v.tape)) else {
             // Nur Konstanten: alle Ableitungen null.
             return Ok(out);
         };
+        // Alle Beteiligten müssen zu genau diesem Band in seinem aktuellen
+        // Stand gehören.
+        let belongs = |v: &Self| {
+            v.tape.is_none_or(|other| core::ptr::eq(tape, other)) && v.is_current()
+        };
+        if !belongs(&self) || !wrt.iter().all(belongs) {
+            return Err(TapeError::UnknownVariable);
+        }
         tape.backward(self.index, &wrt.map(|v| v.index), &mut out)?;
         Ok(out)
     }
@@ -193,8 +231,12 @@ impl<T: Real, R: Record<T>> Conjugate for Var<'_, T, R> {
         self
     }
 
-    fn abs_sum(self) -> Self {
+    fn max_abs(self) -> Self {
         <Self as Real>::abs(self)
+    }
+
+    fn div_real(self, divisor: Self) -> Self {
+        self / divisor
     }
 
     fn scale(self, factor: Self) -> Self {

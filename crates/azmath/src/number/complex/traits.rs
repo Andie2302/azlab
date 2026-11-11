@@ -38,8 +38,13 @@ impl<T: Real> Conjugate for Complex<T> {
     }
 
     #[inline]
-    fn abs_sum(self) -> T {
-        self.re.abs() + self.im.abs()
+    fn max_abs(self) -> T {
+        self.re.abs().max(self.im.abs())
+    }
+
+    #[inline]
+    fn div_real(self, divisor: T) -> Self {
+        self / divisor
     }
 
     #[inline]

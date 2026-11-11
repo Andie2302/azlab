@@ -2,7 +2,7 @@
 
 use super::util::is_positive;
 use crate::linalg::{LinalgError, Matrix, Vector};
-use crate::scalar::{Conjugate, Elementary, Field, Real, RealElementary};
+use crate::scalar::{Commutative, Conjugate, Elementary, Field, Real, RealElementary};
 use core::ops::IndexMut;
 
 /// Zerlegt die `n × n`-Matrix `a` an Ort und Stelle.
@@ -79,18 +79,20 @@ impl<T: Field + Conjugate, const N: usize> Cholesky<T, N> {
         Vector(x)
     }
 
-    /// Determinante von `A`: Quadrat des Produkts der Diagonale von `L`.
-    pub fn det(&self) -> T {
-        let product = self.l.diagonal().0.into_iter().fold(T::ONE, |acc, d| acc * d);
-        product * product
-    }
-
     /// Inverse von `A`.
     pub fn inverse(&self) -> Matrix<T, N, N> {
         let identity = Matrix::<T, N, N>::identity();
         let columns: [Vector<T, N>; N] =
             core::array::from_fn(|k| self.solve(Vector(identity.0.map(|row| row[k]))));
         Matrix::from_fn(|i, k| columns[k].0[i])
+    }
+}
+
+impl<T: Field + Conjugate + Commutative, const N: usize> Cholesky<T, N> {
+    /// Determinante von `A`: Quadrat des Produkts der Diagonale von `L`.
+    pub fn det(&self) -> T {
+        let product = self.l.diagonal().0.into_iter().fold(T::ONE, |acc, d| acc * d);
+        product * product
     }
 }
 

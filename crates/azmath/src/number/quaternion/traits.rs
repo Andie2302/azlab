@@ -44,8 +44,13 @@ impl<T: Real> Conjugate for Quaternion<T> {
     }
 
     #[inline]
-    fn abs_sum(self) -> T {
-        self.w.abs() + self.x.abs() + self.y.abs() + self.z.abs()
+    fn max_abs(self) -> T {
+        self.w.abs().max(self.x.abs()).max(self.y.abs().max(self.z.abs()))
+    }
+
+    #[inline]
+    fn div_real(self, divisor: T) -> Self {
+        self / divisor
     }
 
     #[inline]

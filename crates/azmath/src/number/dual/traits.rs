@@ -53,8 +53,13 @@ macro_rules! impl_dual_traits {
             }
 
             #[inline]
-            fn abs_sum(self) -> Self {
+            fn max_abs(self) -> Self {
                 <Self as Real>::abs(self)
+            }
+
+            #[inline]
+            fn div_real(self, divisor: Self) -> Self {
+                self / divisor
             }
 
             #[inline]

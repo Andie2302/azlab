@@ -37,7 +37,7 @@ where
         x -= step;
         fx = f(x);
         let state = Solution { x, residual: fx.abs(), iterations: iteration };
-        if !x.is_finite() || fx.is_nan() {
+        if !x.is_finite() || !fx.is_finite() {
             return Err(SolveError::NonFinite(state));
         }
         if tol.x_converged(step, x) {

@@ -99,6 +99,33 @@ fn extremes<T: Real>(huge: f64) {
         newton(|_x: T| (T::INFINITY, one), one, &tol),
         Err(SolveError::NonFinite(_))
     ));
+    // Auch nach einem winzigen Schritt gilt ein unendlicher Restfehler
+    // nicht als Erfolg.
+    let mut calls = 0;
+    assert!(matches!(
+        newton(
+            |_x: T| {
+                calls += 1;
+                if calls == 1 { (one, T::from_f64(1.0e20)) } else { (T::INFINITY, one) }
+            },
+            one,
+            &tol
+        ),
+        Err(SolveError::NonFinite(s)) if s.iterations == 1
+    ));
+    let mut calls = 0;
+    assert!(matches!(
+        secant(
+            |x: T| {
+                calls += 1;
+                if calls <= 2 { x - one } else { T::INFINITY }
+            },
+            T::ZERO,
+            T::from_f64(0.5),
+            &tol
+        ),
+        Err(SolveError::NonFinite(_))
+    ));
     // Mit Klammer wird stattdessen halbiert.
     assert!(near_one(newton_bracketed(|x: T| (x - one, T::INFINITY), T::ZERO, T::from_f64(3.0), &tol)));
     // Sekante mit nicht endlichem Funktionswert.

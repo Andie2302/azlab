@@ -161,9 +161,9 @@ impl<T: RealElementary, const N: usize> Matrix<Complex<T>, N, N> {
         let mut rotations = [(one, zero); N];
         while active > 1 {
             let (last, before) = (active - 1, active - 2);
-            let size = a[last][last].abs_sum() + a[before][before].abs_sum();
+            let size = a[last][last].max_abs() + a[before][before].max_abs();
             let reference = if size > T::ZERO { size } else { scale };
-            if a[last][before].abs_sum() <= T::EPSILON * reference {
+            if a[last][before].max_abs() <= T::EPSILON * reference {
                 a[last][before] = zero;
                 active -= 1;
                 stalled = 0;
@@ -181,14 +181,14 @@ impl<T: RealElementary, const N: usize> Matrix<Complex<T>, N, N> {
             let determinant = a[before][before] * a[last][last] - a[before][last] * a[last][before];
             let [first, second] = solve_quadratic_complex([determinant, -trace, one]);
             let corner = a[last][last];
-            let mut shift = if (first - corner).abs_sum() <= (second - corner).abs_sum() {
+            let mut shift = if (first - corner).max_abs() <= (second - corner).max_abs() {
                 first
             } else {
                 second
             };
             if stalled % 10 == 0 {
                 // Ausnahmeverschiebung gegen Stillstand.
-                shift += Complex::from_real(a[last][before].abs_sum());
+                shift += Complex::from_real(a[last][before].max_abs());
             }
 
             for k in 0..active {

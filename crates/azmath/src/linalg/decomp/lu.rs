@@ -2,7 +2,7 @@
 
 use crate::linalg::{LinalgError, Matrix, Vector};
 use super::util::is_positive;
-use crate::scalar::{Conjugate, Field};
+use crate::scalar::{Commutative, Conjugate, Field};
 use core::ops::IndexMut;
 
 /// Zerlegt die `n × n`-Matrix `a` an Ort und Stelle.
@@ -29,9 +29,9 @@ where
         let mut pivot = k;
         // Größe ohne Quadrieren: Sehr kleine oder sehr große Elemente
         // laufen so weder unter noch über.
-        let mut best = a[(k, k)].abs_sum();
+        let mut best = a[(k, k)].max_abs();
         for i in k + 1..n {
-            let magnitude = a[(i, k)].abs_sum();
+            let magnitude = a[(i, k)].max_abs();
             if magnitude > best {
                 best = magnitude;
                 pivot = i;
@@ -105,17 +105,6 @@ impl<T: Field + Conjugate, const N: usize> Lu<T, N> {
         Matrix::from_fn(|i, k| columns[k].0[i])
     }
 
-    /// Determinante von `A`.
-    pub fn det(&self) -> T {
-        let product = self
-            .lu
-            .diagonal()
-            .0
-            .into_iter()
-            .fold(T::ONE, |acc, d| acc * d);
-        if self.odd { -product } else { product }
-    }
-
     /// Inverse von `A`.
     pub fn inverse(&self) -> Matrix<T, N, N> {
         self.solve_matrix(Matrix::identity())
@@ -153,6 +142,36 @@ impl<T: Field + Conjugate, const N: usize> Matrix<T, N, N> {
         Ok(Lu { lu, perm, odd })
     }
 
+    /// Inverse Matrix.
+    pub fn inverse(self) -> Result<Self, LinalgError> {
+        Ok(self.lu()?.inverse())
+    }
+
+    /// Löst `self·x = b`.
+    ///
+    /// Für mehrere rechte Seiten zur selben Matrix lohnt sich
+    /// [`lu`](Self::lu) und dann [`Lu::solve`].
+    pub fn solve(self, b: Vector<T, N>) -> Result<Vector<T, N>, LinalgError> {
+        Ok(self.lu()?.solve(b))
+    }
+}
+
+/// Die Determinante setzt eine kommutative Multiplikation voraus; für
+/// Quaternionen etwa gibt es sie in dieser Form nicht.
+impl<T: Field + Conjugate + Commutative, const N: usize> Lu<T, N> {
+    /// Determinante von `A`.
+    pub fn det(&self) -> T {
+        let product = self
+            .lu
+            .diagonal()
+            .0
+            .into_iter()
+            .fold(T::ONE, |acc, d| acc * d);
+        if self.odd { -product } else { product }
+    }
+}
+
+impl<T: Field + Conjugate + Commutative, const N: usize> Matrix<T, N, N> {
     /// Determinante. Für singuläre Matrizen null.
     ///
     /// Bis 3×3 über die geschlossene Formel, sonst über die LU-Zerlegung.
@@ -169,18 +188,5 @@ impl<T: Field + Conjugate, const N: usize> Matrix<T, N, N> {
             }
             _ => self.lu().map_or(T::ZERO, |lu| lu.det()),
         }
-    }
-
-    /// Inverse Matrix.
-    pub fn inverse(self) -> Result<Self, LinalgError> {
-        Ok(self.lu()?.inverse())
-    }
-
-    /// Löst `self·x = b`.
-    ///
-    /// Für mehrere rechte Seiten zur selben Matrix lohnt sich
-    /// [`lu`](Self::lu) und dann [`Lu::solve`].
-    pub fn solve(self, b: Vector<T, N>) -> Result<Vector<T, N>, LinalgError> {
-        Ok(self.lu()?.solve(b))
     }
 }

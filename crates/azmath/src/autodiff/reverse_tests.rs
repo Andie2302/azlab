@@ -80,10 +80,33 @@ fn algebra<T: Real + 'static>() {
     assert!(small.is_empty());
     let c = Var::new(&small, f(3.0));
     assert_eq!((c * c).gradient([c]), Ok([f(6.0)]));
-    assert_eq!(c.gradient([overflow]), Ok([T::ZERO]));
+    assert_eq!(c.gradient([overflow]), Err(TapeError::UnknownVariable));
     let stale = Var::new(&tape, f(1.0));
     tape.clear();
     assert_eq!(stale.gradient([stale]), Err(TapeError::UnknownVariable));
+
+    // Zwei Bänder: Variablen dürfen nicht verwechselt werden, auch wenn
+    // sie auf beiden Bändern dieselbe Nummer tragen.
+    let (left, right) = (Tape::<T, 16>::new(), Tape::<T, 16>::new());
+    let (u, w) = (Var::new(&left, f(2.0)), Var::new(&right, f(3.0)));
+    assert_eq!(u.gradient([w]), Err(TapeError::UnknownVariable));
+    assert_eq!(u.gradient([u]), Ok([T::ONE]));
+    let mixed = u + w;
+    assert_eq!(mixed.value(), f(5.0));
+    assert_eq!(mixed.gradient([u]), Err(TapeError::UnknownVariable));
+    assert_eq!(mixed.gradient([w]), Err(TapeError::UnknownVariable));
+    assert_eq!((mixed * u).gradient([u]), Err(TapeError::UnknownVariable));
+    assert_eq!((-mixed).gradient([u]), Err(TapeError::UnknownVariable));
+    assert_eq!((u * u).gradient([u]), Ok([f(4.0)]));
+    // Nach dem Löschen sind alte Variablen ungültig, auch wenn ihre Nummer
+    // inzwischen neu vergeben ist.
+    left.clear();
+    let fresh = Var::new(&left, f(7.0));
+    assert_eq!(u.gradient([u]), Err(TapeError::UnknownVariable));
+    assert_eq!(fresh.gradient([u]), Err(TapeError::UnknownVariable));
+    assert_eq!((u * fresh).gradient([fresh]), Err(TapeError::UnknownVariable));
+    assert_eq!((u * fresh).value(), f(14.0));
+    assert_eq!((fresh * fresh).gradient([fresh]), Ok([f(14.0)]));
 
     // Durch einen ganzen Algorithmus hindurch: Lösen von A(p)·x = b.
     // x₀ = 2/(2p − 1) → dx₀/dp = −4/(2p − 1)², bei p = 1: −4.

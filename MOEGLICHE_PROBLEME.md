@@ -73,3 +73,20 @@ Die Prüfung auf endliche Werte sollte deshalb auch **nach der Auswertung und vo
 **Die Trait-Frage von vorher bleibt ebenfalls offen:** `det()` ist weiterhin für `Field + Conjugate` verfügbar, damit auch für Quaternionen. Für die üblichen Determinantenformeln fehlt hier die Voraussetzung `Commutative`.
 
 Insbesondere die Bandzugehörigkeit sowie die SVD priorisieren. Beide können derzeit plausible Ergebnisse liefern, die mathematisch falsch sind.
+
+## Stand zu diesen fünf Punkten
+
+Alle fünf sind behoben, jeweils mit Regressionstest; die volle Prüfmatrix ist
+grün.
+
+| Punkt | Behebung | Regressionstest |
+|---|---|---|
+| 1. Bandzugehörigkeit | `Var` merkt sich die Generation seines Bands; `clear` zählt sie hoch. Verknüpfungen prüfen, dass beide Operanden zum selben Band in seinem aktuellen Stand gehören. Sonst ist das Ergebnis „vergiftet“: Der Wert stimmt, `gradient` meldet `TapeError::UnknownVariable`. `gradient` prüft zusätzlich alle Beteiligten. | `autodiff/reverse_tests.rs`, Abschnitt „Zwei Bänder“ |
+| 2. Normberechnung | `scaled_norm` dividiert direkt durch den Maßstab (neu: `Conjugate::div_real`). Als Maßstab dient der größte Komponentenbetrag (`Conjugate::max_abs`, ersetzt `abs_sum`); er läuft nicht über. | `limits` in `linalg/vector/tests.rs` |
+| 3. SVD | Die Matrix wird vor dem Verfahren durch ihren größten Betrag geteilt, die Singulärwerte danach zurückskaliert. | `magnitudes` in `linalg/decomp/spectral_tests.rs` (Rekonstruktion und Orthogonalität von 1e-200 bis 1e200) |
+| 4. Newton | `newton` und `secant` prüfen den Funktionswert auch nach dem Schritt auf Endlichkeit. `bisection`, `brent` und `newton_bracketed` melden nie Erfolg mit unendlichem Restfehler. | `extremes` in `solve/tests.rs` |
+| 5. `det()` | `Matrix::det`, `Lu::det` und `Cholesky::det` verlangen jetzt `Commutative`; für Quaternion-Matrizen gibt es sie nicht mehr. | Übersetzungszeit |
+
+Die Zusage in der Doku von `max_abs` („läuft weder über noch unter“) gilt
+jetzt, weil nicht mehr summiert wird.
+

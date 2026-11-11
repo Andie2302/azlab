@@ -182,6 +182,40 @@ fn singular_values<T: RealElementary>() {
     );
 }
 
+/// Zerlegung über viele Größenordnungen: Rekonstruktion und
+/// Orthogonalität müssen unabhängig vom Maßstab stimmen.
+fn magnitudes<T: RealElementary>(scales: [f64; 4]) {
+    let unit = m::<T, 2, 2>([[1.0, 1.0], [0.0, 1.0]]);
+    let reference = unit.svd();
+    for scale in scales.map(T::from_f64) {
+        let a = unit * scale;
+        assert!(match (a.svd(), reference) {
+            (Ok(d), Ok(r)) => {
+                close_m(d.u.transpose() * d.u, Matrix::identity())
+                    && close_m(d.v.transpose() * d.v, Matrix::identity())
+                    // Rekonstruktion, gemessen am Maßstab.
+                    && close_m((d.u * Matrix::from_diagonal(d.s) * d.v.transpose()) / scale, unit)
+                    && close(d.s[0] / scale, r.s[0], ULPS)
+                    && close(d.s[1] / scale, r.s[1], ULPS)
+                    && d.rank() == 2
+                    && close(d.condition_number(), r.condition_number(), ULPS)
+                    && close_m(d.pseudo_inverse() * a, Matrix::identity())
+            }
+            _ => false,
+        });
+    }
+}
+
+#[test]
+fn magnitudes_f32() {
+    magnitudes::<f32>([1.0e15, 1.0e-15, 1.0e25, 1.0e-25]);
+}
+
+#[test]
+fn magnitudes_f64() {
+    magnitudes::<f64>([1.0e100, 1.0e-100, 1.0e200, 1.0e-200]);
+}
+
 #[test]
 fn spectral_f32() {
     symmetric::<f32>();

@@ -7,13 +7,19 @@ use core::fmt;
 /// Nummer für „nicht auf dem Band“: Konstanten und fehlende Vorgänger.
 pub(super) const DETACHED: usize = usize::MAX;
 
+/// Nummer für ein ungültiges Ergebnis: aus Variablen verschiedener Bänder
+/// oder aus Variablen, die älter sind als das letzte Löschen ihres Bands.
+pub(super) const POISONED: usize = usize::MAX - 1;
+
 /// Fehler des Rückwärtsmodus.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TapeError {
     /// Das Band war zu klein für die Rechnung.
     CapacityExceeded,
-    /// Eine Variable gehört nicht zu diesem Band (z. B. nach `clear`).
+    /// Eine Variable gehört nicht zu diesem Band: Sie stammt von einem
+    /// anderen Band, ist älter als das letzte `clear`, oder ein
+    /// Zwischenergebnis hat Variablen verschiedener Bänder vermischt.
     UnknownVariable,
 }
 
@@ -67,6 +73,11 @@ pub trait Record<T> {
     #[doc(hidden)]
     fn push(&self, parents: [usize; 2], partials: [T; 2]) -> usize;
 
+    /// Zähler der Löschvorgänge; unterscheidet Variablen von vor und nach
+    /// einem `clear`.
+    #[doc(hidden)]
+    fn generation(&self) -> u32;
+
     /// Ableitungen des Schritts `output` nach den Schritten `wanted`.
     #[doc(hidden)]
     fn backward(&self, output: usize, wanted: &[usize], out: &mut [T]) -> Result<(), TapeError>;
@@ -77,6 +88,7 @@ struct Fixed<T, const CAP: usize> {
     adjoints: [T; CAP],
     len: usize,
     overflowed: bool,
+    generation: u32,
 }
 
 /// Band fester Größe für bis zu `CAP` Rechenschritte, ohne Heap.
@@ -99,6 +111,7 @@ impl<T: Algebra, const CAP: usize> Tape<T, CAP> {
                 adjoints: [T::ZERO; CAP],
                 len: 0,
                 overflowed: false,
+                generation: 0,
             }),
         }
     }
@@ -118,6 +131,7 @@ impl<T: Algebra, const CAP: usize> Tape<T, CAP> {
         let mut inner = self.inner.borrow_mut();
         inner.len = 0;
         inner.overflowed = false;
+        inner.generation = inner.generation.wrapping_add(1);
     }
 }
 
@@ -150,6 +164,10 @@ impl<T: Algebra, const CAP: usize> Record<T> for Tape<T, CAP> {
         }
     }
 
+    fn generation(&self) -> u32 {
+        self.inner.borrow().generation
+    }
+
     fn backward(&self, output: usize, wanted: &[usize], out: &mut [T]) -> Result<(), TapeError> {
         let mut inner = self.inner.borrow_mut();
         if inner.overflowed {
@@ -174,18 +192,19 @@ mod growable {
     use crate::scalar::Algebra;
     use alloc::vec;
     use alloc::vec::Vec;
-    use core::cell::RefCell;
+    use core::cell::{Cell, RefCell};
     use core::fmt;
 
     /// Band, das mit der Rechnung wächst (Feature `alloc`).
     pub struct GrowTape<T> {
         nodes: RefCell<Vec<Node<T>>>,
+        generation: Cell<u32>,
     }
 
     impl<T: Algebra> GrowTape<T> {
         /// Leeres Band.
         pub fn new() -> Self {
-            Self { nodes: RefCell::new(Vec::new()) }
+            Self { nodes: RefCell::new(Vec::new()), generation: Cell::new(0) }
         }
 
         /// Anzahl der aufgezeichneten Schritte.
@@ -201,6 +220,7 @@ mod growable {
         /// Löscht das Band. Zuvor erzeugte Variablen sind danach ungültig.
         pub fn clear(&self) {
             self.nodes.borrow_mut().clear();
+            self.generation.set(self.generation.get().wrapping_add(1));
         }
     }
 
@@ -221,6 +241,10 @@ mod growable {
             let mut nodes = self.nodes.borrow_mut();
             nodes.push(Node { parents, partials });
             nodes.len() - 1
+        }
+
+        fn generation(&self) -> u32 {
+            self.generation.get()
         }
 
         fn backward(&self, output: usize, wanted: &[usize], out: &mut [T]) -> Result<(), TapeError> {

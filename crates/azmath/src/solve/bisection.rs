@@ -51,7 +51,8 @@ where
             || x == hi
             || tol.x_converged(hi - lo, x)
         {
-            return Ok(state);
+            // Kein Erfolg mit unendlichem Restfehler (z. B. an einer Polstelle).
+            return if fx.is_finite() { Ok(state) } else { Err(SolveError::NonFinite(state)) };
         }
         if opposite_signs(f_lo, fx) {
             hi = x;

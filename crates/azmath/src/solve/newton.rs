@@ -36,7 +36,9 @@ where
         x -= step;
         (fx, slope) = f(x);
         let state = Solution { x, residual: fx.abs(), iterations: iteration };
-        if !x.is_finite() || fx.is_nan() {
+        // Auch nach dem Schritt prüfen: Ein kleiner Schritt darf einen
+        // unendlichen Restfehler nicht als Erfolg durchgehen lassen.
+        if !x.is_finite() || !fx.is_finite() {
             return Err(SolveError::NonFinite(state));
         }
         if tol.x_converged(step, x) {
@@ -129,7 +131,8 @@ where
             return Err(SolveError::NonFinite(state));
         }
         if tol.x_converged(step, x) {
-            return Ok(state);
+            // Kein Erfolg mit unendlichem Restfehler (z. B. an einer Polstelle).
+            return if fx.is_finite() { Ok(state) } else { Err(SolveError::NonFinite(state)) };
         }
         if fx < T::ZERO {
             negative = x;

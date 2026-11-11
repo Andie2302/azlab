@@ -128,6 +128,31 @@ mod norms {
         assert!(Vector([T::INFINITY, T::ONE]).normalize().is_none());
     }
 
+    /// Die äußersten Grenzen: kleinste subnormale Zahl (ihr Kehrwert ist
+    /// nicht darstellbar) und komplexe Zahlen, deren Betragssumme überläuft.
+    fn limits<T: RealElementary>(largest: f64) {
+        let smallest = T::ZERO.next_up();
+        assert_eq!(Vector([smallest]).norm(), smallest);
+        assert!(Vector([smallest, T::ZERO, -smallest]).norm() > T::ZERO);
+        assert!(Vector([smallest]).normalize().is_some_and(|n| n[0] == T::ONE));
+        let big = T::from_f64(largest);
+        let z = Complex::new(big, big);
+        let norm = Vector([z]).norm();
+        assert!(norm.is_finite() && close(norm / big, T::from_f64(2.0).sqrt(), 8.0));
+        assert!(Vector([z]).normalize().is_some_and(|n| close(n.norm(), T::ONE, 8.0)));
+        assert!(close(Vector([big, big]).norm() / big, T::from_f64(2.0).sqrt(), 8.0));
+    }
+
+    #[test]
+    fn limits_f32() {
+        limits::<f32>(2.0e38);
+    }
+
+    #[test]
+    fn limits_f64() {
+        limits::<f64>(1.0e308);
+    }
+
     #[test]
     fn extremes_f32() {
         extremes::<f32>(1.0e-30, 1.0e30);

@@ -71,11 +71,18 @@ impl<T: RealElementary, const R: usize, const C: usize> Matrix<T, R, C> {
         if R < C {
             return Err(LinalgError::DimensionMismatch);
         }
-        let mut u = self.0;
         let mut v = Matrix::<T, C, C>::identity().0;
         if !self.norm().is_finite() {
             return Err(LinalgError::NotConverged);
         }
+        // Auf Einträge der Größenordnung eins bringen: Die Quadratsummen
+        // und ihr Produkt laufen sonst über oder unter und täuschen
+        // orthogonale Spalten vor.
+        let scale = self.0.iter().flatten().fold(T::ZERO, |largest, &entry| largest.max(entry.abs()));
+        if scale == T::ZERO {
+            return Ok(Svd { u: self, s: Vector::ZERO, v: Matrix(v) });
+        }
+        let mut u = self.map(|entry| entry / scale).0;
 
         let mut converged = false;
         for _ in 0..MAX_SWEEPS {
@@ -122,7 +129,7 @@ impl<T: RealElementary, const R: usize, const C: usize> Matrix<T, R, C> {
         let mut s = [T::ZERO; C];
         for col in 0..C {
             let length = Vector::<T, R>(core::array::from_fn(|row| u[row][col])).norm();
-            s[col] = length;
+            s[col] = length * scale;
             if length > T::ZERO {
                 for row in u.iter_mut() {
                     row[col] /= length;

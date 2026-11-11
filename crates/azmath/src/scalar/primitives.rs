@@ -50,8 +50,12 @@ macro_rules! impl_real {
                     self
                 }
                 #[inline]
-                fn abs_sum(self) -> Self {
+                fn max_abs(self) -> Self {
                     $t::abs(self)
+                }
+                #[inline]
+                fn div_real(self, divisor: Self) -> Self {
+                    self / divisor
                 }
                 #[inline]
                 fn scale(self, factor: Self) -> Self {

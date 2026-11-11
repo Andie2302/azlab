@@ -63,7 +63,9 @@ where
         // Getrennt halbieren: `c - b` könnte überlaufen.
         let xm = half * c - half * b;
         if xm.abs() <= tol1 || fb == T::ZERO || tol.f_converged(fb) {
-            return Ok(Solution { x: b, residual: fb.abs(), iterations: iteration - 1 });
+            let state = Solution { x: b, residual: fb.abs(), iterations: iteration - 1 };
+            // Kein Erfolg mit unendlichem Restfehler (z. B. an einer Polstelle).
+            return if fb.is_finite() { Ok(state) } else { Err(SolveError::NonFinite(state)) };
         }
 
         if e.abs() >= tol1 && fa.abs() > fb.abs() {

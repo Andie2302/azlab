@@ -114,7 +114,7 @@ impl<T: Field + Conjugate, const R: usize, const C: usize> Qr<T, R, C> {
         let mut x = [T::ZERO; C];
         for (i, row) in self.r.0.iter().enumerate().take(C).rev() {
             let diagonal = row[i];
-            if !is_positive(diagonal.abs_sum()) {
+            if !is_positive(diagonal.max_abs()) {
                 return Err(LinalgError::Singular);
             }
             let rest = row[i + 1..]
