@@ -14,3 +14,62 @@
   bilden weiterhin Quadratsummen. Für Matrizen mit Einträgen nahe den
   Grenzen des Zahlbereichs können sie über- oder unterlaufen.
 - `CayleyDickson::norm` ist nicht skaliert.
+
+
+
+# Diese Punkte würde ich als Nächstes korrigieren:
+
+**1. Rückwärts-Autodiff verwechselt Variablen verschiedener Bänder**
+
+In [`var.rs`](https://github.com/Andie2302/azlab/blob/40e018cbdbe27e97b886571a095099fea72b9680/crates/azmath/src/autodiff/var.rs) werden nur die Knotenindizes weitergereicht. Ob zwei Variablen tatsächlich zum selben Band gehören, wird nicht geprüft.
+
+Konkretes Beispiel:
+
+```rust
+let a = Tape::<f64, 16>::new();
+let b = Tape::<f64, 16>::new();
+
+let x = Var::new(&a, 2.0); // Index 0 auf a
+let y = Var::new(&b, 3.0); // Index 0 auf b
+```
+
+`x.gradient([y])` liefert nach dem aktuellen Code `Ok([1.0])`. Dokumentiert ist für eine fremde Variable jedoch ein Fehler. Auch `x + y` vermischt die beiden Knoten mit Index 0.
+
+Zusätzlich können alte Variablen nach `clear()` wieder als gültig erscheinen, sobald ihre Indizes neu belegt wurden. **Bandidentität und eine Generation für jeden Löschzyklus** würden beide Probleme abdecken.
+
+**2. Die Normberechnung hat noch zwei Lücken**
+
+In [`scaled_norm`](https://github.com/Andie2302/azlab/blob/40e018cbdbe27e97b886571a095099fea72b9680/crates/azmath/src/linalg/vector/products.rs) wird mit `scale.recip()` multipliziert. Bei einem sehr kleinen subnormalen Wert wie `1e-320_f64` läuft dieser Kehrwert über. Die Norm eines Vektors mit diesem einen Eintrag wäre aber weiterhin darstellbar.
+
+Außerdem kann `abs_sum()` selbst überlaufen: Für `Complex::new(1e308, 1e308)` ergibt die Betragssumme unendlich, obwohl die euklidische Norm von ungefähr `1.414e308` darstellbar ist.
+
+Hier würde ich durch die Skalierung **direkt dividieren** und als Skalierungsmaß den größten Komponentenbetrag verwenden. Die Zusage in `Conjugate::abs_sum`, dass kein Überlauf auftreten könne, stimmt derzeit nicht.
+
+**3. Die neue SVD kann eine falsche Zerlegung als erfolgreich zurückgeben**
+
+In [`svd.rs`](https://github.com/Andie2302/azlab/blob/40e018cbdbe27e97b886571a095099fea72b9680/crates/azmath/src/linalg/decomp/svd.rs) entstehen weiterhin unskalierte Quadratsummen und das Produkt `alpha * beta`.
+
+Für
+
+```rust
+Matrix::new([
+    [1e100_f64, 1e100],
+    [0.0,       1e100],
+])
+```
+
+sind `alpha` und `beta` endlich, ihr Produkt läuft jedoch über. Die Orthogonalitätsprüfung akzeptiert dadurch die nichtorthogonalen Spalten und das Verfahren meldet Konvergenz.
+
+Das ist besonders relevant, weil anschließend Rang, Pseudoinverse und Ausgleichslösung auf dieser Zerlegung beruhen. Ich würde die Rotationsberechnung skalieren und Tests für **Rekonstruktion und Orthogonalität über verschiedene Größenordnungen** ergänzen.
+
+**4. Newton kann nach einem Schritt weiterhin einen unendlichen Restfehler akzeptieren**
+
+Die neue Prüfung greift vor dem Schritt. Nach der erneuten Funktionsauswertung wird aber nur `fx.is_nan()` geprüft; danach kann eine kleine Schrittweite bereits zu `Ok` führen.
+
+Beispielsweise ergibt ein Start bei `x = 1`, mit zunächst `(fx, slope) = (1, 1e20)` und anschließend `(INFINITY, 1)`, einen winzigen Schritt und danach einen erfolgreichen Rückgabewert mit unendlichem Residuum.
+
+Die Prüfung auf endliche Werte sollte deshalb auch **nach der Auswertung und vor der Erfolgsmeldung** stehen.
+
+**Die Trait-Frage von vorher bleibt ebenfalls offen:** `det()` ist weiterhin für `Field + Conjugate` verfügbar, damit auch für Quaternionen. Für die üblichen Determinantenformeln fehlt hier die Voraussetzung `Commutative`.
+
+Insbesondere die Bandzugehörigkeit sowie die SVD priorisieren. Beide können derzeit plausible Ergebnisse liefern, die mathematisch falsch sind.
