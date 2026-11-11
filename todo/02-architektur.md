@@ -6,8 +6,9 @@ Jede Schicht darf nur Schichten unter sich benutzen. Das hält azmath
 erweiterbar und erlaubt, Schichten später in eigene Crates auszulagern.
 
 ```
-6  Löser & Numerik    Nullstellen, lineare/nichtlineare Systeme, ODE,
-                      Quadratur, Interpolation, Optimierung
+7  PDE                Gitter, Differenzen/Volumen, Finite Elemente
+6  Löser & Numerik    Nullstellen, Polynome, lineare/nichtlineare
+                      Systeme, ODE, Quadratur, Interpolation, Optimierung
 5  Autodiff           vorwärts (Dualzahlen), rückwärts (Tape)
 4  Lie-Theorie        Lie-Algebren (Klammer), Lie-Gruppen (exp/log)
 3  Lineare Algebra    Vektor, Matrix, Zerlegungen, Tensoren
@@ -100,7 +101,11 @@ Alle generisch über die Skalar-Traits, Arbeitsspeicher kommt vom Aufrufer
 oder liegt in const-generischen Größen.
 
 - Nullstellen 1D: Bisektion, Sekante, Newton, Brent.
-- Nichtlineare Systeme: Newton (Jacobi-Matrix über Autodiff), gedämpft.
+- Gleichungen höherer Ordnung: geschlossene Formeln Grad 2–4 (numerisch
+  stabil), alle Nullstellen eines Polynoms (Aberth/Durand-Kerner, komplex),
+  reelle Nullstellen in einem Intervall.
+- Nichtlineare Systeme: Newton (Jacobi-Matrix über Autodiff), gedämpft,
+  mit Liniensuche.
 - Lineare Systeme direkt: LU, Cholesky, QR; später Eigenwerte, SVD.
 - Lineare Systeme iterativ: CG, BiCGSTAB, GMRES über `LinearOperator`.
 - ODE: Euler, RK4, eingebettete RK (Schrittweitensteuerung), implizite
@@ -109,7 +114,22 @@ oder liegt in const-generischen Größen.
 - Interpolation: linear, kubische Splines, Polynome (Horner, Tschebyschow).
 - Optimierung: Gradientenabstieg, (L-)BFGS, Levenberg-Marquardt, Nelder-Mead.
 
-## 9. Fehlerbehandlung
+## 9. Partielle Differentialgleichungen (Schicht 7)
+
+- **Gitterverfahren**: regelmäßige Gitter als Sicht auf Puffer,
+  Finite-Differenzen- und Finite-Volumen-Operatoren (Gradient, Divergenz,
+  Laplace) als `LinearOperator`, Randbedingungen als eigener Typ.
+- **Linienmethode**: Ortsdiskretisierung ergibt ein ODE-System für die
+  Zeitintegratoren aus Schicht 6.
+- **Mehrgitter** als Löser und Vorkonditionierer.
+- **Finite Elemente**: Referenzelemente (Strecke, Dreieck, Viereck,
+  Tetraeder), Ansatzfunktionen, Quadraturregeln, Assemblierung in
+  dünnbesetzte Matrizen, Randbedingungen. Netze kommen vom Aufrufer.
+- **Standardprobleme** als Referenz und Test: Poisson, Wärmeleitung,
+  Advektion, Wellengleichung. Navier-Stokes und Gewebe gehören in
+  Fach-Crates.
+
+## 9a. Fehlerbehandlung
 
 - Keine Panics in Bibliotheksfunktionen. Indexzugriffe prüfend (`get`) oder
   durch const generics zur Übersetzungszeit abgesichert.
@@ -122,7 +142,7 @@ oder liegt in const-generischen Größen.
 
 ```
 crates/azmath/src/
-  lib.rs              nur Crate-Doku, #![no_std], mod-Deklarationen, pub use
+  lib.rs              nur Doku, Attribute/Feature-Schalter, Deklarationen, pub use
   backend.rs          Auswahl per cfg
   backend/libm.rs
   backend/std.rs
@@ -136,7 +156,9 @@ crates/azmath/src/
   tensor.rs  tensor/...
   lie.rs     lie/...
   autodiff.rs  autodiff/...
-  solve.rs   solve/roots.rs  nonlinear.rs  iterative.rs
+  solve.rs   solve/roots.rs  polyroots.rs  nonlinear.rs  iterative.rs  multigrid.rs
+  pde.rs     pde/grid.rs  stencil.rs  boundary.rs  lines.rs
+  fem.rs     fem/element.rs  basis.rs  assembly.rs  mesh.rs
   ode.rs  quad.rs  interp.rs  optim.rs  poly.rs
   error.rs
 ```

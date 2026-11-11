@@ -1,60 +1,6 @@
 # Offene Fragen
 
-Jede Frage hat eine Empfehlung. Entscheidung hier eintragen, dann wandert
-sie in die Tabelle in `README.md`.
-
-## F1 – Standard-Features von azmath
-
-Soll `default = ["libm"]` gelten oder `default = []`?
-
-- `[]`: entspricht Regel 1 am wörtlichsten; wer azmath einbindet, muss ein
-  Backend wählen, sonst haben `f32`/`f64` keine Elementarfunktionen.
-- `["libm"]`: funktioniert sofort, bleibt `no_std` ohne `alloc`, bringt aber
-  standardmäßig eine Abhängigkeit mit.
-
-Empfehlung: `default = ["libm"]`; Crates im Workspace binden ohnehin mit
-`default-features = false` ein.
-
-Entscheidung: _offen_
-
-## F2 – Was genau darf in `lib.rs` stehen?
-
-„Kein Code in `lib.rs`“ – Annahme: erlaubt sind Crate-Doku, `#![no_std]`,
-`mod`-Deklarationen und `pub use`; verboten sind Funktionen, Typen, Traits,
-Makros. Gilt dasselbe für Modul-Dateien wie `scalar.rs`, neben denen ein
-Ordner `scalar/` liegt?
-
-Empfehlung: ja, beide nur Deklarationen und Re-Exporte.
-
-Entscheidung: _offen_
-
-## F3 – „Stoffsimulation“
-
-Gemeint ist Textil/Gewebe (Cloth) oder Stoff im Sinn von Materie/Stoffdaten?
-Ändert die Prioritäten in Phase 6/7 (Cloth braucht vor allem implizite
-Zeitintegration und dünnbesetzte Löser).
-
-Entscheidung: _offen_
-
-## F4 – Ein Crate oder mehrere?
-
-azmath als ein Crate mit Schichten als Modulen, oder von Anfang an getrennt
-(`azmath-core`, `azmath-linalg`, ...)?
-
-Empfehlung: ein Crate. Die Schichtenregel (Abhängigkeiten nur nach unten)
-hält eine spätere Aufteilung offen, ohne jetzt Verwaltungsaufwand zu erzeugen.
-
-Entscheidung: _offen_
-
-## F5 – Quaternion: eigener Typ oder Alias auf Cayley-Dickson?
-
-- Alias `CayleyDickson<Complex<T>>`: mathematisch elegant, aber unhandliche
-  Felder und Rotations-API.
-- Eigener Typ `Quaternion<T>` mit `w, x, y, z` plus Umwandlung.
-
-Empfehlung: eigener Typ, Cayley-Dickson daneben als generische Konstruktion.
-
-Entscheidung: _offen_
+Entschiedene Fragen stehen in der Tabelle in [README.md](README.md).
 
 ## F6 – Prüfmatrix: Skript, CI oder beides?
 
@@ -67,22 +13,40 @@ Entscheidung: _offen_
 
 ## F7 – Ganzzahlen in den Traits
 
-Sollen `i8`…`i128` `Ring` implementieren (Ganzzahl-Matrizen, exakte
-Rechnung), und brauchen vorzeichenlose Typen eine eigene Stufe ohne Negation
-(`Semiring`)?
+Vorzeichenbehaftete Ganzzahlen implementieren im Entwurf bereits `Ring`.
+Brauchen vorzeichenlose Typen eine eigene Stufe ohne Negation (`Semiring`)?
 
-Empfehlung: vorzeichenbehaftete als `Ring` in Phase 1, `Semiring` erst bei
-Bedarf.
+Empfehlung: erst bei Bedarf.
 
 Entscheidung: _offen_
 
-## F8 – Verbleib der Regeln in `lib.rs`
+## F9 – Geometrie für Kollisionen
 
-Die vier Regeln stehen als Kommentar in `crates/azmath/src/lib.rs`. Sollen
-sie dort bleiben, oder nur noch in `todo/README.md` (und ggf. einer
-`CLAUDE.md`, damit KI-Sitzungen sie sicher zuerst lesen)?
+Gewebe-Kollision braucht Geometrie-Bausteine: Abstand Punkt–Dreieck und
+Kante–Kante, Schnitt-Tests, kontinuierliche Kollisionserkennung (führt auf
+kubische Gleichungen), räumliche Suchstrukturen. Gehört das in azmath oder
+in ein eigenes Crate (z. B. `azgeom`) auf azmath?
 
-Empfehlung: `CLAUDE.md` im Repo-Wurzelverzeichnis mit Verweis auf
-`todo/README.md`.
+Empfehlung: eigenes Crate. azmath liefert dafür Vektoren, Polynom-Nullstellen
+und Intervall-Hilfen; Suchstrukturen sind keine reine Mathematik.
+
+Entscheidung: _offen_
+
+## F10 – Welches Verfahren ist mit dem „Durchbruch“ gemeint?
+
+Vermutung: *Incremental Potential Contact* (IPC, 2020) für
+durchdringungsfreie Kontakte bei Gewebe und Festkörpern; bei Flüssigkeiten
+kämen u. a. Material-Point-Methoden in Frage. Die Antwort bestimmt, welche
+Löser zuerst gebraucht werden (IPC: Newton mit Liniensuche, dünnbesetzte
+symmetrische Löser, zweite Ableitungen über Autodiff).
+
+Entscheidung: _offen_
+
+## F11 – Finite Elemente ohne Heap
+
+Unstrukturierte Netze haben zur Laufzeit bestimmte Größen. Vorschlag: Netz
+und Systemmatrix als Sichten auf Puffer des Aufrufers (läuft ohne `alloc`),
+bequeme besitzende Typen nur hinter `alloc`. Netzerzeugung (Meshing) ist kein
+Ziel von azmath.
 
 Entscheidung: _offen_

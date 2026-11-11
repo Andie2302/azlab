@@ -18,7 +18,7 @@ Regeln:
 - Rangfolge der Backends bei mehreren aktiven: `std` > `libm` > weitere.
 - Aufbauende Crates binden azmath mit `default-features = false` ein und
   reichen `std`/`libm`/`alloc` als eigene Features durch.
-- Standard-Features: siehe offene Frage F1.
+- Standard-Features: `default = ["libm"]` (entschieden).
 
 ## Abhängigkeiten
 

@@ -6,9 +6,10 @@ wenn der zugehörige Abschnitt hier geplant und freigegeben ist.**
 ## Regeln (aus `crates/azmath/src/lib.rs`, gelten für den ganzen Workspace)
 
 1. Alles, was nicht hinter Feature-Flags steht, MUSS in `no_std` ohne Features laufen.
-2. Neuer Rust-Stil: nirgends `mod.rs`; in `lib.rs` steht kein Code.
+2. Neuer Rust-Stil: nirgends `mod.rs`; in `lib.rs` steht kein Code (erlaubt: Doku, Deklarationen, `pub use`, crate-weite Attribute/Feature-Schalter).
 3. Erst planen (Abhängigkeiten, Feature-Flags, Ziele, Nicht-Ziele), dann Code. Gilt besonders für KI.
 4. KI führt von sich aus keinen Code aus – nicht zum Testen, nicht zum Rechnen, nicht zum Prüfen.
+5. Bei Fragen sofort nachfragen, auch bei mehreren.
 
 Folgerungen für die Zusammenarbeit:
 
@@ -47,3 +48,11 @@ Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 | Elementarfunktionen | austauschbares Backend (`libm`, `std`, später weitere); weder azmath-Nutzer noch aufbauende Crates sehen, was rechnet |
 | „He-Klammern/He-Algebra“ | gemeint sind Lie-Klammern und Lie-Algebren |
 | Sprache | Plan, Doku-Kommentare und Commits deutsch; Bezeichner englisch |
+| Standard-Features | `default = ["libm"]` |
+| Inhalt von `lib.rs` | Doku, Deklarationen, `pub use`, crate-weite Attribute/Feature-Schalter; kein sonstiger Code |
+| „Stoffsimulation“ | Gewebe/Kleidung inklusive Kollision |
+| Gleichungslöser | Nullstellen, lineare Systeme, Gleichungen höherer Ordnung, ODE und PDE gehören zu azmath |
+| PDE-Umfang | Gitterverfahren **und** Finite Elemente |
+| Crate-Schnitt | ein Crate `azmath`, Schichten als Module |
+| Quaternionen | eigener Typ `Quaternion<T>` plus generische Cayley-Dickson-Konstruktion |
+| Ort der Regeln | `CLAUDE.md` im Wurzelverzeichnis und hier |

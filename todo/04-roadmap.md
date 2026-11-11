@@ -9,8 +9,8 @@ auf denen alles Weitere steht.
 
 - [x] `Cargo.toml` (Workspace): `[workspace.dependencies]`, `version`, `rust-version`
 - [x] `crates/azmath/Cargo.toml`: Features `libm`, `std`, `alloc`; `[lints] workspace = true`
-- [x] `lib.rs`: Crate-Doku, `#![no_std]`, Modul-Deklarationen (siehe Frage F2)
-- [ ] Regeln aus `lib.rs` zusätzlich in `todo/README.md` (erledigt) – Verbleib im Quelltext klären
+- [x] `lib.rs`: Crate-Doku, `#![no_std]`, Modul-Deklarationen (Frage F2 entschieden)
+- [x] Regeln in `CLAUDE.md` und `todo/README.md`
 - [ ] Prüfmatrix als Skript oder CI (siehe 05-qualitaet.md, Frage F6)
 
 ## Phase 1 – Skalar-Traits und Backend
@@ -48,7 +48,8 @@ Ergebnis: Vertrag, gegen den alle späteren Algorithmen geschrieben werden.
 
 - [ ] Polynomauswertung (Horner), Tschebyschow
 - [ ] Bisektion, Sekante, Newton, Brent
-- [ ] Newton für Systeme (Jacobi-Matrix über `DualN`)
+- [ ] Gleichungen höherer Ordnung: Formeln Grad 2–4, alle Polynom-Nullstellen (komplex), reelle Nullstellen im Intervall
+- [ ] Newton für Systeme (Jacobi-Matrix über `DualN`), Dämpfung und Liniensuche
 - [ ] `derivative`, `gradient`, `jacobian` als Autodiff-Hilfen
 
 Meilenstein: **ausreichend für ein IAPWS-95-Crate.**
@@ -76,16 +77,35 @@ Meilenstein: **ausreichend für Robotik-Kinematik.**
 - [ ] Gauß-Legendre, adaptive Quadratur
 - [ ] Lineare Interpolation, kubische Splines
 
-Meilenstein: **ausreichend für Navier-Stokes- und Stoffsimulations-Crates.**
+## Phase 8 – PDE auf Gittern
 
-## Phase 8 – Rückwärts-Autodiff und Optimierung
+- [ ] Regelmäßige Gitter als Sicht, Randbedingungen
+- [ ] Finite-Differenzen- und Finite-Volumen-Operatoren als `LinearOperator`
+- [ ] Linienmethode (Kopplung an die ODE-Löser)
+- [ ] Mehrgitter
+- [ ] Referenzprobleme: Poisson, Wärmeleitung, Advektion, Welle
+
+Meilenstein: **ausreichend für ein Navier-Stokes-Crate.**
+
+## Phase 9 – Finite Elemente
+
+- [ ] Netz-Sicht (Knoten, Elemente) auf Puffer des Aufrufers
+- [ ] Referenzelemente, Ansatzfunktionen, Quadraturregeln
+- [ ] Assemblierung in dünnbesetzte Matrizen, Randbedingungen
+- [ ] Referenzprobleme: Poisson, lineare Elastizität
+
+Meilenstein: **ausreichend für ein Gewebesimulations-Crate** (zusammen mit
+Phase 10 für zweite Ableitungen und Optimierung; Kollisionsgeometrie siehe
+Frage F9).
+
+## Phase 10 – Rückwärts-Autodiff und Optimierung
 
 - [ ] Tape mit fester Kapazität, wachsendes Tape (`alloc`)
 - [ ] Gradientenabstieg, (L-)BFGS, Levenberg-Marquardt, Nelder-Mead
 
 Meilenstein: **ausreichend für KI-Grundlagen.**
 
-## Phase 9 – Ausbau
+## Phase 11 – Ausbau
 
 - [ ] Eigenwerte, SVD
 - [ ] FFT

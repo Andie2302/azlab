@@ -6,8 +6,8 @@
 - `azmath` ist das Fundament. Fachliche Crates bauen darauf auf und hängen
   nie umgekehrt voneinander ab, ohne dass es hier geplant ist.
 - Mögliche spätere Crates (nur zur Einordnung, noch nicht geplant):
-  Stoffdaten (IAPWS-95), Strömung (Navier-Stokes), Stoffsimulation,
-  Robotik, KI.
+  Stoffdaten (IAPWS-95), Strömung (Navier-Stokes), Gewebesimulation
+  (Kleidung inkl. Kollision), Robotik, KI.
 
 ## Ziele von azmath
 
@@ -23,7 +23,10 @@
 5. **Erweiterbar ohne Brüche**: neue Zahlentypen, Speicherformen, Löser und
    Backends kommen hinzu, ohne bestehende API zu ändern
    (Regeln in [02-architektur.md](02-architektur.md)).
-6. **Keine Panics**: Fehler als `Result`, `unsafe` ist verboten
+6. **Gleichungen lösen**: Nullstellen, lineare Gleichungssysteme,
+   Gleichungen höherer Ordnung (Polynome) und nichtlineare Systeme,
+   gewöhnliche und partielle Differentialgleichungen.
+7. **Keine Panics**: Fehler als `Result`, `unsafe` ist verboten
    (Workspace-Lints).
 
 ## Was azmath als Grundlage leisten muss
@@ -31,8 +34,8 @@
 | Anwendung | Benötigt aus azmath |
 |-----------|--------------------|
 | IAPWS-95 | Elementarfunktionen, Polynom-/Reihenauswertung, Autodiff (Ableitungen der Helmholtz-Energie), Nullstellen- und Newton-Löser für Systeme |
-| Navier-Stokes | Vektoren/Matrizen, Gitter-/Tensor-Sichten auf Puffer, dünnbesetzte und iterative lineare Löser, Zeitintegration |
-| Stoffsimulation | Vektoren, Zeitintegration (auch implizit), lineare Löser |
+| Navier-Stokes | Vektoren/Matrizen, Gitter-/Tensor-Sichten auf Puffer, Differenzen-/Volumen-Operatoren, dünnbesetzte und iterative lineare Löser, Mehrgitter, Zeitintegration |
+| Gewebesimulation mit Kollision | Vektoren, implizite Zeitintegration, dünnbesetzte symmetrische Löser, Newton mit Liniensuche, zweite Ableitungen (Autodiff), kubische Nullstellen, Finite Elemente auf Dreiecksnetzen |
 | Robotik | Quaternionen, Lie-Gruppen SO(3)/SE(3), Lie-Algebren mit Klammer, exp/log, Jacobi-Matrizen |
 | KI | Tensoren, Matrizen, Autodiff (vorwärts und rückwärts), Optimierer |
 | Physik allgemein | komplexe Zahlen, Cayley-Dickson-Algebren, ODE-Löser, Quadratur, Interpolation |
@@ -49,4 +52,8 @@
   eigenes Crate, das die azmath-Traits implementiert.
 - Kein Ersatz für BLAS/LAPACK in Sachen Höchstleistung; Korrektheit und
   Portabilität gehen vor.
+- Keine Netzerzeugung (Meshing) und keine Geometrie-Suchstrukturen; Netze
+  kommen vom Aufrufer.
+- Keine fertigen Fach-Löser (Navier-Stokes, Gewebe): azmath liefert die
+  mathematischen Verfahren, die Fach-Crates setzen sie zusammen.
 - Keine Pflicht-Abhängigkeit: ohne Features hat azmath null Abhängigkeiten.
