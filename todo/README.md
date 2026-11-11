@@ -18,7 +18,8 @@ Wurzelverzeichnis.
 | [04-roadmap.md](04-roadmap.md) | Phasen mit Aufgabenlisten | Entwurf |
 | [05-qualitaet.md](05-qualitaet.md) | Tests, Prüfmatrix, Doku | Entwurf |
 | [06-offene-fragen.md](06-offene-fragen.md) | Entscheidungen, die noch fehlen | offen |
-| [phase-2-zahlentypen.md](phase-2-zahlentypen.md) | Detailplan Phase 2 | umgesetzt, volle Prüfmatrix offen |
+| [phase-2-zahlentypen.md](phase-2-zahlentypen.md) | Detailplan Phase 2 | umgesetzt und geprüft |
+| [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) | Detailplan Phase 3 | freigegeben, in Arbeit |
 
 Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 

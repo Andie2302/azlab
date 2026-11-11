@@ -31,8 +31,7 @@ Ergebnis: Vertrag, gegen den alle späteren Algorithmen geschrieben werden.
 ## Phase 2 – Zahlentypen
 
 Detailplan: [phase-2-zahlentypen.md](phase-2-zahlentypen.md) – umgesetzt.
-Von der KI mit Standard-Features und ohne Features geprüft; die volle
-Prüfmatrix (`scripts/pruefen.sh`) steht noch aus.
+Volle Prüfmatrix grün.
 
 - [x] Trait-Umbau: `Algebra`, `Commutative`, `Conjugate`; `from_f64` nach `Field`
 
@@ -43,6 +42,8 @@ Prüfmatrix (`scripts/pruefen.sh`) steht noch aus.
 - [x] `Quaternion<T>` mit Rotationen, Slerp, Umwandlungen
 
 ## Phase 3 – Lineare Algebra fester Größe
+
+Detailplan: [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) – freigegeben, in Arbeit.
 
 - [ ] `Vector<T, N>`, `Matrix<T, R, C>`: Arithmetik, Skalar-/Kreuzprodukt, Normen, Transponieren
 - [ ] Zugriffs-Traits für Matrizen (lesend/schreibend)
