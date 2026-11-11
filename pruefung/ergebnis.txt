@@ -1,31 +1,39 @@
-Mi 11 Nov 2026 02:52:42 CET
+Mi 11 Nov 2026 03:07:04 CET
 rustc 1.99.1 (58cf8f9c3 2026-10-13)
 cargo 1.99.1 (5f94df478 2026-08-27)
 
 == cargo test -p azmath --no-default-features
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.76s
      Running unittests src/lib.rs (target/debug/deps/azmath-27cd1881844c60cd)
 
-running 16 tests
+running 24 tests
+test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::decomp::tests::lu_f32 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
+test linalg::matrix::tests::concrete_types ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
+test linalg::vector::tests::algebra_f32 ... ok
+test linalg::vector::tests::algebra_f64 ... ok
+test linalg::vector::tests::concrete_types ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
+test number::complex::tests::algebra_f32 ... ok
+test number::complex::tests::algebra_f64 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
 test number::dual::tests::algebra_f32 ... ok
 test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
-test number::complex::tests::algebra_f64 ... ok
 test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
-test number::complex::tests::algebra_f32 ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
 
-test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -36,23 +44,38 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --no-default-features -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.24s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.38s
    OK
 == cargo test -p azmath --no-default-features --features libm
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.43s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.99s
      Running unittests src/lib.rs (target/debug/deps/azmath-f94848aee42155db)
 
-running 25 tests
+running 40 tests
+test linalg::decomp::tests::lu_f32 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::decomp::tests::with_roots::qr_f32 ... ok
+test linalg::decomp::tests::with_roots::qr_f64 ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
+test linalg::matrix::tests::frobenius_norm ... ok
+test linalg::matrix::tests::concrete_types ... ok
+test linalg::vector::tests::algebra_f32 ... ok
+test linalg::vector::tests::algebra_f64 ... ok
+test linalg::vector::tests::concrete_types ... ok
+test linalg::vector::tests::norms::norms_f32 ... ok
+test linalg::vector::tests::norms::norms_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
-test number::cayley_dickson::tests::norm ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
+test number::cayley_dickson::tests::norm ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
 test number::complex::tests::algebra_f32 ... ok
 test number::complex::tests::algebra_f64 ... ok
 test number::complex::tests::elementary::elementary_f32 ... ok
-test number::complex::tests::elementary::elementary_f64 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
+test number::complex::tests::elementary::elementary_f64 ... ok
 test number::dual::tests::algebra_f32 ... ok
 test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
@@ -70,7 +93,7 @@ test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
 
-test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -81,18 +104,33 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features libm -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.45s
    OK
 == cargo test -p azmath --no-default-features --features std
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.01s
      Running unittests src/lib.rs (target/debug/deps/azmath-2a2ca91bb10aa077)
 
-running 25 tests
+running 40 tests
+test linalg::decomp::tests::lu_f32 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
+test linalg::decomp::tests::with_roots::qr_f64 ... ok
+test linalg::decomp::tests::with_roots::qr_f32 ... ok
+test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
+test linalg::matrix::tests::concrete_types ... ok
+test linalg::matrix::tests::frobenius_norm ... ok
+test linalg::vector::tests::algebra_f32 ... ok
+test linalg::vector::tests::algebra_f64 ... ok
+test linalg::vector::tests::concrete_types ... ok
+test linalg::vector::tests::norms::norms_f32 ... ok
+test linalg::vector::tests::norms::norms_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
+test number::cayley_dickson::tests::norm ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
-test number::cayley_dickson::tests::norm ... ok
 test number::complex::tests::algebra_f32 ... ok
 test number::complex::tests::algebra_f64 ... ok
 test number::complex::tests::elementary::elementary_f32 ... ok
@@ -103,8 +141,8 @@ test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
 test number::dual::tests::elementary::elementary_f32 ... ok
 test number::dual::tests::elementary::elementary_f64 ... ok
-test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
+test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::left_scalar ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
@@ -115,7 +153,7 @@ test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
 
-test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -126,20 +164,28 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features std -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.44s
    OK
 == cargo test -p azmath --no-default-features --features alloc
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.36s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.74s
      Running unittests src/lib.rs (target/debug/deps/azmath-f493d9ab45e6a2be)
 
-running 16 tests
-test number::cayley_dickson::tests::all_levels_f64 ... ok
+running 24 tests
+test linalg::decomp::tests::lu_f32 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
+test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::matrix::tests::concrete_types ... ok
+test linalg::vector::tests::algebra_f32 ... ok
+test linalg::vector::tests::algebra_f64 ... ok
+test linalg::vector::tests::concrete_types ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
-test number::complex::tests::algebra_f32 ... ok
+test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
-test number::complex::tests::left_scalar_and_conversions ... ok
+test number::complex::tests::algebra_f32 ... ok
 test number::complex::tests::algebra_f64 ... ok
+test number::complex::tests::left_scalar_and_conversions ... ok
 test number::dual::tests::algebra_f32 ... ok
 test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
@@ -151,7 +197,7 @@ test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
 
-test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -162,20 +208,35 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features alloc -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.38s
    OK
 == cargo test -p azmath --all-features
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.99s
      Running unittests src/lib.rs (target/debug/deps/azmath-957768517f674ad9)
 
-running 25 tests
+running 40 tests
+test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::lu_f32 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
+test linalg::decomp::tests::with_roots::qr_f32 ... ok
+test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::decomp::tests::with_roots::qr_f64 ... ok
+test linalg::matrix::tests::concrete_types ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
+test linalg::matrix::tests::frobenius_norm ... ok
+test linalg::vector::tests::algebra_f32 ... ok
+test linalg::vector::tests::algebra_f64 ... ok
+test linalg::vector::tests::concrete_types ... ok
+test linalg::vector::tests::norms::norms_f32 ... ok
+test linalg::vector::tests::norms::norms_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::norm ... ok
+test number::cayley_dickson::tests::trait_levels ... ok
 test number::complex::tests::algebra_f32 ... ok
 test number::complex::tests::algebra_f64 ... ok
-test number::cayley_dickson::tests::trait_levels ... ok
 test number::complex::tests::elementary::elementary_f32 ... ok
 test number::complex::tests::elementary::elementary_f64 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
@@ -190,13 +251,13 @@ test number::quaternion::tests::left_scalar ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
 test scalar::tests::backend::f32_backend ... ok
+test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::backend::f64_backend ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
-test scalar::tests::powi_uses_repeated_squaring ... ok
-test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
+test scalar::tests::real_basics ... ok
 
-test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -207,20 +268,68 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --all-features -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.44s
    OK
 == cargo doc -p azmath --no-deps --all-features
  Documenting azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
    Generated /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/doc/azmath/index.html
    OK
 == cargo build -p azmath --target thumbv7em-none-eabihf --no-default-features
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.24s
    OK
 == cargo build -p azmath --target thumbv7em-none-eabihf
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s
-   OK
 
-ERGEBNIS: alles OK
+thread 'rustc' (266983) panicked at /rustc-dev/58cf8f9c35b355199727627d07ae34a4e2846d67/compiler/rustc_middle/src/query/on_disk_cache.rs:484:5:
+assertion `left == right` failed
+  left: 3
+ right: 35
+stack backtrace:
+   0:     0x7fd66571f476 - <<std[68c81ae915296b05]::sys::backtrace::BacktraceLock>::print::DisplayBacktrace as core[efd5e57aef94d71e]::fmt::Display>::fmt
+   1:     0x7fd665e0eecf - core[efd5e57aef94d71e]::fmt::write
+   2:     0x7fd66705ce2c - <std[68c81ae915296b05]::sys::stdio::unix::Stderr as core[efd5e57aef94d71e]::io::write::Write>::write_fmt
+   3:     0x7fd6656f28da - std[68c81ae915296b05]::panicking::default_hook::{closure#0}
+   4:     0x7fd665713723 - std[68c81ae915296b05]::panicking::default_hook
+   5:     0x7fd664689eda - std[68c81ae915296b05]::panicking::update_hook::<alloc[c23e483dde3f7cfb]::boxed::Box<rustc_driver_impl[adbd623b30937d3b]::install_ice_hook::{closure#1}>>::{closure#0}
+   6:     0x7fd665713bc2 - std[68c81ae915296b05]::panicking::panic_with_hook
+   7:     0x7fd6656f2992 - std[68c81ae915296b05]::panicking::panic_handler::{closure#0}
+   8:     0x7fd6656e9879 - std[68c81ae915296b05]::sys::backtrace::__rust_end_short_backtrace::<std[68c81ae915296b05]::panicking::panic_handler::{closure#0}, !>
+   9:     0x7fd6656f439d - __rustc[3d2f79520d6fa809]::rust_begin_unwind
+  10:     0x7fd661adcccc - core[efd5e57aef94d71e]::panicking::panic_fmt
+  11:     0x7fd664006693 - core[efd5e57aef94d71e]::panicking::assert_failed_inner
+  12:     0x7fd663ffc6e5 - core[efd5e57aef94d71e]::panicking::assert_failed::<u64, u64>
+  13:     0x7fd666784814 - <rustc_query_impl[a29dffa3fa494aa1]::query_vtables::lookup_deprecation_entry::make_query_vtable::{closure#0} as core[efd5e57aef94d71e]::ops::function::FnOnce<(rustc_middle[a1b25c71ebdbabb6]::ty::context::TyCtxt, rustc_middle[a1b25c71ebdbabb6]::dep_graph::serialized::SerializedDepNodeIndex)>>::call_once
+  14:     0x7fd666783016 - rustc_query_impl[a29dffa3fa494aa1]::execution::try_execute_query::<rustc_middle[a1b25c71ebdbabb6]::query::caches::DefIdCache<rustc_middle[a1b25c71ebdbabb6]::query::erase::ErasedData<[u8; 28usize]>>, true>
+  15:     0x7fd666781e8d - rustc_query_impl[a29dffa3fa494aa1]::query_vtables::lookup_deprecation_entry::execute_query_incr::__rust_end_short_backtrace
+  16:     0x7fd66677c7cd - <rustc_middle[a1b25c71ebdbabb6]::ty::context::TyCtxt>::check_stability_allow_unstable
+  17:     0x7fd666779483 - <rustc_passes[29b4dd9f1324bf40]::stability::Checker as rustc_hir[b4fce93dd2cfcce5]::intravisit::Visitor>::visit_ty
+  18:     0x7fd666778407 - <rustc_passes[29b4dd9f1324bf40]::stability::Checker as rustc_hir[b4fce93dd2cfcce5]::intravisit::Visitor>::visit_generics
+  19:     0x7fd6667784df - <rustc_passes[29b4dd9f1324bf40]::stability::Checker as rustc_hir[b4fce93dd2cfcce5]::intravisit::Visitor>::visit_item
+  20:     0x7fd66235714b - rustc_passes[29b4dd9f1324bf40]::stability::check_mod_unstable_api_usage
+  21:     0x7fd666ef0a81 - rustc_query_impl[a29dffa3fa494aa1]::execution::try_execute_query::<rustc_middle[a1b25c71ebdbabb6]::query::caches::DefaultCache<rustc_span[8115d814b104bfef]::def_id::LocalModId, rustc_middle[a1b25c71ebdbabb6]::query::erase::ErasedData<[u8; 0usize]>>, true>
+  22:     0x7fd666eefb6f - rustc_query_impl[a29dffa3fa494aa1]::query_vtables::check_mod_unstable_api_usage::execute_query_incr::__rust_end_short_backtrace
+  23:     0x7fd666eee4fb - rustc_interface[8fa331b5442ffbb0]::passes::run_required_analyses::{closure#0}::{closure#1}
+  24:     0x7fd666eecf9a - rustc_data_structures[3e8ad1bb47986a46]::sync::parallel::par_fns
+  25:     0x7fd666a38edb - rustc_interface[8fa331b5442ffbb0]::passes::analysis
+  26:     0x7fd6673e57e1 - rustc_query_impl[a29dffa3fa494aa1]::execution::try_execute_query::<rustc_middle[a1b25c71ebdbabb6]::query::caches::SingleCache<rustc_middle[a1b25c71ebdbabb6]::query::erase::ErasedData<[u8; 0usize]>>, true>
+  27:     0x7fd6673e505d - rustc_query_impl[a29dffa3fa494aa1]::query_vtables::analysis::execute_query_incr::__rust_end_short_backtrace
+  28:     0x7fd667138b58 - rustc_interface[8fa331b5442ffbb0]::interface::run_compiler::<(), rustc_driver_impl[adbd623b30937d3b]::run_compiler::{closure#0}>::{closure#2}
+  29:     0x7fd6670f58e4 - std[68c81ae915296b05]::sys::backtrace::__rust_begin_short_backtrace::<rustc_interface[8fa331b5442ffbb0]::util::run_in_thread_with_globals<rustc_interface[8fa331b5442ffbb0]::util::run_in_thread_pool_with_globals<rustc_interface[8fa331b5442ffbb0]::interface::run_compiler<(), rustc_driver_impl[adbd623b30937d3b]::run_compiler::{closure#0}>::{closure#2}, ()>::{closure#0}, ()>::{closure#0}::{closure#0}, ()>
+  30:     0x7fd6670f56ad - <std[68c81ae915296b05]::thread::lifecycle::spawn_unchecked<rustc_interface[8fa331b5442ffbb0]::util::run_in_thread_with_globals<rustc_interface[8fa331b5442ffbb0]::util::run_in_thread_pool_with_globals<rustc_interface[8fa331b5442ffbb0]::interface::run_compiler<(), rustc_driver_impl[adbd623b30937d3b]::run_compiler::{closure#0}>::{closure#2}, ()>::{closure#0}, ()>::{closure#0}::{closure#0}, ()>::{closure#1} as core[efd5e57aef94d71e]::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+  31:     0x7fd66720c607 - <std[68c81ae915296b05]::sys::thread::unix::Thread>::new::thread_start
+  32:     0x7fd6606efc42 - start_thread
+  33:     0x7fd66077519c - __GI___clone3
+  34:                0x0 - <unknown>
+
+panicked at /rustc-dev/58cf8f9c35b355199727627d07ae34a4e2846d67/compiler/rustc_middle/src/dep_graph/graph.rs:1455:5:
+
+thread panicked while processing panic. aborting.
+error: could not compile `azmath` (lib)
+
+Caused by:
+  process didn't exit successfully: `/home/andreas/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name azmath --edition=2024 crates/azmath/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debuginfo=2 '--forbid=clippy::unwrap_used' --forbid=unsafe_code '--forbid=clippy::std_instead_of_core' '--forbid=clippy::std_instead_of_alloc' '--forbid=clippy::panic' --warn=missing_docs '--forbid=clippy::alloc_instead_of_core' --cfg 'feature="default"' --cfg 'feature="libm"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("alloc", "default", "libm", "std"))' -C metadata=b5e0212e76519f2a -C extra-filename=-930224e003217d94 --out-dir /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/thumbv7em-none-eabihf/debug/deps --target thumbv7em-none-eabihf -C incremental=/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/thumbv7em-none-eabihf/debug/incremental -L dependency=/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/thumbv7em-none-eabihf/debug/deps -L dependency=/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/debug/deps --extern libm=/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/thumbv7em-none-eabihf/debug/deps/liblibm-6774da40fb28f407.rmeta` (signal: 6, SIGABRT: process abort signal)
+   FEHLER
+
+ERGEBNIS: FEHLER, Details in pruefung/ergebnis.txt
