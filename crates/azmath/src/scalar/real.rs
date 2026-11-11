@@ -19,6 +19,8 @@ pub trait Real: Field + Commutative + Conjugate<Real = Self> + PartialOrd {
     const EPSILON: Self;
     /// Positiv unendlich.
     const INFINITY: Self;
+    /// Negativ unendlich.
+    const NEG_INFINITY: Self;
     /// Keine Zahl (NaN).
     const NAN: Self;
 
@@ -32,6 +34,10 @@ pub trait Real: Field + Commutative + Conjugate<Real = Self> + PartialOrd {
     fn max(self, other: Self) -> Self;
     /// Betrag von `self` mit dem Vorzeichen von `sign`.
     fn copysign(self, sign: Self) -> Self;
+    /// Nächstgrößere darstellbare Zahl.
+    fn next_up(self) -> Self;
+    /// Nächstkleinere darstellbare Zahl.
+    fn next_down(self) -> Self;
     /// `true`, wenn die Zahl weder unendlich noch NaN ist.
     fn is_finite(self) -> bool;
     /// `true`, wenn die Zahl NaN ist.

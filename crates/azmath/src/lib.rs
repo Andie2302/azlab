@@ -32,14 +32,21 @@ extern crate std;
 #[macro_use]
 mod macros;
 
+pub mod autodiff;
 mod backend;
+pub mod interval;
 pub mod linalg;
 pub mod number;
+pub mod poly;
 pub mod scalar;
+pub mod solve;
 
 #[cfg(test)]
 mod testutil;
 
 pub use linalg::{Cholesky, LinalgError, Lu, Matrix, Qr, Vector};
 pub use number::{CayleyDickson, Complex, Dual, DualN, Octonion, Quaternion};
+pub use interval::Interval;
+pub use poly::Polynomial;
 pub use scalar::{Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring};
+pub use solve::{Solution, SolveError, Tolerance};

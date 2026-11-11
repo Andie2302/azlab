@@ -1,8 +1,42 @@
 # Phase 4 – Nullstellen, Polynome, erste Löser (Detailplan)
 
-Status: **zur Freigabe**. Erst nach Freigabe entsteht Code. Umsetzung dann
-ohne Prüfläufe der KI; geprüft wird über `scripts/pruefen.sh` durch den
-Menschen.
+Status: **umgesetzt, noch ungeprüft**. Die KI hat nichts ausgeführt; der
+Code ist weder übersetzt noch getestet. Prüfung durch den Menschen über
+`scripts/pruefen.sh`, Korrekturen anhand von `pruefung/ergebnis.txt`.
+
+## Abweichungen vom Plan bei der Umsetzung
+
+- Alles steckt in einem Commit statt in zehn: Ohne Prüfläufe ließ sich nicht
+  sicherstellen, dass jeder Zwischenstand für sich übersetzt.
+- `Real` bekommt zusätzlich die Konstante `NEG_INFINITY` (für
+  `Interval::ENTIRE`).
+- Mehrfache Nullstellen in den geschlossenen Formeln: Sie erscheinen nur
+  dann einmal, wenn die Rechnung sie exakt gleich liefert. Durch Rundung
+  kann eine doppelte Nullstelle bei Grad 3 und 4 auch als zwei sehr nahe
+  Werte oder gar nicht erscheinen. Die Garantie liefert Schritt H.
+- `Interval` erweitert jedes berechnete Ergebnis um eine Maschinenzahl nach
+  außen, auch wenn die Rechnung exakt war. `powi` kommt aus `Field`
+  (wiederholtes Quadrieren): gültiger, aber nicht engster Einschluss; für
+  das Quadrat gibt es das engere `sqr`.
+- `complex_roots` verlangt, dass der Ausgabepuffer genau so lang ist wie der
+  Grad (zu kurz: `CapacityExceeded`, zu lang: `InvalidInput`).
+- Autodiff-Hilfen haben zusätzlich `variables` (macht aus einem Punkt die
+  unabhängigen Variablen).
+- Newton für Systeme: Lässt sich der Restfehler nicht mehr verkleinern,
+  obwohl der Schritt schon winzig ist, gilt das als konvergiert
+  (Rechengenauigkeit erreicht), nicht als Fehler.
+- Typ-Aliase `ScalarResult<T>` und `SystemResult<T, N>` für die Ergebnisse.
+- Die Garantie-Tests für Grad 7 nutzen `x·(x²−1)·(x²−4)·(x²−9)` statt der
+  Nullstellen 1 bis 7: Bei jenem Polynom wäre der Einschluss so grob, dass
+  sehr viele unaufgelöste Klammern entstünden.
+
+## Bekannte Grenze
+
+Die Einschließung arbeitet mit Intervall-Horner und Mittelwertform. Bei
+Polynomen mit sehr großen Koeffizienten und dicht liegenden Nullstellen
+(Wilkinson-artig) bleibt sie korrekt, meldet aber viele unaufgelöste
+Klammern. Für die Polynome der Kollisionserkennung (Grad 3) ist das kein
+Problem.
 
 ## Ziel
 

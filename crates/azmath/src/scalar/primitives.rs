@@ -60,6 +60,7 @@ macro_rules! impl_real {
                 const E: Self = core::$t::consts::E;
                 const EPSILON: Self = $t::EPSILON;
                 const INFINITY: Self = $t::INFINITY;
+                const NEG_INFINITY: Self = $t::NEG_INFINITY;
                 const NAN: Self = $t::NAN;
 
                 #[inline]
@@ -81,6 +82,14 @@ macro_rules! impl_real {
                 #[inline]
                 fn copysign(self, sign: Self) -> Self {
                     $t::copysign(self, sign)
+                }
+                #[inline]
+                fn next_up(self) -> Self {
+                    $t::next_up(self)
+                }
+                #[inline]
+                fn next_down(self) -> Self {
+                    $t::next_down(self)
                 }
                 #[inline]
                 fn is_finite(self) -> bool {

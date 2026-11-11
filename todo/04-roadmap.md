@@ -54,14 +54,15 @@ Volle Prüfmatrix grün.
 
 ## Phase 4 – Nullstellen, Polynome, erste Löser
 
-Detailplan: [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) – zur Freigabe.
+Detailplan: [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) – umgesetzt, noch ungeprüft
+(die KI hat nichts ausgeführt; Prüflauf durch den Menschen steht aus).
 
-- [ ] Polynomauswertung (Horner), Tschebyschow
-- [ ] Bisektion, Sekante, Newton, Brent
-- [ ] Gleichungen höherer Ordnung: Formeln Grad 2–4, alle Polynom-Nullstellen (komplex), reelle Nullstellen im Intervall
-- [ ] Intervallarithmetik `Interval<T>` mit Rundung nach außen (für beweisbar konservative Tests, z. B. CCD)
-- [ ] Newton für Systeme (Jacobi-Matrix über `DualN`), Dämpfung und Liniensuche
-- [ ] `derivative`, `gradient`, `jacobian` als Autodiff-Hilfen
+- [x] Polynomauswertung (Horner), Tschebyschow
+- [x] Bisektion, Sekante, Newton, Brent
+- [x] Gleichungen höherer Ordnung: Formeln Grad 2–4, alle Polynom-Nullstellen (komplex), reelle Nullstellen im Intervall
+- [x] Intervallarithmetik `Interval<T>` mit Rundung nach außen (für beweisbar konservative Tests, z. B. CCD)
+- [x] Newton für Systeme (Jacobi-Matrix über `DualN`), Dämpfung und Liniensuche
+- [x] `derivative`, `gradient`, `jacobian` als Autodiff-Hilfen
 
 Meilenstein: **ausreichend für ein IAPWS-95-Crate** und, zusammen mit
 Phase 3, für PBD/XPBD-Gewebe mit kontinuierlicher Kollisionserkennung in

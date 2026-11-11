@@ -67,6 +67,7 @@ macro_rules! impl_dual_traits {
             const E: Self = Self { re: T::E, eps: $zero };
             const EPSILON: Self = Self { re: T::EPSILON, eps: $zero };
             const INFINITY: Self = Self { re: T::INFINITY, eps: $zero };
+            const NEG_INFINITY: Self = Self { re: T::NEG_INFINITY, eps: $zero };
             const NAN: Self = Self { re: T::NAN, eps: $zero };
 
             #[inline]
@@ -98,6 +99,16 @@ macro_rules! impl_dual_traits {
                     <$eps as Tangent<T>>::map(self.eps, |a| -a)
                 };
                 Self { re, eps }
+            }
+
+            #[inline]
+            fn next_up(self) -> Self {
+                Self { re: self.re.next_up(), eps: self.eps }
+            }
+
+            #[inline]
+            fn next_down(self) -> Self {
+                Self { re: self.re.next_down(), eps: self.eps }
             }
 
             #[inline]
