@@ -17,8 +17,6 @@ pub trait Real: Field + PartialOrd {
     /// Keine Zahl (NaN).
     const NAN: Self;
 
-    /// Wandelt eine `f64`-Konstante in diesen Typ um (ggf. mit Rundung).
-    fn from_f64(value: f64) -> Self;
     /// Wandelt in `f64` um (ggf. mit Rundung).
     fn to_f64(self) -> f64;
     /// Betrag.

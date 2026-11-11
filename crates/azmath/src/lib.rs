@@ -32,4 +32,4 @@ extern crate std;
 mod backend;
 pub mod scalar;
 
-pub use scalar::{Elementary, Field, Real, RealElementary, Ring};
+pub use scalar::{Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring};
