@@ -4,7 +4,9 @@
 //! Nichts in diesem Modul braucht Heap-Speicher.
 
 mod error;
+mod matrix;
 mod vector;
 
 pub use error::LinalgError;
+pub use matrix::Matrix;
 pub use vector::Vector;
