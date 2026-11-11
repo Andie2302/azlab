@@ -1,8 +1,6 @@
 # Phase 3 – Lineare Algebra fester Größe (Detailplan)
 
-Status: **umgesetzt**. Von der KI nach jedem Schritt mit Standard-Features
-und ohne Features geprüft (Clippy und Tests); die volle Prüfmatrix über
-`scripts/pruefen.sh` steht noch aus.
+Status: **umgesetzt und geprüft** (volle Prüfmatrix grün).
 
 ## Abweichungen vom Plan bei der Umsetzung
 

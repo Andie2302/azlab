@@ -44,8 +44,7 @@ Volle Prüfmatrix grün.
 ## Phase 3 – Lineare Algebra fester Größe
 
 Detailplan: [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) – umgesetzt.
-Von der KI mit Standard-Features und ohne Features geprüft; die volle
-Prüfmatrix (`scripts/pruefen.sh`) steht noch aus.
+Volle Prüfmatrix grün.
 
 - [x] `Vector<T, N>`, `Matrix<T, R, C>`: Arithmetik, Skalar-/Kreuzprodukt, Normen, Transponieren
 - [x] Zugriff für Algorithmen: über `IndexMut<(usize, usize)>` statt eigener Traits
