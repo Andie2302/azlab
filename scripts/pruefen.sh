@@ -10,6 +10,11 @@
 set -u
 cd "$(dirname "$0")/.." || exit 1
 
+# Ohne inkrementellen Compiler-Cache prüfen: Ein beschädigter Cache hat schon
+# einmal einen internen Compilerfehler ausgelöst, der nichts mit dem Code zu
+# tun hatte. Für die kleine Bibliothek kostet das nur Sekunden.
+export CARGO_INCREMENTAL=0
+
 out="pruefung/ergebnis.txt"
 mkdir -p pruefung
 : > "$out"
