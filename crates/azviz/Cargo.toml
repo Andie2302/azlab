@@ -1,0 +1,16 @@
+[package]
+name = "azviz"
+description = "Anzeige für die Beispiele des azlab-Workspace: Live-Fenster oder Bilddateien"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+gif = "0.13"
+macroquad = { version = "0.4", default-features = false }
+tiny-skia = { version = "0.11", default-features = false, features = ["std", "png-format"] }
+
+[lints]
+workspace = true

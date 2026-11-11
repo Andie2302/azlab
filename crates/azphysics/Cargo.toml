@@ -1,0 +1,26 @@
+[package]
+name = "azphysics"
+description = "Physik-Simulationen auf azmath: Kollisionsgeometrie, Gewebe, Strömung"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# Standard: no_std ohne alloc, Elementarfunktionen über libm.
+default = ["libm"]
+# Rechen-Backends, durchgereicht an azmath.
+libm = ["azmath/libm"]
+std = ["azmath/std", "alloc"]
+# Simulationen mit eigenem Speicher: Gewebe, Strömung, Suchstruktur.
+alloc = ["azmath/alloc"]
+
+[dependencies]
+azmath = { workspace = true }
+
+[dev-dependencies]
+azviz = { path = "../azviz" }
+
+[lints]
+workspace = true
