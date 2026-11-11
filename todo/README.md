@@ -20,7 +20,8 @@ Wurzelverzeichnis.
 | [06-offene-fragen.md](06-offene-fragen.md) | Entscheidungen, die noch fehlen | offen |
 | [phase-2-zahlentypen.md](phase-2-zahlentypen.md) | Detailplan Phase 2 | umgesetzt und geprüft |
 | [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) | Detailplan Phase 3 | umgesetzt und geprüft |
-| [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) | Detailplan Phase 4 | umgesetzt, noch ungeprüft |
+| [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) | Detailplan Phase 4 | umgesetzt und geprüft |
+| [phase-5-lie-theorie.md](phase-5-lie-theorie.md) | Detailplan Phase 5 | umgesetzt, noch ungeprüft |
 
 Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 

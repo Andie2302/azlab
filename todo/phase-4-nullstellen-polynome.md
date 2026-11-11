@@ -1,8 +1,6 @@
 # Phase 4 – Nullstellen, Polynome, erste Löser (Detailplan)
 
-Status: **umgesetzt, noch ungeprüft**. Die KI hat nichts ausgeführt; der
-Code ist weder übersetzt noch getestet. Prüfung durch den Menschen über
-`scripts/pruefen.sh`, Korrekturen anhand von `pruefung/ergebnis.txt`.
+Status: **umgesetzt und geprüft** (volle Prüfmatrix grün).
 
 ## Abweichungen vom Plan bei der Umsetzung
 

@@ -54,8 +54,8 @@ Volle Prüfmatrix grün.
 
 ## Phase 4 – Nullstellen, Polynome, erste Löser
 
-Detailplan: [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) – umgesetzt, noch ungeprüft
-(die KI hat nichts ausgeführt; Prüflauf durch den Menschen steht aus).
+Detailplan: [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) – umgesetzt.
+Volle Prüfmatrix grün.
 
 - [x] Polynomauswertung (Horner), Tschebyschow
 - [x] Bisektion, Sekante, Newton, Brent
@@ -70,9 +70,11 @@ Phase 3, für PBD/XPBD-Gewebe mit kontinuierlicher Kollisionserkennung in
 
 ## Phase 5 – Lie-Theorie
 
-- [ ] Traits `LieAlgebra`, `LieGroup`
-- [ ] `SO2`, `SO3`, `SE2`, `SE3` mit exp/log, Adjungierte, Klammer
-- [ ] Matrix-Kommutator, Matrix-Exponential kleiner Matrizen
+Detailplan: [phase-5-lie-theorie.md](phase-5-lie-theorie.md) – umgesetzt, noch ungeprüft.
+
+- [x] Traits `LieAlgebra`, `LieGroup`
+- [x] `SO2`, `SO3`, `SE2`, `SE3` mit exp/log, Adjungierte, Klammer
+- [x] Matrix-Kommutator, Matrix-Exponential kleiner Matrizen
 
 Meilenstein: **ausreichend für Robotik-Kinematik.**
 

@@ -1,5 +1,6 @@
 //! Matrizen fester Größe.
 
+mod expm;
 mod ops;
 mod repr;
 mod square;

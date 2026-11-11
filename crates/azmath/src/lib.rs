@@ -35,6 +35,7 @@ mod macros;
 pub mod autodiff;
 mod backend;
 pub mod interval;
+pub mod lie;
 pub mod linalg;
 pub mod number;
 pub mod poly;
