@@ -1,24 +1,28 @@
-Mi 11 Nov 2026 03:10:57 CET
+Mi 11 Nov 2026 03:57:21 CET
 rustc 1.99.1 (58cf8f9c3 2026-10-13)
 cargo 1.99.1 (5f94df478 2026-08-27)
 
 == cargo test -p azmath --no-default-features
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.63s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.75s
      Running unittests src/lib.rs (target/debug/deps/azmath-b796290cf85cd505)
 
-running 24 tests
-test linalg::decomp::tests::lu_f64 ... ok
+running 34 tests
+test autodiff::tests::autodiff_f32 ... ok
+test autodiff::tests::autodiff_f64 ... ok
+test interval::tests::interval_f64 ... ok
+test interval::tests::interval_f32 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
-test linalg::vector::tests::algebra_f32 ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
+test linalg::vector::tests::algebra_f32 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
 test linalg::vector::tests::concrete_types ... ok
-test linalg::matrix::tests::algebra_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
-test number::cayley_dickson::tests::trait_levels ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
+test number::cayley_dickson::tests::trait_levels ... ok
 test number::complex::tests::algebra_f32 ... ok
 test number::complex::tests::algebra_f64 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
@@ -28,12 +32,18 @@ test number::dual::tests::default_is_zero ... ok
 test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
+test poly::tests::evaluation_f32 ... ok
+test poly::tests::evaluation_f64 ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
-test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
+test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
+test solve::tests::scalar_f32 ... ok
+test solve::tests::scalar_f64 ... ok
+test poly::tests::isolation_f64 ... ok
+test poly::tests::isolation_f32 ... ok
 
-test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -44,21 +54,34 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --no-default-features -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
-   OK
+error: equal expressions as operands to `-`
+  --> crates/azmath/src/interval/tests.rs:49:22
+   |
+49 |     let difference = a - a;
+   |                      ^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#eq_op
+   = note: `#[deny(clippy::eq_op)]` on by default
+
+error: could not compile `azmath` (lib test) due to 1 previous error
+   FEHLER
 == cargo test -p azmath --no-default-features --features libm
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.93s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.00s
      Running unittests src/lib.rs (target/debug/deps/azmath-3583e4d564419e54)
 
-running 40 tests
+running 56 tests
+test autodiff::tests::autodiff_f32 ... ok
+test autodiff::tests::autodiff_f64 ... ok
+test interval::tests::interval_f32 ... ok
+test interval::tests::interval_f64 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
-test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
+test linalg::decomp::tests::with_roots::qr_f32 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
 test linalg::decomp::tests::with_roots::qr_f64 ... ok
-test linalg::decomp::tests::with_roots::qr_f32 ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
 test linalg::matrix::tests::frobenius_norm ... ok
@@ -80,20 +103,32 @@ test number::dual::tests::algebra_f32 ... ok
 test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
 test number::dual::tests::elementary::elementary_f32 ... ok
-test number::quaternion::tests::algebra_f32 ... ok
 test number::dual::tests::elementary::elementary_f64 ... ok
+test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
+test poly::tests::evaluation_f32 ... ok
+test poly::tests::evaluation_f64 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
+test poly::tests::roots::closed_forms_f32 ... ok
+test poly::tests::roots::closed_forms_f64 ... ok
 test scalar::tests::backend::f32_backend ... ok
 test scalar::tests::backend::f64_backend ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
+test poly::tests::roots::complex_f32 ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
+test poly::tests::roots::complex_f64 ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
+test poly::tests::isolation_f64 ... ok
+test solve::tests::scalar_f32 ... ok
+test solve::tests::scalar_f64 ... ok
+test poly::tests::isolation_f32 ... ok
+test solve::tests::systems::systems_f32 ... ok
+test solve::tests::systems::systems_f64 ... ok
 
-test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -104,18 +139,31 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features libm -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.38s
-   OK
+error: equal expressions as operands to `-`
+  --> crates/azmath/src/interval/tests.rs:49:22
+   |
+49 |     let difference = a - a;
+   |                      ^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#eq_op
+   = note: `#[deny(clippy::eq_op)]` on by default
+
+error: could not compile `azmath` (lib test) due to 1 previous error
+   FEHLER
 == cargo test -p azmath --no-default-features --features std
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.80s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.00s
      Running unittests src/lib.rs (target/debug/deps/azmath-a3ccc8f45a22b896)
 
-running 40 tests
-test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
-test linalg::decomp::tests::lu_f32 ... ok
+running 56 tests
+test autodiff::tests::autodiff_f64 ... ok
+test autodiff::tests::autodiff_f32 ... ok
+test interval::tests::interval_f32 ... ok
+test interval::tests::interval_f64 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
+test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
 test linalg::decomp::tests::with_roots::qr_f32 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
 test linalg::decomp::tests::with_roots::qr_f64 ... ok
@@ -124,15 +172,15 @@ test linalg::matrix::tests::concrete_types ... ok
 test linalg::matrix::tests::frobenius_norm ... ok
 test linalg::vector::tests::algebra_f32 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
-test linalg::vector::tests::concrete_types ... ok
 test linalg::vector::tests::norms::norms_f32 ... ok
 test linalg::vector::tests::norms::norms_f64 ... ok
+test linalg::vector::tests::concrete_types ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
-test number::cayley_dickson::tests::norm ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
 test number::complex::tests::algebra_f32 ... ok
 test number::complex::tests::algebra_f64 ... ok
+test number::cayley_dickson::tests::norm ... ok
 test number::complex::tests::elementary::elementary_f32 ... ok
 test number::complex::tests::elementary::elementary_f64 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
@@ -146,14 +194,26 @@ test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
+test poly::tests::evaluation_f32 ... ok
+test poly::tests::evaluation_f64 ... ok
+test poly::tests::roots::closed_forms_f32 ... ok
+test poly::tests::roots::closed_forms_f64 ... ok
+test poly::tests::roots::complex_f32 ... ok
 test scalar::tests::backend::f32_backend ... ok
+test poly::tests::roots::complex_f64 ... ok
 test scalar::tests::backend::f64_backend ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
+test solve::tests::scalar_f32 ... ok
+test solve::tests::scalar_f64 ... ok
+test poly::tests::isolation_f32 ... ok
+test poly::tests::isolation_f64 ... ok
+test solve::tests::systems::systems_f32 ... ok
+test solve::tests::systems::systems_f64 ... ok
 
-test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -164,20 +224,33 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features std -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.37s
-   OK
+error: equal expressions as operands to `-`
+  --> crates/azmath/src/interval/tests.rs:49:22
+   |
+49 |     let difference = a - a;
+   |                      ^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#eq_op
+   = note: `#[deny(clippy::eq_op)]` on by default
+
+error: could not compile `azmath` (lib test) due to 1 previous error
+   FEHLER
 == cargo test -p azmath --no-default-features --features alloc
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.64s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.75s
      Running unittests src/lib.rs (target/debug/deps/azmath-ae4d673ae4ceea29)
 
-running 24 tests
-test linalg::matrix::tests::algebra_f32 ... ok
+running 34 tests
+test autodiff::tests::autodiff_f64 ... ok
+test autodiff::tests::autodiff_f32 ... ok
+test interval::tests::interval_f64 ... ok
+test interval::tests::interval_f32 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
+test linalg::matrix::tests::algebra_f32 ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
-test linalg::vector::tests::algebra_f32 ... ok
 test linalg::matrix::tests::concrete_types ... ok
+test linalg::vector::tests::algebra_f32 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
 test linalg::vector::tests::concrete_types ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
@@ -192,12 +265,18 @@ test number::dual::tests::default_is_zero ... ok
 test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
+test poly::tests::evaluation_f32 ... ok
+test poly::tests::evaluation_f64 ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
+test solve::tests::scalar_f32 ... ok
+test solve::tests::scalar_f64 ... ok
+test poly::tests::isolation_f32 ... ok
+test poly::tests::isolation_f64 ... ok
 
-test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -208,23 +287,36 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features alloc -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.32s
-   OK
+error: equal expressions as operands to `-`
+  --> crates/azmath/src/interval/tests.rs:49:22
+   |
+49 |     let difference = a - a;
+   |                      ^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#eq_op
+   = note: `#[deny(clippy::eq_op)]` on by default
+
+error: could not compile `azmath` (lib test) due to 1 previous error
+   FEHLER
 == cargo test -p azmath --all-features
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.78s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.99s
      Running unittests src/lib.rs (target/debug/deps/azmath-8578dee6f899d56e)
 
-running 40 tests
-test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
+running 56 tests
+test autodiff::tests::autodiff_f32 ... ok
+test autodiff::tests::autodiff_f64 ... ok
+test interval::tests::interval_f32 ... ok
+test interval::tests::interval_f64 ... ok
+test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
-test linalg::decomp::tests::lu_f32 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
 test linalg::decomp::tests::with_roots::qr_f32 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::decomp::tests::with_roots::qr_f64 ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
-test linalg::decomp::tests::with_roots::qr_f64 ... ok
 test linalg::matrix::tests::frobenius_norm ... ok
 test linalg::vector::tests::algebra_f32 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
@@ -250,14 +342,26 @@ test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
+test poly::tests::evaluation_f32 ... ok
+test poly::tests::evaluation_f64 ... ok
+test poly::tests::roots::closed_forms_f32 ... ok
+test poly::tests::roots::closed_forms_f64 ... ok
+test poly::tests::roots::complex_f32 ... ok
 test scalar::tests::backend::f32_backend ... ok
+test poly::tests::roots::complex_f64 ... ok
 test scalar::tests::backend::f64_backend ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
+test poly::tests::isolation_f32 ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
+test poly::tests::isolation_f64 ... ok
+test solve::tests::scalar_f32 ... ok
+test solve::tests::scalar_f64 ... ok
+test solve::tests::systems::systems_f32 ... ok
+test solve::tests::systems::systems_f64 ... ok
 
-test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests azmath
 
@@ -268,20 +372,29 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    OK
 == cargo clippy -p azmath --all-targets --all-features -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.36s
-   OK
+error: equal expressions as operands to `-`
+  --> crates/azmath/src/interval/tests.rs:49:22
+   |
+49 |     let difference = a - a;
+   |                      ^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#eq_op
+   = note: `#[deny(clippy::eq_op)]` on by default
+
+error: could not compile `azmath` (lib test) due to 1 previous error
+   FEHLER
 == cargo doc -p azmath --no-deps --all-features
  Documenting azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
    Generated /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/doc/azmath/index.html
    OK
 == cargo build -p azmath --target thumbv7em-none-eabihf --no-default-features
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.23s
    OK
 == cargo build -p azmath --target thumbv7em-none-eabihf
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
    OK
 
-ERGEBNIS: alles OK
+ERGEBNIS: FEHLER, Details in pruefung/ergebnis.txt
