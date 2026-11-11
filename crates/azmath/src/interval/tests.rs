@@ -46,7 +46,7 @@ fn arithmetic<T: Real>() {
     assert!(square.is_subset_of(c.powi(2)));
 
     // x − x ist nicht null, enthält aber null.
-    let difference = a - a;
+    let difference = a - iv(1.0, 2.0);
     assert!(difference.contains_zero() && difference.width() > T::ZERO);
 
     let mut acc = a;
