@@ -30,6 +30,11 @@
 extern crate std;
 
 mod backend;
+pub mod number;
 pub mod scalar;
 
+#[cfg(test)]
+mod testutil;
+
+pub use number::Complex;
 pub use scalar::{Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring};
