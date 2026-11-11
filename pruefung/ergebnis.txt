@@ -1,21 +1,21 @@
-Mi 11 Nov 2026 13:33:30 CET
+Mi 11 Nov 2026 13:41:55 CET
 rustc 1.99.1 (58cf8f9c3 2026-10-13)
 cargo 1.99.1 (5f94df478 2026-08-27)
 
 == cargo test -p azmath --no-default-features
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.82s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.81s
      Running unittests src/lib.rs (target/debug/deps/azmath-b796290cf85cd505)
 
 running 36 tests
 test autodiff::tests::autodiff_f32 ... ok
 test autodiff::tests::autodiff_f64 ... ok
-test interval::tests::interval_f32 ... ok
 test interval::tests::interval_f64 ... ok
+test interval::tests::interval_f32 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
-test linalg::dynamic_tests::dynamic_f32 ... FAILED
-test linalg::dynamic_tests::dynamic_f64 ... FAILED
+test linalg::dynamic_tests::dynamic_f32 ... ok
+test linalg::dynamic_tests::dynamic_f64 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
@@ -45,61 +45,48 @@ test solve::tests::scalar_f64 ... ok
 test poly::tests::isolation_f64 ... ok
 test poly::tests::isolation_f32 ... ok
 
-failures:
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
----- linalg::dynamic_tests::dynamic_f32 stdout ----
+   Doc-tests azmath
 
-thread 'linalg::dynamic_tests::dynamic_f32' (380498) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+running 0 tests
 
----- linalg::dynamic_tests::dynamic_f64 stdout ----
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-thread 'linalg::dynamic_tests::dynamic_f64' (380499) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-
-
-failures:
-    linalg::dynamic_tests::dynamic_f32
-    linalg::dynamic_tests::dynamic_f64
-
-test result: FAILED. 34 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-error: test failed, to rerun pass `-p azmath --lib`
-   FEHLER
+   OK
 == cargo clippy -p azmath --all-targets --no-default-features -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.50s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.45s
    OK
 == cargo test -p azmath --no-default-features --features libm
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.28s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.22s
      Running unittests src/lib.rs (target/debug/deps/azmath-3583e4d564419e54)
 
 running 64 tests
 test interval::tests::interval_f32 ... ok
+test autodiff::tests::autodiff_f32 ... ok
 test interval::tests::interval_f64 ... ok
 test autodiff::tests::autodiff_f64 ... ok
-test autodiff::tests::autodiff_f32 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
-test linalg::decomp::tests::lu_f64 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
 test linalg::decomp::tests::with_roots::qr_f32 ... ok
-test linalg::dynamic_tests::dynamic_f32 ... FAILED
-test linalg::decomp::tests::with_roots::qr_f64 ... ok
-test linalg::dynamic_tests::dynamic_f64 ... FAILED
-test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
-test linalg::dynamic_tests::with_roots::cholesky_f64 ... ok
-test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::dynamic_tests::dynamic_f32 ... ok
 test lie::tests::groups_f32 ... ok
-test linalg::matrix::tests::algebra_f64 ... ok
-test linalg::matrix::tests::concrete_types ... ok
-test linalg::matrix::tests::frobenius_norm ... ok
-test linalg::vector::tests::algebra_f32 ... ok
+test linalg::dynamic_tests::dynamic_f64 ... ok
+test linalg::decomp::tests::with_roots::qr_f64 ... ok
+test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
+test linalg::matrix::tests::algebra_f32 ... ok
 test lie::tests::groups_f64 ... ok
+test linalg::dynamic_tests::with_roots::cholesky_f64 ... ok
+test linalg::matrix::tests::frobenius_norm ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
+test linalg::vector::tests::algebra_f32 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
 test linalg::vector::tests::concrete_types ... ok
+test linalg::matrix::tests::concrete_types ... ok
 test linalg::vector::tests::norms::norms_f32 ... ok
 test linalg::vector::tests::norms::norms_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
@@ -119,91 +106,69 @@ test number::dual::tests::elementary::elementary_f64 ... ok
 test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
-test number::quaternion::tests::rotation::rotation_f32 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
 test poly::tests::evaluation_f32 ... ok
 test poly::tests::evaluation_f64 ... ok
+test number::quaternion::tests::rotation::rotation_f32 ... ok
 test poly::tests::roots::closed_forms_f32 ... ok
-test scalar::tests::backend::f32_backend ... ok
-test scalar::tests::backend::f64_backend ... ok
-test poly::tests::roots::complex_f32 ... ok
 test poly::tests::roots::closed_forms_f64 ... ok
+test scalar::tests::backend::f32_backend ... ok
+test poly::tests::roots::complex_f32 ... ok
+test scalar::tests::backend::f64_backend ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
-test poly::tests::roots::complex_f64 ... ok
 test scalar::tests::real_basics ... ok
+test poly::tests::roots::complex_f64 ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
+test poly::tests::isolation_f32 ... ok
 test poly::tests::isolation_f64 ... ok
 test solve::iterative::tests::iterative_f32 ... ok
-test solve::tests::scalar_f32 ... ok
 test solve::iterative::tests::iterative_f64 ... ok
-test poly::tests::isolation_f32 ... ok
+test solve::tests::scalar_f32 ... ok
 test solve::tests::scalar_f64 ... ok
 test solve::tests::systems::systems_f32 ... ok
 test solve::tests::systems::systems_f64 ... ok
 
-failures:
+test result: ok. 64 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
----- linalg::dynamic_tests::dynamic_f32 stdout ----
+   Doc-tests azmath
 
-thread 'linalg::dynamic_tests::dynamic_f32' (380651) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+running 0 tests
 
----- linalg::dynamic_tests::dynamic_f64 stdout ----
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-thread 'linalg::dynamic_tests::dynamic_f64' (380652) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-
-
-failures:
-    linalg::dynamic_tests::dynamic_f32
-    linalg::dynamic_tests::dynamic_f64
-
-test result: FAILED. 62 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-error: test failed, to rerun pass `-p azmath --lib`
-   FEHLER
+   OK
 == cargo clippy -p azmath --all-targets --no-default-features --features libm -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-error: equal expressions as operands to `-`
-  --> crates/azmath/src/lie/tests.rs:78:16
-   |
-78 |     assert_eq!(xi - xi, So2Tangent::ZERO);
-   |                ^^^^^^^
-   |
-   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#eq_op
-   = note: `#[deny(clippy::eq_op)]` on by default
-
-error: could not compile `azmath` (lib test) due to 1 previous error
-   FEHLER
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.56s
+   OK
 == cargo test -p azmath --no-default-features --features std
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.17s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.18s
      Running unittests src/lib.rs (target/debug/deps/azmath-a3ccc8f45a22b896)
 
 running 64 tests
-test interval::tests::interval_f32 ... ok
 test autodiff::tests::autodiff_f64 ... ok
-test interval::tests::interval_f64 ... ok
 test autodiff::tests::autodiff_f32 ... ok
+test interval::tests::interval_f32 ... ok
+test interval::tests::interval_f64 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
-test linalg::decomp::tests::lu_f64 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
-test linalg::decomp::tests::with_roots::qr_f32 ... ok
-test lie::tests::groups_f64 ... ok
+test linalg::dynamic_tests::dynamic_f32 ... ok
 test linalg::decomp::tests::with_roots::qr_f64 ... ok
-test linalg::dynamic_tests::dynamic_f32 ... FAILED
-test linalg::dynamic_tests::dynamic_f64 ... FAILED
+test linalg::decomp::tests::with_roots::qr_f32 ... ok
+test linalg::dynamic_tests::dynamic_f64 ... ok
 test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
 test linalg::dynamic_tests::with_roots::cholesky_f64 ... ok
-test lie::tests::groups_f32 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
+test lie::tests::groups_f32 ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
 test linalg::matrix::tests::frobenius_norm ... ok
 test linalg::vector::tests::algebra_f32 ... ok
+test lie::tests::groups_f64 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
 test linalg::vector::tests::concrete_types ... ok
 test linalg::vector::tests::norms::norms_f32 ... ok
@@ -233,56 +198,34 @@ test poly::tests::roots::closed_forms_f32 ... ok
 test poly::tests::roots::closed_forms_f64 ... ok
 test poly::tests::roots::complex_f32 ... ok
 test scalar::tests::backend::f32_backend ... ok
-test scalar::tests::backend::f64_backend ... ok
 test poly::tests::roots::complex_f64 ... ok
+test scalar::tests::backend::f64_backend ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
+test poly::tests::isolation_f64 ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
-test poly::tests::isolation_f64 ... ok
 test poly::tests::isolation_f32 ... ok
 test solve::iterative::tests::iterative_f32 ... ok
-test solve::iterative::tests::iterative_f64 ... ok
 test solve::tests::scalar_f32 ... ok
+test solve::iterative::tests::iterative_f64 ... ok
 test solve::tests::scalar_f64 ... ok
 test solve::tests::systems::systems_f32 ... ok
 test solve::tests::systems::systems_f64 ... ok
 
-failures:
+test result: ok. 64 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
----- linalg::dynamic_tests::dynamic_f32 stdout ----
+   Doc-tests azmath
 
-thread 'linalg::dynamic_tests::dynamic_f32' (380825) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+running 0 tests
 
----- linalg::dynamic_tests::dynamic_f64 stdout ----
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-thread 'linalg::dynamic_tests::dynamic_f64' (380826) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-
-
-failures:
-    linalg::dynamic_tests::dynamic_f32
-    linalg::dynamic_tests::dynamic_f64
-
-test result: FAILED. 62 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-error: test failed, to rerun pass `-p azmath --lib`
-   FEHLER
+   OK
 == cargo clippy -p azmath --all-targets --no-default-features --features std -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-error: equal expressions as operands to `-`
-  --> crates/azmath/src/lie/tests.rs:78:16
-   |
-78 |     assert_eq!(xi - xi, So2Tangent::ZERO);
-   |                ^^^^^^^
-   |
-   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#eq_op
-   = note: `#[deny(clippy::eq_op)]` on by default
-
-error: could not compile `azmath` (lib test) due to 1 previous error
-   FEHLER
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.55s
+   OK
 == cargo test -p azmath --no-default-features --features alloc
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
@@ -290,13 +233,13 @@ error: could not compile `azmath` (lib test) due to 1 previous error
 
 running 36 tests
 test autodiff::tests::autodiff_f32 ... ok
-test interval::tests::interval_f64 ... ok
 test autodiff::tests::autodiff_f64 ... ok
 test interval::tests::interval_f32 ... ok
+test interval::tests::interval_f64 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
-test linalg::dynamic_tests::dynamic_f32 ... FAILED
-test linalg::dynamic_tests::dynamic_f64 ... FAILED
 test linalg::decomp::tests::lu_f64 ... ok
+test linalg::dynamic_tests::dynamic_f32 ... ok
+test linalg::dynamic_tests::dynamic_f64 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
@@ -326,57 +269,44 @@ test solve::tests::scalar_f64 ... ok
 test poly::tests::isolation_f64 ... ok
 test poly::tests::isolation_f32 ... ok
 
-failures:
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
----- linalg::dynamic_tests::dynamic_f32 stdout ----
+   Doc-tests azmath
 
-thread 'linalg::dynamic_tests::dynamic_f32' (380985) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+running 0 tests
 
----- linalg::dynamic_tests::dynamic_f64 stdout ----
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-thread 'linalg::dynamic_tests::dynamic_f64' (380986) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-
-
-failures:
-    linalg::dynamic_tests::dynamic_f32
-    linalg::dynamic_tests::dynamic_f64
-
-test result: FAILED. 34 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-error: test failed, to rerun pass `-p azmath --lib`
-   FEHLER
+   OK
 == cargo clippy -p azmath --all-targets --no-default-features --features alloc -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.46s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.45s
    OK
 == cargo test -p azmath --all-features
    Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.16s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.18s
      Running unittests src/lib.rs (target/debug/deps/azmath-8578dee6f899d56e)
 
 running 64 tests
 test interval::tests::interval_f32 ... ok
-test autodiff::tests::autodiff_f64 ... ok
-test autodiff::tests::autodiff_f32 ... ok
 test interval::tests::interval_f64 ... ok
+test autodiff::tests::autodiff_f32 ... ok
+test autodiff::tests::autodiff_f64 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
-test linalg::decomp::tests::with_roots::qr_f32 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
+test linalg::decomp::tests::with_roots::qr_f32 ... ok
+test linalg::dynamic_tests::dynamic_f32 ... ok
 test linalg::decomp::tests::with_roots::qr_f64 ... ok
-test linalg::dynamic_tests::dynamic_f32 ... FAILED
-test linalg::dynamic_tests::dynamic_f64 ... FAILED
-test lie::tests::groups_f64 ... ok
 test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
+test linalg::dynamic_tests::dynamic_f64 ... ok
 test linalg::dynamic_tests::with_roots::cholesky_f64 ... ok
-test lie::tests::groups_f32 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
+test lie::tests::groups_f32 ... ok
 test linalg::matrix::tests::concrete_types ... ok
+test lie::tests::groups_f64 ... ok
 test linalg::matrix::tests::frobenius_norm ... ok
 test linalg::vector::tests::algebra_f32 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
@@ -388,88 +318,64 @@ test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::norm ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
 test number::complex::tests::algebra_f32 ... ok
-test number::complex::tests::elementary::elementary_f64 ... ok
 test number::complex::tests::algebra_f64 ... ok
-test number::dual::tests::algebra_f32 ... ok
 test number::complex::tests::elementary::elementary_f32 ... ok
+test number::complex::tests::elementary::elementary_f64 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
-test number::dual::tests::default_is_zero ... ok
+test number::dual::tests::algebra_f32 ... ok
 test number::dual::tests::algebra_f64 ... ok
-test number::quaternion::tests::algebra_f32 ... ok
+test number::dual::tests::default_is_zero ... ok
 test number::dual::tests::elementary::elementary_f32 ... ok
 test number::dual::tests::elementary::elementary_f64 ... ok
+test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
-test number::quaternion::tests::rotation::rotation_f64 ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
+test number::quaternion::tests::rotation::rotation_f64 ... ok
 test poly::tests::evaluation_f32 ... ok
 test poly::tests::evaluation_f64 ... ok
 test poly::tests::roots::closed_forms_f32 ... ok
 test poly::tests::roots::closed_forms_f64 ... ok
-test scalar::tests::backend::f32_backend ... ok
 test poly::tests::roots::complex_f32 ... ok
-test scalar::tests::backend::f64_backend ... ok
+test scalar::tests::backend::f32_backend ... ok
 test poly::tests::roots::complex_f64 ... ok
+test scalar::tests::backend::f64_backend ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
 test poly::tests::isolation_f64 ... ok
 test solve::iterative::tests::iterative_f32 ... ok
+test solve::tests::scalar_f32 ... ok
 test poly::tests::isolation_f32 ... ok
 test solve::iterative::tests::iterative_f64 ... ok
-test solve::tests::scalar_f32 ... ok
 test solve::tests::scalar_f64 ... ok
 test solve::tests::systems::systems_f32 ... ok
 test solve::tests::systems::systems_f64 ... ok
 
-failures:
+test result: ok. 64 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
----- linalg::dynamic_tests::dynamic_f32 stdout ----
+   Doc-tests azmath
 
-thread 'linalg::dynamic_tests::dynamic_f32' (381137) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+running 0 tests
 
----- linalg::dynamic_tests::dynamic_f64 stdout ----
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-thread 'linalg::dynamic_tests::dynamic_f64' (381138) panicked at crates/azmath/src/linalg/dynamic_tests.rs:30:5:
-assertion failed: MatrixView::new(&data, 2, 4).is_ok_and(|view| view[(1, 0)] == data[4])
-
-
-failures:
-    linalg::dynamic_tests::dynamic_f32
-    linalg::dynamic_tests::dynamic_f64
-
-test result: FAILED. 62 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-error: test failed, to rerun pass `-p azmath --lib`
-   FEHLER
+   OK
 == cargo clippy -p azmath --all-targets --all-features -- -D warnings
     Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-error: equal expressions as operands to `-`
-  --> crates/azmath/src/lie/tests.rs:78:16
-   |
-78 |     assert_eq!(xi - xi, So2Tangent::ZERO);
-   |                ^^^^^^^
-   |
-   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#eq_op
-   = note: `#[deny(clippy::eq_op)]` on by default
-
-error: could not compile `azmath` (lib test) due to 1 previous error
-   FEHLER
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.53s
+   OK
 == cargo doc -p azmath --no-deps --all-features
  Documenting azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
    Generated /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/doc/azmath/index.html
    OK
 == cargo build -p azmath --target thumbv7em-none-eabihf --no-default-features
-   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
    OK
 == cargo build -p azmath --target thumbv7em-none-eabihf
-   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.00s
    OK
 
-ERGEBNIS: FEHLER, Details in pruefung/ergebnis.txt
+ERGEBNIS: alles OK
