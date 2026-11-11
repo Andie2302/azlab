@@ -36,5 +36,5 @@ pub mod scalar;
 #[cfg(test)]
 mod testutil;
 
-pub use number::Complex;
+pub use number::{Complex, Dual, DualN};
 pub use scalar::{Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring};

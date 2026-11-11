@@ -8,5 +8,7 @@
 mod macros;
 
 mod complex;
+mod dual;
 
 pub use complex::Complex;
+pub use dual::{Dual, DualN};
