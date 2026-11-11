@@ -1,8 +1,6 @@
 # Phase 5 – Lie-Theorie (Detailplan)
 
-Status: **umgesetzt, noch ungeprüft**. Die KI hat nichts ausgeführt und
-nichts nachgerechnet; geprüft wird nur durch `scripts/pruefen.sh` beim
-Menschen.
+Status: **umgesetzt und geprüft** (volle Prüfmatrix grün).
 
 ## Ziel
 

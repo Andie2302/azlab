@@ -7,9 +7,12 @@
 //! - [`LinearOperator`] verbindet alle Speicherformen mit den iterativen
 //!   Lösern.
 //!
-//! Nichts in diesem Modul braucht Heap-Speicher.
+//! Ohne Features braucht nichts in diesem Modul Heap-Speicher. Mit dem
+//! Feature `alloc` kommt die besitzende `DMatrix` dazu.
 
 mod decomp;
+#[cfg(feature = "alloc")]
+mod dmatrix;
 mod error;
 mod matrix;
 mod operator;
@@ -21,6 +24,8 @@ mod view;
 mod dynamic_tests;
 
 pub use decomp::{Cholesky, Lu, Qr};
+#[cfg(feature = "alloc")]
+pub use dmatrix::DMatrix;
 pub use error::LinalgError;
 pub use matrix::Matrix;
 pub use operator::LinearOperator;

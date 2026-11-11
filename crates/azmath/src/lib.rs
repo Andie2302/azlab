@@ -26,6 +26,9 @@
 
 #![no_std]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -41,6 +44,7 @@ pub mod number;
 pub mod poly;
 pub mod scalar;
 pub mod solve;
+pub mod tensor;
 
 #[cfg(test)]
 mod testutil;
@@ -54,3 +58,4 @@ pub use interval::Interval;
 pub use poly::Polynomial;
 pub use scalar::{Algebra, Commutative, Conjugate, Elementary, Field, Real, RealElementary, Ring};
 pub use solve::{Solution, SolveError, Tolerance};
+pub use tensor::{TensorView, TensorViewMut};

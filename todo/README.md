@@ -21,8 +21,9 @@ Wurzelverzeichnis.
 | [phase-2-zahlentypen.md](phase-2-zahlentypen.md) | Detailplan Phase 2 | umgesetzt und geprüft |
 | [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) | Detailplan Phase 3 | umgesetzt und geprüft |
 | [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) | Detailplan Phase 4 | umgesetzt und geprüft |
-| [phase-5-lie-theorie.md](phase-5-lie-theorie.md) | Detailplan Phase 5 | umgesetzt, noch ungeprüft |
-| [phase-6a-sichten-iterative-loeser.md](phase-6a-sichten-iterative-loeser.md) | Detailplan Phase 6, Teil 1 | umgesetzt, noch ungeprüft |
+| [phase-5-lie-theorie.md](phase-5-lie-theorie.md) | Detailplan Phase 5 | umgesetzt und geprüft |
+| [phase-6a-sichten-iterative-loeser.md](phase-6a-sichten-iterative-loeser.md) | Detailplan Phase 6, Teil 1 | umgesetzt und geprüft |
+| [phase-6b-gmres-tensoren-alloc.md](phase-6b-gmres-tensoren-alloc.md) | Detailplan Phase 6, Teil 2 | umgesetzt, noch ungeprüft |
 
 Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 

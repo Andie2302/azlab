@@ -12,6 +12,7 @@
 
 mod bicgstab;
 mod cg;
+mod gmres;
 mod util;
 
 #[cfg(test)]
@@ -19,4 +20,5 @@ mod tests;
 
 pub use bicgstab::bicgstab;
 pub use cg::conjugate_gradient;
+pub use gmres::{gmres, gmres_work_len};
 pub use util::LinearResult;

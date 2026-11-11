@@ -2,7 +2,7 @@
 
 #![cfg(any(feature = "std", feature = "libm"))]
 
-use super::{bicgstab, conjugate_gradient};
+use super::{bicgstab, conjugate_gradient, gmres, gmres_work_len};
 use crate::linalg::{CsrMatrix, LinearOperator, Matrix, Vector};
 use crate::scalar::RealElementary;
 use crate::solve::{SolveError, Tolerance};
@@ -94,6 +94,61 @@ fn check<T: RealElementary>() {
         conjugate_gradient(&spd, &b, &mut x, &mut work, &none),
         Err(SolveError::NotConverged(s)) if s.iterations == 0
     ));
+}
+
+fn check_gmres<T: RealElementary>() {
+    let f = T::from_f64;
+    let tol = Tolerance::<T>::default()
+        .with_rel_x(T::EPSILON.sqrt())
+        .with_max_iterations(200);
+    let b = [f(1.0), f(-2.0), f(0.5), f(0.25)];
+    // Unsymmetrisch, diagonal dominant.
+    let a = Matrix([
+        [f(4.0), f(1.0), f(-0.5), f(0.2)],
+        [f(-1.0), f(5.0), f(0.8), f(-0.3)],
+        [f(0.3), f(-0.7), f(3.0), f(0.6)],
+        [f(0.5), f(0.1), f(-0.4), f(6.0)],
+    ]);
+    let exact = a.solve(Vector(b));
+
+    // Voller Krylov-Raum und Neustart kleiner als die Systemgröße.
+    for restart in [4, 2, 1] {
+        let mut x = [T::ZERO; 4];
+        let mut work = [T::ZERO; 64];
+        assert!(gmres_work_len(4, restart).is_some_and(|needed| needed <= work.len()));
+        assert!(gmres(&a, &b, &mut x, restart, &mut work, &tol).is_ok());
+        assert!(exact.is_ok_and(|e| near(&x, &e.0)));
+        let mut image = [T::ZERO; 4];
+        assert!(a.apply(&x, &mut image).is_ok() && near(&image, &b));
+
+        // Die Lösung als Startwert: sofort fertig.
+        assert!(gmres(&a, &b, &mut x, restart, &mut work, &tol).is_ok_and(|s| s.iterations == 0));
+    }
+
+    // Fehlerfälle.
+    let mut x = [T::ZERO; 4];
+    let mut work = [T::ZERO; 64];
+    assert_eq!(gmres(&a, &b, &mut x, 0, &mut work, &tol), Err(SolveError::InvalidInput));
+    let mut small = [T::ZERO; 8];
+    assert_eq!(gmres(&a, &b, &mut x, 4, &mut small, &tol), Err(SolveError::InvalidInput));
+    let mut short = [T::ZERO; 3];
+    assert_eq!(gmres(&a, &b, &mut short, 4, &mut work, &tol), Err(SolveError::InvalidInput));
+    let none = tol.with_max_iterations(0);
+    assert!(matches!(
+        gmres(&a, &b, &mut x, 4, &mut work, &none),
+        Err(SolveError::NotConverged(s)) if s.iterations == 0
+    ));
+    assert!(gmres_work_len(usize::MAX, 2).is_none());
+}
+
+#[test]
+fn gmres_f32() {
+    check_gmres::<f32>();
+}
+
+#[test]
+fn gmres_f64() {
+    check_gmres::<f64>();
 }
 
 #[test]

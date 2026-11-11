@@ -183,3 +183,89 @@ mod with_roots {
         cholesky::<f64>();
     }
 }
+
+#[cfg(feature = "alloc")]
+mod owned {
+    use super::*;
+    use crate::linalg::DMatrix;
+    use alloc::vec;
+
+    fn check<T: Real>() {
+        let f = T::from_f64;
+        let a = Matrix([[f(4.0), f(1.0), f(-0.5)], [f(-1.0), f(5.0), f(0.8)], [f(0.3), f(-0.7), f(3.0)]]);
+        let c = Matrix([[f(1.0), f(0.5)], [f(0.2), f(1.5)], [f(-0.6), f(0.1)]]);
+        let b = [f(1.0), f(-2.0), f(0.5)];
+
+        let da = DMatrix::from_fn(3, 3, |i, j| a[(i, j)]);
+        let dc = DMatrix::from_fn(3, 2, |i, j| c[(i, j)]);
+        let ok = match (da, dc) {
+            (Ok(da), Ok(dc)) => {
+                let fixed_product = a * c;
+                let product_ok = da.mul(&dc).is_ok_and(|p| {
+                    p.rows() == 3
+                        && p.cols() == 2
+                        && (0..3).all(|i| (0..2).all(|j| p[(i, j)] == fixed_product[(i, j)]))
+                }) && dc.mul(&da).is_err();
+
+                let vector_ok = da.mul_vec(&b).is_ok_and(|y| y == (a * Vector(b)).0)
+                    && da.mul_vec(&b[..2]).is_err();
+
+                let transpose_ok = {
+                    let t = dc.transpose();
+                    t.rows() == 2
+                        && t.cols() == 3
+                        && (0..3).all(|i| (0..2).all(|j| t[(j, i)] == dc[(i, j)]))
+                        && t.transpose() == dc
+                };
+
+                let solve_ok = match (da.solve(&b), a.solve(Vector(b))) {
+                    (Ok(x), Ok(exact)) => {
+                        x.iter().zip(exact.0).all(|(&got, want)| close(got, want, 64.0))
+                    }
+                    _ => false,
+                } && dc.solve(&b).is_err()
+                    && da.solve(&b[..2]).is_err();
+
+                // LinearOperator und Sichten.
+                let mut y = [T::ZERO; 3];
+                let operator_ok = da.apply(&b, &mut y).is_ok()
+                    && y == (a * Vector(b)).0
+                    && LinearOperator::rows(&da) == 3
+                    && LinearOperator::cols(&dc) == 2
+                    && da.view()[(1, 2)] == a[(1, 2)]
+                    && da.get(1, 2) == Some(&a[(1, 2)])
+                    && da.get(3, 0).is_none();
+                let mut copy = da.clone();
+                copy.view_mut()[(0, 0)] = T::ZERO;
+                copy[(1, 1)] = T::ONE;
+                let mutation_ok = copy[(0, 0)] == T::ZERO && copy[(1, 1)] == T::ONE && copy != da;
+
+                product_ok && vector_ok && transpose_ok && solve_ok && operator_ok && mutation_ok
+            }
+            _ => false,
+        };
+        assert!(ok);
+
+        // Erzeugen.
+        assert!(DMatrix::<T>::identity(3).is_ok_and(|id| {
+            (0..3).all(|i| (0..3).all(|j| id[(i, j)] == Matrix::<T, 3, 3>::identity()[(i, j)]))
+        }));
+        assert!(DMatrix::<T>::zeros(2, 3).is_ok_and(|z| z.rows() == 2 && z.cols() == 3));
+        assert!(DMatrix::<T>::zeros(usize::MAX, 2).is_err());
+        assert!(DMatrix::from_vec(vec![T::ONE; 6], 2, 3).is_ok());
+        assert!(DMatrix::from_vec(vec![T::ONE; 6], 2, 2).is_err());
+        // Singulär.
+        assert!(DMatrix::from_vec(vec![T::ONE; 4], 2, 2)
+            .is_ok_and(|m| m.solve(&[T::ONE, T::ONE]) == Err(LinalgError::Singular)));
+    }
+
+    #[test]
+    fn owned_f32() {
+        check::<f32>();
+    }
+
+    #[test]
+    fn owned_f64() {
+        check::<f64>();
+    }
+}

@@ -70,7 +70,7 @@ Phase 3, für PBD/XPBD-Gewebe mit kontinuierlicher Kollisionserkennung in
 
 ## Phase 5 – Lie-Theorie
 
-Detailplan: [phase-5-lie-theorie.md](phase-5-lie-theorie.md) – umgesetzt, noch ungeprüft.
+Detailplan: [phase-5-lie-theorie.md](phase-5-lie-theorie.md) – umgesetzt. Volle Prüfmatrix grün.
 
 - [x] Traits `LieAlgebra`, `LieGroup`
 - [x] `SO2`, `SO3`, `SE2`, `SE3` mit exp/log, Adjungierte, Klammer
@@ -80,16 +80,16 @@ Meilenstein: **ausreichend für Robotik-Kinematik.**
 
 ## Phase 6 – Sichten, Tensoren, große Systeme
 
-Teil 1: [phase-6a-sichten-iterative-loeser.md](phase-6a-sichten-iterative-loeser.md) – umgesetzt, noch ungeprüft.
-Teil 2 (GMRES, Tensoren, `alloc`-Typen) folgt nach einem Prüflauf.
+Teil 1: [phase-6a-sichten-iterative-loeser.md](phase-6a-sichten-iterative-loeser.md) – umgesetzt, volle Prüfmatrix grün.
+Teil 2: [phase-6b-gmres-tensoren-alloc.md](phase-6b-gmres-tensoren-alloc.md) – umgesetzt, noch ungeprüft.
 
 - [x] Matrix-Sichten auf Puffer des Aufrufers (Teil 1)
-- [ ] Tensor-Sichten auf Puffer des Aufrufers (Teil 2)
+- [x] Tensor-Sichten auf Puffer des Aufrufers (Teil 2)
 - [x] `LinearOperator`, dünnbesetzte Formate (CSR) als Sicht (Teil 1)
 - [x] CG, BiCGSTAB (Teil 1)
-- [ ] GMRES (Teil 2)
-- [ ] Tensor-Grundoperationen (Kontraktion, äußeres Produkt, Umformen) (Teil 2)
-- [ ] Feature `alloc`: `DMatrix`, `DTensor` (Teil 2)
+- [x] GMRES (Teil 2)
+- [x] Tensor-Grundoperationen (Kontraktion, äußeres Produkt, Umformen) (Teil 2)
+- [x] Feature `alloc`: `DMatrix`, `DTensor` (Teil 2)
 
 ## Phase 7 – ODE, Quadratur, Interpolation
 

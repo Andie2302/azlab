@@ -11,7 +11,7 @@ use core::ops::{Index, IndexMut};
 
 /// Position im Puffer; für ungültige Indizes eine, die sicher außerhalb liegt.
 #[inline]
-fn flat_index(rows: usize, cols: usize, row: usize, col: usize) -> usize {
+pub(super) fn flat_index(rows: usize, cols: usize, row: usize, col: usize) -> usize {
     if row < rows && col < cols { row * cols + col } else { usize::MAX }
 }
 
@@ -71,6 +71,14 @@ impl<'a, T> MatrixView<'a, T> {
     pub fn data(&self) -> &'a [T] {
         self.data
     }
+
+    /// Sicht ohne Längenprüfung; der Aufrufer garantiert
+    /// `data.len() == rows · cols`.
+    #[cfg(feature = "alloc")]
+    #[inline]
+    pub(super) fn from_parts(data: &'a [T], rows: usize, cols: usize) -> Self {
+        Self { data, rows, cols }
+    }
 }
 
 impl<'a, T> MatrixViewMut<'a, T> {
@@ -104,6 +112,14 @@ impl<'a, T> MatrixViewMut<'a, T> {
     #[inline]
     pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
         self.data.get_mut(flat_index(self.rows, self.cols, row, col))
+    }
+
+    /// Sicht ohne Längenprüfung; der Aufrufer garantiert
+    /// `data.len() == rows · cols`.
+    #[cfg(feature = "alloc")]
+    #[inline]
+    pub(super) fn from_parts(data: &'a mut [T], rows: usize, cols: usize) -> Self {
+        Self { data, rows, cols }
     }
 
     /// Lesende Sicht auf dieselben Daten.
