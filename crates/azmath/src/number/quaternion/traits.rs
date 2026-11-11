@@ -44,6 +44,11 @@ impl<T: Real> Conjugate for Quaternion<T> {
     }
 
     #[inline]
+    fn abs_sum(self) -> T {
+        self.w.abs() + self.x.abs() + self.y.abs() + self.z.abs()
+    }
+
+    #[inline]
     fn scale(self, factor: T) -> Self {
         self * factor
     }

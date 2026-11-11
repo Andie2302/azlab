@@ -27,9 +27,11 @@ where
     for k in 0..n {
         // Pivot: betragsgrößtes Element der Spalte ab der Diagonale.
         let mut pivot = k;
-        let mut best = a[(k, k)].norm_sqr();
+        // Größe ohne Quadrieren: Sehr kleine oder sehr große Elemente
+        // laufen so weder unter noch über.
+        let mut best = a[(k, k)].abs_sum();
         for i in k + 1..n {
-            let magnitude = a[(i, k)].norm_sqr();
+            let magnitude = a[(i, k)].abs_sum();
             if magnitude > best {
                 best = magnitude;
                 pivot = i;

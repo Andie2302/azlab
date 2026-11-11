@@ -30,5 +30,6 @@ pub use error::LinalgError;
 pub use matrix::Matrix;
 pub use operator::{AffineOperator, LinearOperator};
 pub use sparse::CsrMatrix;
+pub(crate) use vector::scaled_norm;
 pub use vector::Vector;
 pub use view::{MatrixView, MatrixViewMut};

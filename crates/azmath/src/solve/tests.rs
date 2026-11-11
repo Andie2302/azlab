@@ -72,6 +72,52 @@ fn scalar<T: Real>() {
     assert!(bisection(f, one, two, &loose).is_ok_and(|s| s.iterations == 1));
 }
 
+/// Robustheit an den Grenzen des Zahlbereichs.
+fn extremes<T: Real>(huge: f64) {
+    let one = T::ONE;
+    let tol = Tolerance::<T>::default().with_max_iterations(4000);
+    let big = T::from_f64(huge);
+    let f = |x: T| x - one;
+    let df = |x: T| (x - one, one);
+
+    // Klammern, deren Breite überläuft.
+    let near_one = |result: ScalarResult<T>| result.is_ok_and(|s| close(s.x, one, 64.0));
+    assert!(near_one(bisection(f, -big, big, &tol)));
+    assert!(near_one(brent(f, -big, big, &tol)));
+    assert!(near_one(newton_bracketed(df, -big, big, &tol)));
+
+    // Unendliche Ableitung darf nicht wie Konvergenz aussehen.
+    assert!(matches!(
+        newton(|_x: T| (one, T::INFINITY), one, &tol),
+        Err(SolveError::NonFinite(s)) if s.residual == one
+    ));
+    assert!(matches!(
+        newton(|_x: T| (one, T::NAN), one, &tol),
+        Err(SolveError::NonFinite(_))
+    ));
+    assert!(matches!(
+        newton(|_x: T| (T::INFINITY, one), one, &tol),
+        Err(SolveError::NonFinite(_))
+    ));
+    // Mit Klammer wird stattdessen halbiert.
+    assert!(near_one(newton_bracketed(|x: T| (x - one, T::INFINITY), T::ZERO, T::from_f64(3.0), &tol)));
+    // Sekante mit nicht endlichem Funktionswert.
+    assert!(matches!(
+        secant(|x: T| if x > one { T::INFINITY } else { x - one }, T::ZERO, T::from_f64(2.0), &tol),
+        Err(SolveError::NonFinite(_))
+    ));
+}
+
+#[test]
+fn extremes_f32() {
+    extremes::<f32>(3.0e38);
+}
+
+#[test]
+fn extremes_f64() {
+    extremes::<f64>(1.0e308);
+}
+
 #[test]
 fn scalar_f32() {
     scalar::<f32>();

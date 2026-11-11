@@ -101,6 +101,32 @@ fn lu<T: Real>() {
     }));
 }
 
+/// Sehr kleine und sehr große Einträge: Ihr Quadrat läuft unter bzw. über,
+/// die Matrizen sind trotzdem regulär und die Normen darstellbar.
+fn extremes<T: Real>(tiny: f64, huge: f64) {
+    let (tiny, huge) = (T::from_f64(tiny), T::from_f64(huge));
+    for value in [tiny, huge] {
+        assert!(Matrix([[value]]).solve(Vector([value])).is_ok_and(|x| close(x[0], T::ONE, 8.0)));
+        assert!(Matrix([[value, T::ZERO], [T::ZERO, value]])
+            .inverse()
+            .is_ok_and(|inverse| close(inverse[(0, 0)] * value, T::ONE, 8.0)));
+        let z = Complex::new(T::ZERO, value);
+        assert!(Matrix([[z]]).lu().is_ok());
+    }
+    assert!(matches!(Matrix([[T::ZERO]]).lu(), Err(LinalgError::Singular)));
+    assert!(matches!(Matrix([[T::NAN]]).lu(), Err(LinalgError::Singular)));
+}
+
+#[test]
+fn extremes_f32() {
+    extremes::<f32>(1.0e-30, 1.0e30);
+}
+
+#[test]
+fn extremes_f64() {
+    extremes::<f64>(1.0e-200, 1.0e200);
+}
+
 #[test]
 fn lu_f32() {
     lu::<f32>();

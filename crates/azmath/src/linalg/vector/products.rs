@@ -3,6 +3,31 @@
 use super::repr::Vector;
 use crate::scalar::{Algebra, Conjugate, Elementary, Field, Real, RealElementary};
 
+/// Euklidische Norm einer Folge von Werten, gegen Über- und Unterlauf
+/// geschützt: Die Werte werden vor dem Quadrieren durch den größten Betrag
+/// geteilt.
+pub(crate) fn scaled_norm<T: Conjugate>(values: impl Iterator<Item = T> + Clone) -> T::Real
+where
+    T::Real: RealElementary,
+{
+    let zero = <T::Real as Algebra>::ZERO;
+    let sum_of_squares = |factor: Option<T::Real>| {
+        values.clone().fold(zero, |acc, value| {
+            acc + factor.map_or(value, |f| value.scale(f)).norm_sqr()
+        })
+    };
+    let scale = values.clone().fold(zero, |largest, value| largest.max(value.abs_sum()));
+    if scale == zero {
+        // Alles null – oder NaN, das die Maximumsuche übergeht; die
+        // einfache Formel liefert in beiden Fällen das Richtige.
+        return sum_of_squares(None).sqrt();
+    }
+    if !scale.is_finite() {
+        return scale;
+    }
+    scale * sum_of_squares(Some(scale.recip())).sqrt()
+}
+
 impl<T: Algebra, const N: usize> Vector<T, N> {
     /// Summe aller Komponenten.
     #[inline]
@@ -57,10 +82,10 @@ impl<T: Conjugate, const N: usize> Vector<T, N>
 where
     T::Real: RealElementary,
 {
-    /// Euklidische Norm (Länge).
+    /// Euklidische Norm (Länge), gegen Über- und Unterlauf geschützt.
     #[inline]
     pub fn norm(self) -> T::Real {
-        self.norm_sqr().sqrt()
+        scaled_norm(self.0.iter().copied())
     }
 
     /// Auf Länge eins gebracht.

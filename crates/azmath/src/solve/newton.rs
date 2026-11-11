@@ -27,6 +27,11 @@ where
         if slope == T::ZERO {
             return Err(SolveError::Singular(state));
         }
+        // Eine unendliche Ableitung ergäbe den Schritt null und sähe wie
+        // Konvergenz aus.
+        if !slope.is_finite() || !fx.is_finite() {
+            return Err(SolveError::NonFinite(state));
+        }
         let step = fx / slope;
         x -= step;
         (fx, slope) = f(x);
@@ -93,7 +98,9 @@ where
     let two = T::from_f64(2.0);
     // negative: Seite mit f < 0, positive: Seite mit f > 0.
     let (mut negative, mut positive) = if f_a < T::ZERO { (a, b) } else { (b, a) };
-    let mut x = half * (a + b);
+    // Getrennt halbieren: Summen und Differenzen der Grenzen könnten
+    // überlaufen.
+    let mut x = half * a + half * b;
     let mut previous_step = (b - a).abs();
     let mut step = previous_step;
     let (mut fx, mut slope) = f(x);
@@ -102,12 +109,15 @@ where
         if fx == T::ZERO || tol.f_converged(fx) {
             return Ok(Solution { x, residual: fx.abs(), iterations: iteration - 1 });
         }
+        // Liegt der Newton-Schritt echt innerhalb der Klammer? NaN und
+        // unendliche Werte gelten als außerhalb.
+        let candidate = x - fx / slope;
         let leaves_bracket =
-            ((x - positive) * slope - fx) * ((x - negative) * slope - fx) > T::ZERO;
+            !(candidate > negative.min(positive) && candidate < negative.max(positive));
         let too_slow = (two * fx).abs() > (previous_step * slope).abs();
         previous_step = step;
-        if leaves_bracket || too_slow || slope == T::ZERO {
-            step = half * (positive - negative);
+        if leaves_bracket || too_slow || slope == T::ZERO || !slope.is_finite() {
+            step = half * positive - half * negative;
             x = negative + step;
         } else {
             step = fx / slope;

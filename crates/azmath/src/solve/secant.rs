@@ -28,6 +28,9 @@ where
         if rise == T::ZERO {
             return Err(SolveError::Singular(state));
         }
+        if !rise.is_finite() {
+            return Err(SolveError::NonFinite(state));
+        }
         let step = fx * (x - previous) / rise;
         previous = x;
         f_previous = fx;

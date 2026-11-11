@@ -30,6 +30,11 @@ impl<A: Conjugate> Conjugate for CayleyDickson<A> {
     }
 
     #[inline]
+    fn abs_sum(self) -> A::Real {
+        self.a.abs_sum() + self.b.abs_sum()
+    }
+
+    #[inline]
     fn scale(self, factor: A::Real) -> Self {
         Self::new(self.a.scale(factor), self.b.scale(factor))
     }

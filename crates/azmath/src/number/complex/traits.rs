@@ -38,6 +38,11 @@ impl<T: Real> Conjugate for Complex<T> {
     }
 
     #[inline]
+    fn abs_sum(self) -> T {
+        self.re.abs() + self.im.abs()
+    }
+
+    #[inline]
     fn scale(self, factor: T) -> Self {
         self * factor
     }

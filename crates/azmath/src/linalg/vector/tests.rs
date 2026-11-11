@@ -100,6 +100,44 @@ mod norms {
         assert!(z.normalize().is_some_and(|n| close(n.norm(), T::ONE, 8.0)));
     }
 
+    /// Normen, deren Quadratsumme über- oder unterläuft.
+    fn extremes<T: RealElementary>(tiny: f64, huge: f64) {
+        use crate::linalg::Matrix;
+        use crate::number::Quaternion;
+        let root2 = T::from_f64(2.0).sqrt();
+        for value in [T::from_f64(tiny), T::from_f64(huge)] {
+            assert!(close(Vector([value, T::ZERO]).norm() / value, T::ONE, 8.0));
+            assert!(close(Vector([value, -value]).norm() / value, root2, 8.0));
+            assert!(Vector([value, value])
+                .normalize()
+                .is_some_and(|n| close(n[0] * root2, T::ONE, 8.0)));
+            assert!(close(Matrix([[value, value], [value, value]]).norm() / value, T::from_f64(2.0), 8.0));
+            let z = Vector([Complex::new(value, value)]);
+            assert!(close(z.norm() / value, root2, 8.0));
+            assert!(close(Quaternion::new(value, value, value, value).norm() / value, T::from_f64(2.0), 8.0));
+            assert!(Quaternion::new(T::ZERO, value, T::ZERO, T::ZERO)
+                .normalize()
+                .is_some_and(|q| close(q.x, T::ONE, 8.0)));
+        }
+        // Sonderwerte.
+        assert_eq!(Vector::<T, 3>::ZERO.norm(), T::ZERO);
+        assert_eq!(Vector::<T, 0>::ZERO.norm(), T::ZERO);
+        assert_eq!(Vector([T::INFINITY, T::ONE]).norm(), T::INFINITY);
+        assert!(Vector([T::NAN, T::ONE]).norm().is_nan());
+        assert!(Vector([T::NAN, T::ZERO]).norm().is_nan());
+        assert!(Vector([T::INFINITY, T::ONE]).normalize().is_none());
+    }
+
+    #[test]
+    fn extremes_f32() {
+        extremes::<f32>(1.0e-30, 1.0e30);
+    }
+
+    #[test]
+    fn extremes_f64() {
+        extremes::<f64>(1.0e-200, 1.0e200);
+    }
+
     #[test]
     fn norms_f32() {
         check::<f32>();

@@ -18,6 +18,12 @@ pub trait Conjugate: Algebra {
     fn norm_sqr(self) -> Self::Real;
     /// Realteil.
     fn real_part(self) -> Self::Real;
+    /// Summe der Beträge aller Anteile; für reelle Zahlen der Betrag.
+    ///
+    /// Ein Maß für die Größe wie die Norm, aber ohne Quadrieren: Es läuft
+    /// weder über noch unter, solange die Zahl selbst darstellbar ist.
+    /// Geeignet für Größenvergleiche (Pivotsuche) und zum Skalieren.
+    fn abs_sum(self) -> Self::Real;
     /// Multiplikation jedes Anteils mit einer reellen Zahl.
     fn scale(self, factor: Self::Real) -> Self;
 }

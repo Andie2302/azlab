@@ -60,7 +60,8 @@ where
         }
 
         let tol1 = two * T::EPSILON * b.abs() + half * (tol.abs_x + tol.rel_x * b.abs());
-        let xm = half * (c - b);
+        // Getrennt halbieren: `c - b` könnte überlaufen.
+        let xm = half * c - half * b;
         if xm.abs() <= tol1 || fb == T::ZERO || tol.f_converged(fb) {
             return Ok(Solution { x: b, residual: fb.abs(), iterations: iteration - 1 });
         }

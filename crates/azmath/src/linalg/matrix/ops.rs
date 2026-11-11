@@ -2,7 +2,8 @@
 
 use super::repr::Matrix;
 use crate::linalg::Vector;
-use crate::scalar::{Algebra, Conjugate, Elementary, Field, RealElementary};
+use crate::linalg::vector::scaled_norm;
+use crate::scalar::{Algebra, Conjugate, Field, RealElementary};
 use core::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
 impl<T: Algebra, const R: usize, const C: usize> Add for Matrix<T, R, C> {
@@ -143,9 +144,9 @@ impl<T: Conjugate, const R: usize, const C: usize> Matrix<T, R, C>
 where
     T::Real: RealElementary,
 {
-    /// Frobenius-Norm.
+    /// Frobenius-Norm, gegen Über- und Unterlauf geschützt.
     #[inline]
     pub fn norm(self) -> T::Real {
-        self.norm_sqr().sqrt()
+        scaled_norm(self.0.iter().flatten().copied())
     }
 }

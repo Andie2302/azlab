@@ -53,6 +53,11 @@ macro_rules! impl_dual_traits {
             }
 
             #[inline]
+            fn abs_sum(self) -> Self {
+                <Self as Real>::abs(self)
+            }
+
+            #[inline]
             fn scale(self, factor: Self) -> Self {
                 self * factor
             }

@@ -37,7 +37,8 @@ where
     let mut x = lo;
     let mut fx = f_lo;
     for iteration in 1..=tol.max_iterations {
-        x = lo + (hi - lo) * half;
+        // Getrennt halbieren: `hi - lo` könnte überlaufen.
+        x = lo * half + hi * half;
         fx = f(x);
         let state = Solution { x, residual: fx.abs(), iterations: iteration };
         if fx.is_nan() {

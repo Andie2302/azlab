@@ -1,6 +1,7 @@
 //! Norm, Exponentialfunktion und Rotationen für [`Quaternion`].
 
 use super::repr::Quaternion;
+use crate::linalg::scaled_norm;
 use crate::scalar::{Algebra, RealElementary};
 
 fn cross<T: RealElementary>(a: [T; 3], b: [T; 3]) -> [T; 3] {
@@ -16,10 +17,10 @@ fn length<T: RealElementary>([x, y, z]: [T; 3]) -> T {
 }
 
 impl<T: RealElementary> Quaternion<T> {
-    /// Norm (Betrag).
+    /// Norm (Betrag), gegen Über- und Unterlauf geschützt.
     #[inline]
     pub fn norm(self) -> T {
-        self.dot(self).sqrt()
+        scaled_norm([self.w, self.x, self.y, self.z].into_iter())
     }
 
     /// Auf Norm eins gebracht.
