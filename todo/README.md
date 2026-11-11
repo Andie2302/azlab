@@ -19,7 +19,8 @@ Wurzelverzeichnis.
 | [05-qualitaet.md](05-qualitaet.md) | Tests, Prüfmatrix, Doku | Entwurf |
 | [06-offene-fragen.md](06-offene-fragen.md) | Entscheidungen, die noch fehlen | offen |
 | [phase-2-zahlentypen.md](phase-2-zahlentypen.md) | Detailplan Phase 2 | umgesetzt und geprüft |
-| [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) | Detailplan Phase 3 | umgesetzt, volle Prüfmatrix offen |
+| [phase-3-lineare-algebra.md](phase-3-lineare-algebra.md) | Detailplan Phase 3 | umgesetzt, letzter Schritt der Prüfmatrix offen |
+| [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) | Detailplan Phase 4 | zur Freigabe |
 
 Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 

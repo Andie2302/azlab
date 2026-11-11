@@ -55,6 +55,8 @@ Prüfmatrix (`scripts/pruefen.sh`) steht noch aus.
 
 ## Phase 4 – Nullstellen, Polynome, erste Löser
 
+Detailplan: [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) – zur Freigabe.
+
 - [ ] Polynomauswertung (Horner), Tschebyschow
 - [ ] Bisektion, Sekante, Newton, Brent
 - [ ] Gleichungen höherer Ordnung: Formeln Grad 2–4, alle Polynom-Nullstellen (komplex), reelle Nullstellen im Intervall
