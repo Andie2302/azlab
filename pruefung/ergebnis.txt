@@ -1,84 +1,226 @@
-Mi 11 Nov 2026 02:49:50 CET
+Mi 11 Nov 2026 02:52:42 CET
 rustc 1.99.1 (58cf8f9c3 2026-10-13)
 cargo 1.99.1 (5f94df478 2026-08-27)
 
 == cargo test -p azmath --no-default-features
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
+   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+     Running unittests src/lib.rs (target/debug/deps/azmath-27cd1881844c60cd)
 
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+running 16 tests
+test number::cayley_dickson::tests::all_levels_f32 ... ok
+test number::cayley_dickson::tests::all_levels_f64 ... ok
+test number::cayley_dickson::tests::trait_levels ... ok
+test number::complex::tests::left_scalar_and_conversions ... ok
+test number::dual::tests::algebra_f32 ... ok
+test number::dual::tests::algebra_f64 ... ok
+test number::dual::tests::default_is_zero ... ok
+test number::complex::tests::algebra_f64 ... ok
+test number::quaternion::tests::algebra_f32 ... ok
+test number::quaternion::tests::algebra_f64 ... ok
+test number::quaternion::tests::left_scalar ... ok
+test number::complex::tests::algebra_f32 ... ok
+test scalar::tests::conjugate_is_identity_for_reals ... ok
+test scalar::tests::powi_uses_repeated_squaring ... ok
+test scalar::tests::real_basics ... ok
+test scalar::tests::ring_works_for_ints_and_floats ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests azmath
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   OK
 == cargo clippy -p azmath --all-targets --no-default-features -- -D warnings
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
-
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+    Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.24s
+   OK
 == cargo test -p azmath --no-default-features --features libm
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
+   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running unittests src/lib.rs (target/debug/deps/azmath-f94848aee42155db)
 
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+running 25 tests
+test number::cayley_dickson::tests::all_levels_f32 ... ok
+test number::cayley_dickson::tests::norm ... ok
+test number::cayley_dickson::tests::all_levels_f64 ... ok
+test number::cayley_dickson::tests::trait_levels ... ok
+test number::complex::tests::algebra_f32 ... ok
+test number::complex::tests::algebra_f64 ... ok
+test number::complex::tests::elementary::elementary_f32 ... ok
+test number::complex::tests::elementary::elementary_f64 ... ok
+test number::complex::tests::left_scalar_and_conversions ... ok
+test number::dual::tests::algebra_f32 ... ok
+test number::dual::tests::algebra_f64 ... ok
+test number::dual::tests::default_is_zero ... ok
+test number::dual::tests::elementary::elementary_f32 ... ok
+test number::dual::tests::elementary::elementary_f64 ... ok
+test number::quaternion::tests::algebra_f32 ... ok
+test number::quaternion::tests::algebra_f64 ... ok
+test number::quaternion::tests::left_scalar ... ok
+test number::quaternion::tests::rotation::rotation_f32 ... ok
+test number::quaternion::tests::rotation::rotation_f64 ... ok
+test scalar::tests::backend::f32_backend ... ok
+test scalar::tests::backend::f64_backend ... ok
+test scalar::tests::conjugate_is_identity_for_reals ... ok
+test scalar::tests::powi_uses_repeated_squaring ... ok
+test scalar::tests::real_basics ... ok
+test scalar::tests::ring_works_for_ints_and_floats ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests azmath
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   OK
 == cargo clippy -p azmath --all-targets --no-default-features --features libm -- -D warnings
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
-
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+    Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+   OK
 == cargo test -p azmath --no-default-features --features std
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
+   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+     Running unittests src/lib.rs (target/debug/deps/azmath-2a2ca91bb10aa077)
 
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+running 25 tests
+test number::cayley_dickson::tests::all_levels_f32 ... ok
+test number::cayley_dickson::tests::all_levels_f64 ... ok
+test number::cayley_dickson::tests::trait_levels ... ok
+test number::cayley_dickson::tests::norm ... ok
+test number::complex::tests::algebra_f32 ... ok
+test number::complex::tests::algebra_f64 ... ok
+test number::complex::tests::elementary::elementary_f32 ... ok
+test number::complex::tests::elementary::elementary_f64 ... ok
+test number::complex::tests::left_scalar_and_conversions ... ok
+test number::dual::tests::algebra_f32 ... ok
+test number::dual::tests::algebra_f64 ... ok
+test number::dual::tests::default_is_zero ... ok
+test number::dual::tests::elementary::elementary_f32 ... ok
+test number::dual::tests::elementary::elementary_f64 ... ok
+test number::quaternion::tests::algebra_f32 ... ok
+test number::quaternion::tests::algebra_f64 ... ok
+test number::quaternion::tests::left_scalar ... ok
+test number::quaternion::tests::rotation::rotation_f32 ... ok
+test number::quaternion::tests::rotation::rotation_f64 ... ok
+test scalar::tests::backend::f32_backend ... ok
+test scalar::tests::backend::f64_backend ... ok
+test scalar::tests::conjugate_is_identity_for_reals ... ok
+test scalar::tests::powi_uses_repeated_squaring ... ok
+test scalar::tests::real_basics ... ok
+test scalar::tests::ring_works_for_ints_and_floats ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests azmath
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   OK
 == cargo clippy -p azmath --all-targets --no-default-features --features std -- -D warnings
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
-
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+    Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+   OK
 == cargo test -p azmath --no-default-features --features alloc
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
+   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.36s
+     Running unittests src/lib.rs (target/debug/deps/azmath-f493d9ab45e6a2be)
 
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+running 16 tests
+test number::cayley_dickson::tests::all_levels_f64 ... ok
+test number::cayley_dickson::tests::all_levels_f32 ... ok
+test number::complex::tests::algebra_f32 ... ok
+test number::cayley_dickson::tests::trait_levels ... ok
+test number::complex::tests::left_scalar_and_conversions ... ok
+test number::complex::tests::algebra_f64 ... ok
+test number::dual::tests::algebra_f32 ... ok
+test number::dual::tests::algebra_f64 ... ok
+test number::dual::tests::default_is_zero ... ok
+test number::quaternion::tests::algebra_f32 ... ok
+test number::quaternion::tests::algebra_f64 ... ok
+test number::quaternion::tests::left_scalar ... ok
+test scalar::tests::conjugate_is_identity_for_reals ... ok
+test scalar::tests::powi_uses_repeated_squaring ... ok
+test scalar::tests::real_basics ... ok
+test scalar::tests::ring_works_for_ints_and_floats ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests azmath
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   OK
 == cargo clippy -p azmath --all-targets --no-default-features --features alloc -- -D warnings
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
-
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+    Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
+   OK
 == cargo test -p azmath --all-features
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
+   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+     Running unittests src/lib.rs (target/debug/deps/azmath-957768517f674ad9)
 
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+running 25 tests
+test number::cayley_dickson::tests::all_levels_f32 ... ok
+test number::cayley_dickson::tests::all_levels_f64 ... ok
+test number::cayley_dickson::tests::norm ... ok
+test number::complex::tests::algebra_f32 ... ok
+test number::complex::tests::algebra_f64 ... ok
+test number::cayley_dickson::tests::trait_levels ... ok
+test number::complex::tests::elementary::elementary_f32 ... ok
+test number::complex::tests::elementary::elementary_f64 ... ok
+test number::complex::tests::left_scalar_and_conversions ... ok
+test number::dual::tests::algebra_f32 ... ok
+test number::dual::tests::algebra_f64 ... ok
+test number::dual::tests::default_is_zero ... ok
+test number::dual::tests::elementary::elementary_f32 ... ok
+test number::dual::tests::elementary::elementary_f64 ... ok
+test number::quaternion::tests::algebra_f32 ... ok
+test number::quaternion::tests::algebra_f64 ... ok
+test number::quaternion::tests::left_scalar ... ok
+test number::quaternion::tests::rotation::rotation_f32 ... ok
+test number::quaternion::tests::rotation::rotation_f64 ... ok
+test scalar::tests::backend::f32_backend ... ok
+test scalar::tests::backend::f64_backend ... ok
+test scalar::tests::conjugate_is_identity_for_reals ... ok
+test scalar::tests::powi_uses_repeated_squaring ... ok
+test scalar::tests::real_basics ... ok
+test scalar::tests::ring_works_for_ints_and_floats ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests azmath
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   OK
 == cargo clippy -p azmath --all-targets --all-features -- -D warnings
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
-
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+    Checking azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+   OK
 == cargo doc -p azmath --no-deps --all-features
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
-
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+ Documenting azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s
+   Generated /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/target/doc/azmath/index.html
+   OK
 == cargo build -p azmath --target thumbv7em-none-eabihf --no-default-features
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
-
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
+   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+   OK
 == cargo build -p azmath --target thumbv7em-none-eabihf
-error: failed to parse lock file at: /run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/Cargo.lock
+   Compiling azmath v0.1.0 (/run/media/system/Daten/Daten/Programme/Programmieren/JetBrains/RustRover/Projects/azlab/crates/azmath)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s
+   OK
 
-Caused by:
-  package `libm` is specified twice in the lockfile
-   FEHLER
-
-ERGEBNIS: FEHLER, Details in pruefung/ergebnis.txt
+ERGEBNIS: alles OK
