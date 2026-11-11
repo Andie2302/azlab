@@ -44,7 +44,7 @@ where
 
 /// Implizites Euler-Verfahren von `t0` nach `t1` in `steps` Schritten.
 ///
-/// 1. Ordnung, aber für jede Schrittweite stabil: das robuste Verfahren für
+/// Erster Ordnung, aber für jede Schrittweite stabil: das robuste Verfahren für
 /// steife Probleme. `f` wird mit Dualzahlen aufgerufen, damit die
 /// Jacobi-Matrix für das Newton-Verfahren automatisch entsteht; `tol`
 /// steuert das Newton-Verfahren.
@@ -65,7 +65,7 @@ where
 
 /// Trapezregel (Crank-Nicolson) von `t0` nach `t1` in `steps` Schritten.
 ///
-/// 2. Ordnung und stabil für steife Probleme, dämpft sehr schnelle Anteile
+/// Zweiter Ordnung und stabil für steife Probleme, dämpft sehr schnelle Anteile
 /// aber weniger stark als [`implicit_euler`]. Aufruf wie dort.
 pub fn trapezoid<T, F, const N: usize>(
     f: F,

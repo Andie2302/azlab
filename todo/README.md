@@ -3,10 +3,18 @@
 Dieser Ordner ist die verbindliche Planung des Workspace. **Code entsteht erst,
 wenn der zugehörige Abschnitt hier geplant und freigegeben ist.**
 
-## Regeln
+## Arbeitsweise
 
-Die Projektregeln stehen ausschließlich in [`CLAUDE.md`](../CLAUDE.md) im
-Wurzelverzeichnis.
+Die früheren Projektregeln (`CLAUDE.md`) sind vom Menschen aufgehoben: Die KI
+stellt azmath selbstständig fertig, darf ausführen, testen und bestehenden
+Code ändern. Als Entwurfsgrundsätze bleiben:
+
+- `no_std` ohne `alloc` ist der Normalfall; alles andere steht hinter
+  Feature-Flags.
+- Kein `mod.rs`; `lib.rs` und Modul-Dateien mit Unterordner enthalten nur
+  Doku, Deklarationen und Re-Exporte.
+- Nur stable Rust. Doku und Commits deutsch, Bezeichner englisch.
+- Jeder Stand auf `master` besteht `scripts/pruefen.sh`.
 
 ## Dokumente
 

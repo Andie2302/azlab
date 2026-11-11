@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Prüfmatrix für den azlab-Workspace (siehe todo/05-qualitaet.md).
 #
-# Wird vom Menschen lokal ausgeführt, nie von der KI. Schreibt das Ergebnis
-# nach pruefung/ergebnis.txt; diese Datei bitte committen und pushen.
+# Schreibt das Ergebnis nach pruefung/ergebnis.txt.
 #
 # Aufruf:  scripts/pruefen.sh
 # Dauer:   erster Lauf voraussichtlich wenige Minuten, danach deutlich kürzer.
