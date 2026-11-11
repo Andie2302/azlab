@@ -37,12 +37,14 @@ mod macros;
 
 pub mod autodiff;
 mod backend;
+pub mod interp;
 pub mod interval;
 pub mod lie;
 pub mod linalg;
 pub mod number;
 pub mod ode;
 pub mod poly;
+pub mod quad;
 pub mod scalar;
 pub mod solve;
 pub mod tensor;

@@ -1,10 +1,7 @@
 # Phase 7, Teil 1 – Gewöhnliche Differentialgleichungen (Detailplan)
 
-Status: **umgesetzt, noch ungeprüft**. Freigegeben vom Menschen („weiter mit
-dem nächsten Schritt“). Die KI hat nichts ausgeführt; geprüft wird nur durch
-`scripts/pruefen.sh` beim Menschen.
-
-Teil 2 (Quadratur und Interpolation) folgt nach einem Prüflauf.
+Status: **umgesetzt und geprüft** (volle Prüfmatrix grün). Teil 2 (Quadratur,
+Interpolation) ist ebenfalls umgesetzt; siehe Roadmap.
 
 ## Ziel
 
