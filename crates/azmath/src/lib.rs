@@ -41,6 +41,7 @@ pub mod interval;
 pub mod lie;
 pub mod linalg;
 pub mod number;
+pub mod ode;
 pub mod poly;
 pub mod scalar;
 pub mod solve;

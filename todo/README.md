@@ -23,7 +23,8 @@ Wurzelverzeichnis.
 | [phase-4-nullstellen-polynome.md](phase-4-nullstellen-polynome.md) | Detailplan Phase 4 | umgesetzt und geprüft |
 | [phase-5-lie-theorie.md](phase-5-lie-theorie.md) | Detailplan Phase 5 | umgesetzt und geprüft |
 | [phase-6a-sichten-iterative-loeser.md](phase-6a-sichten-iterative-loeser.md) | Detailplan Phase 6, Teil 1 | umgesetzt und geprüft |
-| [phase-6b-gmres-tensoren-alloc.md](phase-6b-gmres-tensoren-alloc.md) | Detailplan Phase 6, Teil 2 | umgesetzt, noch ungeprüft |
+| [phase-6b-gmres-tensoren-alloc.md](phase-6b-gmres-tensoren-alloc.md) | Detailplan Phase 6, Teil 2 | umgesetzt; Tests grün, ein Clippy-Befund behoben, Nachlauf offen |
+| [phase-7a-ode.md](phase-7a-ode.md) | Detailplan Phase 7, Teil 1 | umgesetzt, noch ungeprüft |
 
 Status-Stufen: `Entwurf` → `freigegeben` → `umgesetzt`.
 

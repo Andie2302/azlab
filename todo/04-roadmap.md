@@ -93,10 +93,13 @@ Teil 2: [phase-6b-gmres-tensoren-alloc.md](phase-6b-gmres-tensoren-alloc.md) –
 
 ## Phase 7 – ODE, Quadratur, Interpolation
 
-- [ ] Euler, RK4, eingebettete RK mit Schrittweitensteuerung
-- [ ] Implizite Verfahren für steife Systeme
-- [ ] Gauß-Legendre, adaptive Quadratur
-- [ ] Lineare Interpolation, kubische Splines
+Teil 1: [phase-7a-ode.md](phase-7a-ode.md) – umgesetzt, noch ungeprüft.
+Teil 2 (Quadratur, Interpolation) folgt nach einem Prüflauf.
+
+- [x] Euler, RK4, eingebettete RK mit Schrittweitensteuerung (Teil 1)
+- [x] Implizite Verfahren für steife Systeme (Teil 1)
+- [ ] Gauß-Legendre, adaptive Quadratur (Teil 2)
+- [ ] Lineare Interpolation, kubische Splines (Teil 2)
 
 ## Phase 8 – PDE auf Gittern
 
