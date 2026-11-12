@@ -1,0 +1,5 @@
+# Kurzbefehl für die Beispiele von azphysics:
+#   cargo demo cloth_drape
+#   cargo demo fluid_smoke -- --gif rauch.gif
+[alias]
+demo = "run --release -p azphysics --features std --example"

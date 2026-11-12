@@ -24,3 +24,30 @@ azviz = { path = "../azviz" }
 
 [lints]
 workspace = true
+
+# Die Beispiele zeigen die Simulationen im Fenster und brauchen dafür den Heap:
+#   cargo demo cloth_drape
+
+[[example]]
+name = "fluid_dam_break"
+required-features = ["std"]
+
+[[example]]
+name = "fluid_smoke"
+required-features = ["std"]
+
+[[example]]
+name = "fluid_vortex_street"
+required-features = ["std"]
+
+[[example]]
+name = "cloth_drape"
+required-features = ["std"]
+
+[[example]]
+name = "cloth_fold"
+required-features = ["std"]
+
+[[example]]
+name = "cloth_tunnelling"
+required-features = ["std"]

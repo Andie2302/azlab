@@ -96,10 +96,28 @@ fn tunnelling<T: RealElementary>() {
     let moving = 25;
     assert!(unsafe_cloth.positions()[..moving].iter().all(|p| p[1] < T::ZERO));
 
-    // Mit Sicherung: Kein Teilchen kommt je auf die andere Seite.
+    // Mit Sicherung: Kein Teilchen kommt je auf die andere Seite. Das Tuch
+    // ist dabei wirklich bis an das Hindernis herangeflogen und nicht etwa
+    // in der Luft stehen geblieben.
     let (safe_cloth, (hits, _)) = launch(true);
-    assert!(safe_cloth.positions()[..moving].iter().all(|p| p[1] > T::ZERO));
+    let (low, high) = safe_cloth.positions()[..moving]
+        .iter()
+        .fold((T::INFINITY, T::NEG_INFINITY), |(low, high), p| (low.min(p[1]), high.max(p[1])));
+    assert!(low > T::ZERO && high < f(0.1), "Höhen {:?} bis {:?}", low.to_f64(), high.to_f64());
     assert!(hits > 0);
+
+    // Ein Tuch im freien Flug stößt nicht mit sich selbst zusammen: Die
+    // Sicherung greift nicht ein, es kommt genau so weit wie ohne sie.
+    let fly = |ccd: bool| {
+        let mut cloth = sheet::<T>(5, 0.5);
+        cloth.params = ClothParams { ccd, gravity: v(0.0, 0.0, 0.0), damping: T::ZERO, ..ClothParams::default() };
+        cloth.set_all_velocities(v(30.0, -300.0, 10.0));
+        let hits = (0..6).fold(0, |hits, _| hits + cloth.step(f(1.0 / 60.0), &[]).ccd_hits);
+        (cloth.positions()[12], hits)
+    };
+    let ((free, _), (checked, hits)) = (fly(false), fly(true));
+    assert_eq!(hits, 0);
+    assert!((free - checked).norm() < f(1.0e-3) && free[1] < f(-20.0));
     assert_eq!(safe_cloth.intersections(), 0);
     assert_eq!(safe_cloth.triangles().len(), safe_cloth.cloth_triangle_count() + 1);
 }

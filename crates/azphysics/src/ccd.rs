@@ -20,6 +20,14 @@
 //! übersehen kann; an jeder wird geprüft, ob sich die Teile dort wirklich
 //! treffen.
 //!
+//! Bleiben die vier Punkte die ganze Zeit in einer Ebene (ein flaches Tuch,
+//! das in sich gleitet), sagt das Polynom nichts aus. Dann entscheidet der
+//! Abstand selbst: Er wird schrittweise verfolgt, jeweils so weit, wie sich
+//! die Teile in der Zeit höchstens nähern können.
+//!
+//! Gerechnet wird mit der Bewegung der Teile gegeneinander. Eine gemeinsame
+//! Verschiebung – das Tuch fliegt als Ganzes – zählt nicht als Annäherung.
+//!
 //! Die Prüfung ist vorsichtig: Im Zweifel meldet sie eine Berührung. Sie
 //! meldet nie „frei“, wenn sich die Teile durchdringen.
 
@@ -56,12 +64,56 @@ fn coplanarity<T: RealElementary>(e1: Motion<T>, e2: Motion<T>, d: Motion<T>) ->
     [n0.dot(d_0), n0.dot(d_v) + n1.dot(d_0), n1.dot(d_v) + n2.dot(d_0), n2.dot(d_v)]
 }
 
+/// Zieht von vier Bewegungen ihre mittlere Verschiebung ab.
+///
+/// Eine gemeinsame Verschiebung ändert nichts daran, ob und wann sich die
+/// Teile berühren. Ohne sie sind die Wege kürzer: Der schnelle Ausschluss
+/// greift öfter, und ein Tuch, das als Ganzes fliegt, stößt nicht scheinbar
+/// mit sich selbst zusammen.
+fn relative<T: RealElementary>(motions: [Motion<T>; 4]) -> [Motion<T>; 4] {
+    let sum = motions.iter().fold(Vec3::ZERO, |sum, motion| sum + (motion[1] - motion[0]));
+    let mean = sum * T::from_f64(0.25);
+    motions.map(|motion| [motion[0], motion[1] - mean])
+}
+
+/// Sucht in [`from`, `to`] den frühesten Zeitpunkt, an dem `distance(t)`
+/// höchstens `tolerance` beträgt, durch vorsichtiges Vorrücken.
+///
+/// Der Abstand ändert sich je Zeiteinheit höchstens um `reach`. Vom
+/// Zeitpunkt `t` aus kann die Berührung also frühestens nach
+/// `(Abstand − Toleranz) / reach` eintreten; so weit wird vorgerückt. Das
+/// übersieht keine Berührung, für keine Art von Bewegung.
+fn advance<T: RealElementary>(
+    from: T,
+    to: T,
+    reach: T,
+    tolerance: T,
+    distance: impl Fn(T) -> T,
+) -> Option<T> {
+    let mut t = from;
+    for _ in 0..64 {
+        let gap = distance(t) - tolerance;
+        if gap <= T::ZERO || gap.is_nan() {
+            return Some(t);
+        }
+        if reach <= T::ZERO {
+            return None;
+        }
+        t += gap / reach;
+        if t > to {
+            return None;
+        }
+    }
+    // Schleichende Annäherung: vorsichtshalber als Berührung melden.
+    Some(t)
+}
+
 /// Sucht den frühesten Zeitpunkt in [0, 1], an dem die Koplanaritäts-
 /// bedingung erfüllt ist und `distance(t)` höchstens `tolerance` beträgt.
 ///
-/// `reach` ist die größte Strecke, die ein beteiligter Punkt zurücklegt; sie
-/// begrenzt, wie stark sich der Abstand innerhalb einer Zeitspanne ändern
-/// kann.
+/// `reach` ist die größte Strecke, um die sich die Teile im Schritt
+/// annähern können; sie begrenzt, wie stark sich der Abstand innerhalb
+/// einer Zeitspanne ändern kann.
 fn earliest_contact<T: RealElementary>(
     coefficients: [T; 4],
     reach: T,
@@ -73,9 +125,10 @@ fn earliest_contact<T: RealElementary>(
     let mut brackets = [placeholder; 16];
     let min_width = T::EPSILON * T::from_f64(4096.0);
     let Ok(count) = isolate_real_roots(&coefficients, unit, min_width, &mut brackets) else {
-        // Polynom identisch null (Bewegung in einer gemeinsamen Ebene) oder
-        // zu viele Kandidaten: vorsichtshalber als Berührung melden.
-        return Some(T::ZERO);
+        // Polynom identisch null (die vier Punkte bleiben in einer Ebene)
+        // oder zu viele Kandidaten: Die Nullstellen helfen nicht weiter,
+        // der Abstand selbst entscheidet.
+        return advance(T::ZERO, T::ONE, reach, tolerance, distance);
     };
     let tol = Tolerance::default();
     for bracket in brackets.iter().take(count) {
@@ -91,12 +144,8 @@ fn earliest_contact<T: RealElementary>(
             }
         }
         // Nicht aufgelöst: Die Nullstelle liegt irgendwo in der Klammer.
-        // Innerhalb ihrer Breite kann sich der Abstand höchstens um den in
-        // dieser Zeit zurückgelegten Weg ändern.
-        let slack = reach * (hi - lo) * T::from_f64(2.0);
-        let mid = (lo + hi) * T::from_f64(0.5);
-        if [lo, mid, hi].into_iter().any(|t| distance(t) <= tolerance + slack) {
-            return Some(lo);
+        if let Some(t) = advance(lo, hi, reach, tolerance, &distance) {
+            return Some(t);
         }
     }
     None
@@ -115,6 +164,7 @@ pub fn vertex_triangle<T: RealElementary>(
     c: Motion<T>,
     tolerance: T,
 ) -> Option<T> {
+    let [p, a, b, c] = relative([p, a, b, c]);
     // Schneller Ausschluss: Der Abstand kann höchstens um die Wege schrumpfen,
     // die Punkt und Dreieck zurücklegen.
     let travel = (p[1] - p[0]).norm() + reach(&[&a, &b, &c]);
@@ -145,6 +195,7 @@ pub fn edge_edge<T: RealElementary>(
     d: Motion<T>,
     tolerance: T,
 ) -> Option<T> {
+    let [a, b, c, d] = relative([a, b, c, d]);
     let travel = reach(&[&a, &b]) + reach(&[&c, &d]);
     let start = segment_segment_distance(a[0], b[0], c[0], d[0]);
     if start > travel + tolerance {
@@ -165,7 +216,7 @@ pub fn edge_edge<T: RealElementary>(
     })
 }
 
-#[cfg(test)]
+#[cfg(all(test, any(feature = "std", feature = "libm")))]
 mod tests {
     use super::*;
     use azmath::Vector;
@@ -203,6 +254,33 @@ mod tests {
         // Genau bis zur Fläche.
         let hit = vertex_triangle([v(0.5, 0.5, 1.0), v(0.5, 0.5, 0.0)], a, b, c, TOL);
         assert!(hit.is_some_and(|t| t > 0.99));
+    }
+
+    #[test]
+    fn coplanar_and_common_motion() {
+        let (a, b, c) = (v(0.0, 0.0, 0.0), v(2.0, 0.0, 0.0), v(0.0, 2.0, 0.0));
+        let p = v(3.0, 3.0, 0.0);
+        // Alles fliegt gemeinsam, schnell und in der eigenen Ebene oder quer
+        // dazu: Nichts nähert sich, also keine Berührung.
+        for flight in [v(500.0, -300.0, 0.0), v(0.0, 0.0, -900.0), v(70.0, 20.0, 40.0)] {
+            let moved = |x: Vec3<f64>| [x, x + flight];
+            assert!(vertex_triangle(moved(p), moved(a), moved(b), moved(c), TOL).is_none());
+            assert!(edge_edge(moved(a), moved(b), moved(p), moved(v(4.0, 3.0, 0.0)), TOL).is_none());
+        }
+        // In der Ebene des Dreiecks gleitet der Punkt hinein: Das Polynom ist
+        // identisch null, der Abstand entscheidet.
+        let hit = vertex_triangle([p, v(0.5, 0.5, 0.0)], still(a), still(b), still(c), TOL);
+        assert!(hit.is_some_and(|t| (t - 0.8).abs() < 1.0e-3));
+        // Dasselbe, während alles zusammen davonfliegt.
+        let flight = v(0.0, 0.0, 250.0);
+        let moved = |x: Vec3<f64>| [x, x + flight];
+        let hit = vertex_triangle([p, v(0.5, 0.5, 0.0) + flight], moved(a), moved(b), moved(c), TOL);
+        assert!(hit.is_some_and(|t| (t - 0.8).abs() < 1.0e-3));
+        // In der Ebene, aber am Dreieck vorbei.
+        assert!(vertex_triangle([p, v(3.0, -3.0, 0.0)], still(a), still(b), still(c), TOL).is_none());
+        // Zwei Kanten in einer Ebene laufen ineinander.
+        let hit = edge_edge(still(a), still(b), [v(1.0, 1.0, 0.0), v(1.0, -1.0, 0.0)], [v(1.0, 2.0, 0.0), v(1.0, 0.0, 0.0)], TOL);
+        assert!(hit.is_some_and(|t| (t - 0.5).abs() < 1.0e-3));
     }
 
     #[test]

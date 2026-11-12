@@ -20,13 +20,29 @@ Regeln:
   reichen `std`/`libm`/`alloc` als eigene Features durch.
 - Standard-Features: `default = ["libm"]` (entschieden).
 
+## Feature-Flags von azphysics
+
+| Feature | Aktiviert | Bemerkung |
+|---------|-----------|-----------|
+| *(keins)* | `geometry`, `ccd` – generisch | ohne Backend nicht mit `f32`/`f64` nutzbar |
+| `libm` (Standard) | reicht `azmath/libm` durch | |
+| `std` | reicht `azmath/std` durch; schaltet `alloc` mit ein | nötig für die Beispiele |
+| `alloc` | `broadphase`, `cloth`, `fluid` | |
+
+azviz hat keine Feature-Schalter und braucht `std`.
+
 ## Abhängigkeiten
 
 | Crate | Wofür | Art |
 |-------|-------|-----|
 | `libm` 0.2 | Elementarfunktionen ohne `std` | optional, nur mit Feature `libm` |
 
-Sonst keine. Jede neue Abhängigkeit wird zuerst hier eingetragen, ist
+| `macroquad` 0.4 | Fenster für die Beispiele | nur azviz; ohne Standard-Features (kein Ton) |
+| `tiny-skia` 0.11 | Zeichnen in den Speicher, PNG | nur azviz |
+| `gif` 0.13 | Animationen als GIF | nur azviz |
+
+azmath und azphysics selbst hängen nur von `libm` ab; azviz ist für
+azphysics eine reine Entwicklungs-Abhängigkeit (Beispiele). Jede neue Abhängigkeit wird zuerst hier eingetragen, ist
 optional, `no_std`-fähig und wird zentral unter `[workspace.dependencies]`
 versioniert. Keine Abhängigkeit auf `num-traits`, `nalgebra` o. Ä.: die
 Trait-Hierarchie gehört azmath selbst, damit sie frei erweiterbar bleibt.

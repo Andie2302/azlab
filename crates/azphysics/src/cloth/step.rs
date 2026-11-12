@@ -44,6 +44,8 @@ impl<T: RealElementary> Cloth<T> {
         for collider in colliders {
             self.collide(collider);
         }
+        self.pushes.clear();
+        self.pushes.resize(self.positions.len(), Vector::ZERO);
         if self.params.self_collision {
             self.repel(stats);
         }
@@ -53,9 +55,22 @@ impl<T: RealElementary> Cloth<T> {
 
         // 4. Geschwindigkeit aus der tatsächlich erreichten Lage.
         for index in 0..self.positions.len() {
-            if self.inverse_mass[index] > T::ZERO {
-                self.velocities[index] = (self.positions[index] - self.previous[index]) / h;
+            if self.inverse_mass[index] <= T::ZERO {
+                continue;
             }
+            let mut velocity = (self.positions[index] - self.previous[index]) / h;
+            // Abstoßung ist unelastisch: Sie darf die Annäherung aufhalten,
+            // aber das Teilchen nicht wegschleudern. Was die Verschiebung an
+            // Geschwindigkeit vom Dreieck weg hinzugefügt hat, entfällt.
+            let push = self.pushes[index];
+            if let Some(away) = push.normalize() {
+                let gained = velocity.dot(away);
+                let allowed = (gained - push.norm() / h).max(T::ZERO);
+                if gained > allowed {
+                    velocity -= away * (gained - allowed);
+                }
+            }
+            self.velocities[index] = velocity;
         }
     }
 

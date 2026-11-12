@@ -229,7 +229,7 @@ pub fn segment_intersects_triangle<T: RealElementary>(
     inside(a, b) && inside(b, c) && inside(c, a)
 }
 
-#[cfg(test)]
+#[cfg(all(test, any(feature = "std", feature = "libm")))]
 mod tests {
     use super::*;
 

@@ -24,6 +24,10 @@ Jede Kombination muss bauen, Tests bestehen und Clippy-frei sein:
 | `--no-default-features --features alloc` | Heap ohne Backend |
 | `--all-features` | Rangfolge der Backends |
 
+Die Matrix läuft für azmath und für azphysics; azviz wird einmal geprüft.
+Die Tests von azphysics brauchen ein Backend und laufen deshalb nur mit
+`libm` oder `std`.
+
 Zusätzlich ein Build für ein Ziel ohne Betriebssystem (z. B.
 `thumbv7em-none-eabihf`) mit und ohne `libm`: beweist echtes `no_std`.
 
@@ -38,6 +42,13 @@ Zusätzlich ein Build für ein Ziel ohne Betriebssystem (z. B.
   Quelle steht im Test.
 - **Autodiff** gegen analytische Ableitungen prüfen.
 - **Löser** über Rückeinsetzen prüfen (Residuum), nicht nur gegen Zielwerte.
+- **Simulationen** prüfen Erhaltungsgrößen und Zusagen statt Zahlenwerte:
+  keine Durchdringung (`Cloth::intersections`), Quellenfreiheit, Teilchen
+  bleiben im Becken. Ein Test auf „nichts durchdrungen“ prüft auch, dass
+  sich überhaupt etwas bewegt hat.
+- **Bilder ansehen:** Die Beispiele lassen sich ohne Bildschirm als PNG
+  rendern (`--png`); neue Simulationen so mindestens einmal anschauen. Ein
+  Fehler der Kollisionserkennung fiel erst im Bild auf.
 - Tests dürfen `unwrap`/`panic!` nicht verwenden (Workspace-Lints gelten auch
   dort); Fehler mit `assert!` auf `Result` prüfen.
 

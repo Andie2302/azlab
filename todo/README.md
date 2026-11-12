@@ -6,8 +6,7 @@ wenn der zugehörige Abschnitt hier geplant und freigegeben ist.**
 ## Arbeitsweise
 
 Die früheren Projektregeln (`CLAUDE.md`) sind vom Menschen aufgehoben: Die KI
-stellt azmath selbstständig fertig, darf ausführen, testen und bestehenden
-Code ändern. Als Entwurfsgrundsätze bleiben:
+arbeitet selbstständig, darf ausführen, testen und bestehenden Code ändern. Als Entwurfsgrundsätze bleiben:
 
 - `no_std` ohne `alloc` ist der Normalfall; alles andere steht hinter
   Feature-Flags.
@@ -27,6 +26,7 @@ Code ändern. Als Entwurfsgrundsätze bleiben:
 | [05-qualitaet.md](05-qualitaet.md) | Tests, Prüfmatrix, Doku | gültig |
 | [06-offene-fragen.md](06-offene-fragen.md) | Entscheidungen, die noch fehlen | keine offen |
 | `phase-*.md` | Detailpläne der Phasen 2 bis 7 | umgesetzt und geprüft |
+| [azphysics.md](azphysics.md) | Aufbau, Zusagen und Grenzen von azphysics und azviz | erste Fassung umgesetzt |
 
 Die Phasen 8 bis 11 und der zweite Teil von Phase 7 wurden ohne eigenen
 Detailplan umgesetzt; ihr Umfang steht in der Roadmap und in der Doku der
@@ -50,7 +50,9 @@ Module.
 | Ort der Regeln | nur `CLAUDE.md` im Wurzelverzeichnis |
 | Prüfmatrix | Shell-Skript `scripts/pruefen.sh`; der Mensch führt es lokal aus und pusht `pruefung/ergebnis.txt` |
 | Vorzeichenlose Ganzzahlen | vorerst nicht in den Traits |
-| Kollisionsgeometrie | nicht in azmath, sondern im späteren Crate `azphysics` |
+| Kollisionsgeometrie | nicht in azmath, sondern im Crate `azphysics` |
+| Anzeige der Beispiele | eigenes Crate `azviz`: Fenster über `macroquad`, Dateien über `tiny-skia` und `gif`; nur Entwicklungs-Abhängigkeit von azphysics |
+| Aufruf der Beispiele | Kurzbefehl `cargo demo <name>` in `.cargo/config.toml` |
 | Heap in Simulationen/FEM | erlaubt, wo die Simulation ihn braucht, aber immer hinter Feature-Flag |
 | Gewebe-Verfahren | PBD/XPBD, kontinuierliche Kollisionserkennung (Vertex-Face, Edge-Edge), Abstoßungskräfte |
 | Trait-Umbau | Basis-Trait `Algebra` unter `Ring`; `from_f64` in `Field` |

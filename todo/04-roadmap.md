@@ -166,3 +166,17 @@ Alle Phasen 0 bis 11 sind umgesetzt. azmath besteht in jedem Stand auf
 `master` die Prüfmatrix (`scripts/pruefen.sh`): Tests und Clippy in fünf
 Feature-Kombinationen, Doku-Build und zwei Builds für ein Ziel ohne
 Betriebssystem. Die Beispiele der README laufen als Tests mit.
+
+## Nachträge
+
+- [x] `solve::preconditioned_conjugate_gradient`: konjugierte Gradienten mit
+      Vorkonditionierer (für die Druckgleichung in azphysics).
+
+## azphysics
+
+Siehe [azphysics.md](azphysics.md).
+
+- [x] Geometrie, kontinuierliche Kollisionserkennung, Raumgitter
+- [x] Gewebe: XPBD, Hindernisse, Abstoßung, Sicherung gegen Durchdringung
+- [x] Strömung: Navier-Stokes auf dem Gitter, Flüssigkeit aus Teilchen
+- [x] Beispiele mit Anzeige (`azviz`): Fenster, PNG, GIF

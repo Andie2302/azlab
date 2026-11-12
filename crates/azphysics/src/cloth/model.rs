@@ -1,6 +1,6 @@
 //! Das Tuch: Teilchen, Verbindungen, Dreiecke und Einstellungen.
 
-use crate::geometry::Vec3;
+use crate::geometry::{Aabb, Vec3};
 use alloc::vec;
 use alloc::vec::Vec;
 use azmath::Vector;
@@ -90,6 +90,38 @@ pub(super) struct Link<T> {
     pub(super) bend: bool,
 }
 
+/// Nachbarschaftslisten für die Kollision: welche Paare sich nahe genug
+/// sind, um sich berühren zu können.
+#[derive(Clone, Debug)]
+pub(super) struct Proximity<T> {
+    /// Je Teilchen der Bereich, den es beim Bau der Listen überstrich.
+    pub(super) anchors: Vec<Aabb<T, 3>>,
+    /// So weit darf sich ein Teilchen aus seinem Bereich entfernen, bevor
+    /// die Listen neu gebaut werden.
+    pub(super) slack: T,
+    /// Dicke des Tuchs, für die die Listen gebaut wurden.
+    pub(super) thickness: T,
+    /// Paare aus Teilchen und Dreieck.
+    pub(super) vertex_triangle: Vec<(usize, usize)>,
+    /// Paare aus zwei Kanten.
+    pub(super) edge_edge: Vec<(usize, usize)>,
+    /// `false`, wenn die Listen neu gebaut werden müssen.
+    pub(super) valid: bool,
+}
+
+impl<T: RealElementary> Default for Proximity<T> {
+    fn default() -> Self {
+        Self {
+            anchors: Vec::new(),
+            slack: T::ZERO,
+            thickness: T::ZERO,
+            vertex_triangle: Vec::new(),
+            edge_edge: Vec::new(),
+            valid: false,
+        }
+    }
+}
+
 /// Ein Tuch aus Teilchen.
 #[derive(Clone, Debug)]
 pub struct Cloth<T> {
@@ -101,6 +133,10 @@ pub struct Cloth<T> {
     pub(super) lambdas: Vec<T>,
     pub(super) triangles: Vec<[usize; 3]>,
     pub(super) edges: Vec<[usize; 2]>,
+    pub(super) proximity: Proximity<T>,
+    /// Je Teilchen die Verschiebung durch Abstoßung im laufenden
+    /// Teilschritt.
+    pub(super) pushes: Vec<Vec3<T>>,
     cloth_triangles: usize,
     columns: usize,
     /// Einstellungen; dürfen zwischen den Schritten geändert werden.
@@ -175,6 +211,8 @@ impl<T: RealElementary> Cloth<T> {
             links,
             triangles,
             edges: Vec::new(),
+            proximity: Proximity::default(),
+            pushes: Vec::new(),
             columns,
             params: ClothParams::default(),
         };
@@ -241,6 +279,7 @@ impl<T: RealElementary> Cloth<T> {
     pub fn set_position(&mut self, index: usize, position: Vec3<T>) {
         if let Some(slot) = self.positions.get_mut(index) {
             *slot = position;
+            self.proximity.valid = false;
         }
     }
 
@@ -274,6 +313,7 @@ impl<T: RealElementary> Cloth<T> {
         }
         self.triangles.push([first, first + 1, first + 2]);
         self.rebuild_edges();
+        self.proximity.valid = false;
     }
 
     /// Größte relative Längenänderung einer Dehnverbindung gegenüber der

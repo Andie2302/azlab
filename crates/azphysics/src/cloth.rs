@@ -13,16 +13,20 @@
 //! - **Sicherung gegen Durchdringung**: Am Ende jedes Teilschritts prüft die
 //!   kontinuierliche Kollisionserkennung ([`crate::ccd`]) jede Bewegung
 //!   Punkt gegen Dreieck und Kante gegen Kante. Würden sich Teile
-//!   durchdringen, werden die beteiligten Teilchen auf ihre Lage vom Anfang
-//!   des Teilschritts zurückgesetzt; notfalls alle. War das Tuch vorher frei
-//!   von Durchdringungen, ist es das danach auch – gleich wie schnell es
-//!   sich bewegt und wie dünn es ist.
+//!   durchdringen, wird die Bewegung der beteiligten Teilchen gekürzt: Sie
+//!   halten kurz vor der Berührung an oder kehren auf ihre Lage vom Anfang
+//!   des Teilschritts zurück; notfalls alle. War das Tuch vorher frei von
+//!   Durchdringungen, ist es das danach auch – gleich wie schnell es sich
+//!   bewegt und wie dünn es ist.
+//!
+//! Die Sicherung gilt für Dreiecke: das Tuch selbst und Hindernisse aus
+//! Dreiecken. Ebene und Kugel schieben Teilchen nur hinaus.
 
 mod collide;
 mod model;
 mod step;
 
-#[cfg(test)]
+#[cfg(all(test, any(feature = "std", feature = "libm")))]
 mod tests;
 
 pub use model::{Cloth, ClothParams, Collider, StepStats};
