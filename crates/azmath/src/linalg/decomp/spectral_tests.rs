@@ -206,14 +206,51 @@ fn magnitudes<T: RealElementary>(scales: [f64; 4]) {
     }
 }
 
+/// Verschiedene Größenordnungen innerhalb derselben Matrix: Die Quadrate der
+/// kleinen Spalten laufen unter, während die große Spalte den gemeinsamen
+/// Maßstab bestimmt.
+fn mixed_magnitudes<T: RealElementary>(small: f64) {
+    let f = T::from_f64;
+    let small = f(small);
+    assert!(small > T::ZERO && small * small == T::ZERO);
+    // Block diag(1, small·[[1, 1], [0, 1]]): Die Singulärwerte des kleinen
+    // Blocks sind small·(√5 ± 1)/2.
+    let golden = (f(5.0).sqrt() + T::ONE) * f(0.5);
+    let expected = [T::ONE, small * golden, small * (golden - T::ONE)];
+    for (big, shift) in [(0, 1), (1, 2), (2, 0)] {
+        // Dieselbe Matrix mit vertauschter Reihenfolge der Spalten und
+        // Zeilen: Die große Spalte steht vorn, in der Mitte oder hinten.
+        let mut a = Matrix::<T, 3, 3>::ZERO;
+        let (first, second) = ((big + 1) % 3, (big + 2) % 3);
+        a[(shift, big)] = T::ONE;
+        a[((shift + 1) % 3, first)] = small;
+        a[((shift + 1) % 3, second)] = small;
+        a[((shift + 2) % 3, second)] = small;
+        assert!(a.svd().is_ok_and(|d| {
+            let column = |matrix: Matrix<T, 3, 3>, j: usize| Vector::<T, 3>(core::array::from_fn(|i| matrix[(i, j)]));
+            close_m(d.u.transpose() * d.u, Matrix::identity())
+                && close_m(d.v.transpose() * d.v, Matrix::identity())
+                && (0..3).all(|j| close(d.s[j], expected[j], ULPS))
+                // A·v = s·u für jeden Singulärwert, gemessen an seiner
+                // eigenen Größe.
+                && (0..3).all(|j| {
+                    let (image, target) = (a * column(d.v, j), column(d.u, j) * d.s[j]);
+                    (image - target).norm() <= d.s[j] * T::EPSILON * f(ULPS)
+                })
+        }));
+    }
+}
+
 #[test]
 fn magnitudes_f32() {
     magnitudes::<f32>([1.0e15, 1.0e-15, 1.0e25, 1.0e-25]);
+    mixed_magnitudes::<f32>(1.0e-25);
 }
 
 #[test]
 fn magnitudes_f64() {
     magnitudes::<f64>([1.0e100, 1.0e-100, 1.0e200, 1.0e-200]);
+    mixed_magnitudes::<f64>(1.0e-200);
 }
 
 #[test]

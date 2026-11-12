@@ -397,6 +397,10 @@ Features, dazu azviz. Zusätzlich erzeugt es die API-Dokumentation und baut,
 sofern das Target installiert ist, beide Bibliotheken für
 `thumbv7em-none-eabihf` mit und ohne Standard-Features.
 
+Ist die im Manifest genannte Mindestversion von Rust installiert
+(`rustup toolchain install 1.86 --profile minimal`), übersetzt das Skript
+beide Bibliotheken auch mit ihr.
+
 Das Embedded-Target kann zuvor installiert werden:
 
 ```bash

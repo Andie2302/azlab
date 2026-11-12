@@ -28,6 +28,9 @@ Die Matrix läuft für azmath und für azphysics; azviz wird einmal geprüft.
 Die Tests von azphysics brauchen ein Backend und laufen deshalb nur mit
 `libm` oder `std`.
 
+Die im Manifest zugesagte Mindestversion wird mit geprüft: azmath und
+azphysics müssen sich mit ihr übersetzen lassen (wenn sie installiert ist).
+
 Zusätzlich ein Build für ein Ziel ohne Betriebssystem (z. B.
 `thumbv7em-none-eabihf`) mit und ohne `libm`: beweist echtes `no_std`.
 

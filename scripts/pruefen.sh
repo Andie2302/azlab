@@ -75,6 +75,17 @@ else
     echo "== $target nicht installiert, übersprungen (rustup target add $target)" | tee -a "$out"
 fi
 
+# Die zugesagte Mindestversion (rust-version im Workspace-Manifest): Die
+# beiden Bibliotheken müssen sich mit ihr übersetzen lassen. Die Anzeige für
+# die Beispiele ist davon ausgenommen; ihre Abhängigkeiten verlangen mehr.
+msrv="$(sed -n 's/^rust-version *= *"\(.*\)"/\1/p' Cargo.toml | head -n 1)"
+if [ -n "$msrv" ] && rustup toolchain list 2> /dev/null | grep -q "^$msrv"; then
+    run cargo "+$msrv" check -p azmath -p azphysics --no-default-features
+    run cargo "+$msrv" check -p azmath -p azphysics --all-features
+else
+    echo "== Rust $msrv nicht installiert, übersprungen (rustup toolchain install $msrv --profile minimal)" | tee -a "$out"
+fi
+
 echo | tee -a "$out"
 if [ "$fail" -eq 0 ]; then
     echo "ERGEBNIS: alles OK" | tee -a "$out"

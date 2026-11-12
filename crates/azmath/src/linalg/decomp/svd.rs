@@ -89,18 +89,32 @@ impl<T: RealElementary, const R: usize, const C: usize> Matrix<T, R, C> {
             let mut rotated = false;
             for p in 0..C {
                 for q in p + 1..C {
-                    let (mut alpha, mut beta, mut gamma) = (T::ZERO, T::ZERO, T::ZERO);
-                    for row in u.iter() {
-                        alpha += row[p] * row[p];
-                        beta += row[q] * row[q];
-                        gamma += row[p] * row[q];
+                    // Längen der beiden Spalten, ohne Quadrate zu bilden, die
+                    // unter- oder überlaufen könnten. Spalten sehr
+                    // verschiedener Größe kommen in derselben Matrix vor.
+                    let length = |col: usize| Vector::<T, R>(core::array::from_fn(|row| u[row][col])).norm();
+                    let (first, second) = (length(p), length(q));
+                    if first == T::ZERO || second == T::ZERO {
+                        // Eine Nullspalte steht auf allem senkrecht.
+                        continue;
                     }
-                    if gamma.abs() <= T::EPSILON * (alpha * beta).sqrt() {
+                    // Kosinus des Winkels zwischen den Spalten.
+                    let cosine = u.iter().fold(T::ZERO, |sum, row| sum + (row[p] / first) * (row[q] / second));
+                    if cosine.abs() <= T::EPSILON {
+                        continue;
+                    }
+                    // Drehung, die die Spalten p und q orthogonal macht:
+                    // zeta = (β − α) / (2γ), ausgedrückt durch das Verhältnis
+                    // der Längen.
+                    let ratio = second / first;
+                    let zeta = (ratio - ratio.recip()) / (cosine + cosine);
+                    if !zeta.is_finite() {
+                        // Die Längen unterscheiden sich um mehr, als der
+                        // Zahltyp darstellt; die kleinere Spalte ist dann
+                        // nicht mehr aufzulösen.
                         continue;
                     }
                     rotated = true;
-                    // Drehung, die die Spalten p und q orthogonal macht.
-                    let zeta = (beta - alpha) / (gamma + gamma);
                     let t = T::ONE.copysign(zeta) / (zeta.abs() + zeta.hypot(T::ONE));
                     let c = T::ONE.hypot(t).recip();
                     let s = c * t;

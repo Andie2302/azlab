@@ -54,6 +54,17 @@ fn check<T: RealElementary>() {
     assert_eq!((gamma_p(f(2.0), T::ZERO), gamma_q(f(2.0), T::ZERO)), (T::ZERO, T::ONE));
     assert!(gamma_p(T::ZERO, T::ONE).is_nan() && gamma_q(T::ONE, -T::ONE).is_nan());
     assert!(gamma_p(T::NAN, T::ONE).is_nan());
+    // Grenzwerte für unendliche Argumente.
+    assert_eq!((gamma_p(f(2.5), T::INFINITY), gamma_q(f(2.5), T::INFINITY)), (T::ONE, T::ZERO));
+    assert_eq!((gamma_p(T::INFINITY, f(2.5)), gamma_q(T::INFINITY, f(2.5))), (T::ZERO, T::ONE));
+    assert!(gamma_p(T::INFINITY, T::INFINITY).is_nan() && gamma_q(T::INFINITY, T::INFINITY).is_nan());
+    // Großes a: braucht viele Glieder, konvergiert aber. P(a, a) liegt
+    // knapp über 1/2.
+    let (below, above) = (gamma_p(f(1.0e4), f(1.0e4)), gamma_q(f(1.0e4), f(1.0e4)));
+    assert!((below - f(0.5013)).abs() < f(0.02) && (below + above - T::ONE).abs() < f(0.02));
+    // Zu großes a: kein ungenauer Wert, sondern erkennbar NaN.
+    assert!(gamma_p(f(1.0e9), f(1.0e9)).is_nan() && gamma_q(f(1.0e9), f(1.0e9)).is_nan());
+    assert!(gamma_p(f(1.0e17), f(1.0e17)).is_nan() && gamma_q(f(1.0e17), f(3.0e17)).is_nan());
     // Gegenprobe mit Quadratur: P(a, x) = (1/Γ(a))·∫₀ˣ t^(a−1)·e^(−t) dt.
     let rule = GaussLegendre::<T, 16>::new();
     let (a, x) = (f(2.5), f(1.8));
@@ -72,6 +83,15 @@ fn check<T: RealElementary>() {
         assert!((erf(x) - f(2.0) / root_pi * integral).abs() <= T::EPSILON.sqrt());
     }
     assert!(close(erf(f(6.0)), T::ONE, ULPS));
+    // Große endliche Argumente, deren Quadrat nicht mehr darstellbar ist,
+    // und unendliche.
+    for x in [T::INFINITY, T::EPSILON.recip() * T::EPSILON.recip() * T::EPSILON.recip() * T::EPSILON.recip()] {
+        let x = if x.is_finite() { x * x * x * x } else { x };
+        assert!(!(x * x).is_finite());
+        assert_eq!((erf(x), erf(-x)), (T::ONE, -T::ONE));
+        assert_eq!((erfc(x), erfc(-x)), (T::ZERO, f(2.0)));
+    }
+    assert!(erf(T::NAN).is_nan() && erfc(T::NAN).is_nan());
     // Für große x ist erfc winzig, aber nicht null und nicht ausgelöscht.
     let tail = erfc(f(5.0));
     assert!(tail > T::ZERO && tail < f(1.0e-10));

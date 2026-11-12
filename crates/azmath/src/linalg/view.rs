@@ -5,7 +5,7 @@
 //! `i · cols + j`.
 
 use super::LinalgError;
-use super::decomp::{cholesky_in_place, lu_in_place};
+use super::decomp::{cholesky_in_place, left_divide, lu_in_place};
 use crate::scalar::{Conjugate, Field, RealElementary};
 use core::ops::{Index, IndexMut};
 
@@ -219,7 +219,7 @@ impl<T: Field + Conjugate> MatrixView<'_, T> {
             for j in i + 1..size {
                 sum -= self[(i, j)] * x[j];
             }
-            x[i] = self[(i, i)].recip() * sum;
+            x[i] = left_divide(self[(i, i)], sum);
         }
         Ok(())
     }

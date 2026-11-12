@@ -1,7 +1,7 @@
 //! LU-Zerlegung mit Spaltenpivotisierung: `P·A = L·U`.
 
 use crate::linalg::{LinalgError, Matrix, Vector};
-use super::util::is_positive;
+use super::util::{is_positive, left_divide};
 use crate::scalar::{Commutative, Conjugate, Field};
 use core::ops::IndexMut;
 
@@ -93,7 +93,7 @@ impl<T: Field + Conjugate, const N: usize> Lu<T, N> {
                 .iter()
                 .zip(&x[i + 1..])
                 .fold(x[i], |acc, (&u, &xj)| acc - u * xj);
-            x[i] = row[i].recip() * rest;
+            x[i] = left_divide(row[i], rest);
         }
         Vector(x)
     }

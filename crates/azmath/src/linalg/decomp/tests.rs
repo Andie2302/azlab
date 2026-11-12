@@ -2,7 +2,8 @@
 //! werden zusätzlich über Rückeinsetzen geprüft.
 
 use crate::linalg::{LinalgError, Matrix, Vector};
-use crate::number::{Complex, Dual};
+use crate::linalg::MatrixViewMut;
+use crate::number::{Complex, Dual, Quaternion};
 use crate::scalar::{Algebra, Real};
 use crate::testutil::close;
 
@@ -117,14 +118,48 @@ fn extremes<T: Real>(tiny: f64, huge: f64) {
     assert!(matches!(Matrix([[T::NAN]]).lu(), Err(LinalgError::Singular)));
 }
 
+/// Diagonalelemente, deren Kehrwert überläuft (subnormale Zahlen): Die
+/// Lösung ist trotzdem darstellbar und muss stimmen.
+fn tiny_pivots<T: Real>(subnormal: f64) {
+    let tiny = T::from_f64(subnormal);
+    assert!(tiny > T::ZERO && !tiny.recip().is_finite());
+    // 1×1: tiny·x = tiny, also x = 1.
+    assert!(Matrix([[tiny]]).solve(Vector([tiny])).is_ok_and(|x| x[0] == T::ONE));
+    // Dreieckssystem mit winziger Diagonale; Lösung (1, 2).
+    let two = T::from_f64(2.0);
+    let a = Matrix([[tiny, tiny], [T::ZERO, tiny]]);
+    let b = Vector([tiny + tiny + tiny, tiny + tiny]);
+    assert!(a.solve(b).is_ok_and(|x| x[0] == T::ONE && x[1] == two));
+    // Dasselbe über die Sicht auf einen Puffer.
+    let mut data = [tiny, tiny, T::ZERO, tiny];
+    let mut perm = [0_usize; 2];
+    let mut x = [T::ZERO; 2];
+    assert!(MatrixViewMut::new(&mut data, 2, 2).is_ok_and(|mut view| {
+        view.lu_in_place(&mut perm).is_ok() && view.as_view().lu_solve(&perm, &b.0, &mut x).is_ok()
+    }));
+    assert_eq!(x, [T::ONE, two]);
+    // Komplex: (tiny·i)·x = tiny·i.
+    let z = Complex::new(T::ZERO, tiny);
+    assert!(Matrix([[z]]).solve(Vector([z])).is_ok_and(|x| x[0] == Complex::new(T::ONE, T::ZERO)));
+    // Nicht kommutativ: Die Reihenfolge bleibt q⁻¹·(q·p) = p.
+    let q = Quaternion::new(T::ZERO, tiny, tiny, T::ZERO);
+    let p = Quaternion::new(T::ONE, T::ZERO, T::ZERO, two);
+    assert!(Matrix([[q]]).lu().is_ok_and(|lu| {
+        let x = lu.solve(Vector([q * p]))[0];
+        close(x.w, p.w, 8.0) && close(x.z, p.z, 8.0) && x.x.abs() <= T::EPSILON && x.y.abs() <= T::EPSILON
+    }));
+}
+
 #[test]
 fn extremes_f32() {
     extremes::<f32>(1.0e-30, 1.0e30);
+    tiny_pivots::<f32>(1.0e-42);
 }
 
 #[test]
 fn extremes_f64() {
     extremes::<f64>(1.0e-200, 1.0e200);
+    tiny_pivots::<f64>(1.0e-320);
 }
 
 #[test]

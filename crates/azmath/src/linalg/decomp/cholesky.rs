@@ -1,6 +1,6 @@
 //! Cholesky-Zerlegung `A = L·Lᴴ` für hermitesch positiv definite Matrizen.
 
-use super::util::is_positive;
+use super::util::{is_positive, left_divide};
 use crate::linalg::{LinalgError, Matrix, Vector};
 use crate::scalar::{Commutative, Conjugate, Elementary, Field, Real, RealElementary};
 use core::ops::IndexMut;
@@ -65,7 +65,7 @@ impl<T: Field + Conjugate, const N: usize> Cholesky<T, N> {
                 .iter()
                 .zip(&x[..i])
                 .fold(x[i], |acc, (&l, &xj)| acc - l * xj);
-            x[i] = row[i].recip() * rest;
+            x[i] = left_divide(row[i], rest);
         }
         // Rückwärtseinsetzen mit Lᴴ: Zeile i von Lᴴ ist die konjugierte
         // Spalte i von L.
@@ -74,7 +74,7 @@ impl<T: Field + Conjugate, const N: usize> Cholesky<T, N> {
                 .iter()
                 .zip(&x[i + 1..])
                 .fold(x[i], |acc, (row, &xj)| acc - row[i].conj() * xj);
-            x[i] = rows[i][i].recip() * rest;
+            x[i] = left_divide(rows[i][i], rest);
         }
         Vector(x)
     }

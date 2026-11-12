@@ -162,3 +162,22 @@ Die Grenzwerte für unendliche Argumente sollten in `gamma_p`/`gamma_q` ausdrüc
 - **Unvollständige Gammafunktionen:** Reihe und Kettenbruch enden spätestens nach 500 Schritten, geben aber auch ohne erreichte Konvergenz kommentarlos einen Wert zurück. Hier wäre ein erkennbarer Fehler oder eine dokumentierte Einschränkung sinnvoll.
 
 Die bisherigen Reparaturen würde ich beibehalten. **Als Nächstes würde ich LU und komplexe Division korrigieren und anschließend die Tests um gemischte Größenordnungen erweitern.** Damit prüfst du eine andere Fehlerklasse als mit dem bloßen Vergrößern oder Verkleinern einer ganzen Matrix.
+
+## Stand zu den Befunden des Reviewers
+
+Alle sechs Punkte sind bearbeitet, jeweils mit Regressionstest; die volle
+Prüfmatrix ist grün.
+
+| Punkt | Behebung | Regressionstest |
+|---|---|---|
+| 1. LU: Kehrwert des Diagonalelements | Neue Hilfsfunktion `left_divide` berechnet `d⁻¹ · rest`, indem sie beide Seiten zuerst durch den Betrag von `d` teilt; die Reihenfolge bleibt erhalten, es stimmt also auch für Quaternionen. Verwendet in `Lu::solve`, `MatrixView::lu_solve`, `Qr::solve` und `Cholesky::solve`. | `tiny_pivots` in `linalg/decomp/tests.rs` (reell, komplex, Quaternion, Sicht auf Puffer) |
+| 2. Komplexe Division | Zähler und Nenner werden je auf die Größenordnung eins gebracht, dann nach Smith geteilt; die Maßstäbe kommen am Ende dazu. `z / z` ist auch am Rand des Zahlbereichs eins. Die Doku nennt die verbleibende Grenze: Nur ein Ergebnis, das der größten darstellbaren Zahl bis auf den Faktor √2 nahe kommt, kann noch vorzeitig überlaufen. | `division_at_the_limits` in `number/complex/tests.rs` |
+| 3. SVD: verschiedene Spaltengrößen | Je Spaltenpaar werden die Längen skaliert berechnet und der Kosinus des Winkels aus den normierten Spalten; die Drehung folgt aus dem Verhältnis der Längen. Es werden keine Quadratsummen der Spalten mehr gebildet. | `mixed_magnitudes` in `linalg/decomp/spectral_tests.rs` (große Spalte vorn, in der Mitte, hinten) |
+| 4. `erf`, `erfc` für große Argumente | `gamma_p` und `gamma_q` behandeln unendliche Argumente ausdrücklich (`P(a, ∞) = 1`, `Q(a, ∞) = 0`); damit liefern `erf` und `erfc` die Grenzwerte, sobald `x²` nicht mehr darstellbar ist. | `special/tests.rs` |
+| 5. Mindestversion | `scripts/pruefen.sh` übersetzt azmath und azphysics zusätzlich mit der im Manifest genannten Mindestversion (derzeit 1.86), sofern sie installiert ist: `rustup toolchain install 1.86 --profile minimal`. Der Stand besteht das. | Prüfprotokoll |
+| 6. Unvollständige Gammafunktionen | Reihe und Kettenbruch dürfen jetzt 10 000 Glieder brauchen (reicht bis `a` um 10⁶). Ohne Konvergenz ist das Ergebnis NaN statt eines ungenauen Werts; ebenso, wenn der Zahltyp `a + 1` nicht mehr von `a` unterscheidet. Beides steht in der Doku. | `special/tests.rs` |
+
+Nebenbei gefunden und behoben (azphysics): Die kontinuierliche
+Kollisionserkennung meldete für ein schnell fliegendes ebenes Tuch
+Berührungen mit sich selbst. Der zugehörige Test bestand, ohne dass sich das
+Tuch bewegte; er prüft jetzt, dass es am Hindernis ankommt.

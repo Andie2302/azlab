@@ -45,16 +45,49 @@ fn division_avoids_overflow<T: Real>() {
     assert!(close_c(quotient, c(2.0, 0.0), 8.0));
 }
 
+/// Einträge am Rand des Zahlbereichs: Auch dort ist `z / z = 1`, und ein
+/// darstellbares Ergebnis läuft nicht über oder unter.
+fn division_at_the_limits<T: Real>(huge: f64, subnormal: f64) {
+    let (huge, tiny) = (T::from_f64(huge), T::from_f64(subnormal));
+    assert!(huge.is_finite() && !(huge * huge).is_finite() && !tiny.recip().is_finite());
+    let one = Complex::new(T::ONE, T::ZERO);
+    for z in [
+        Complex::new(huge, huge),
+        Complex::new(huge, -huge),
+        Complex::new(tiny, tiny),
+        Complex::new(huge, tiny),
+        Complex::new(tiny, huge),
+        Complex::new(T::ZERO, huge),
+        Complex::new(tiny, T::ZERO),
+    ] {
+        let (top, bottom) = (z, z);
+        assert_eq!(top / bottom, one);
+    }
+    // Groß durch mäßig und winzig durch winzig bleiben genau.
+    let two = T::from_f64(2.0);
+    assert!(close_c(Complex::new(huge, huge) / Complex::new(two, two), Complex::new(huge / two, T::ZERO), 8.0));
+    assert!(close_c(Complex::new(tiny + tiny, T::ZERO) / Complex::new(T::ZERO, tiny), Complex::new(T::ZERO, -two), 8.0));
+    // Groß durch winzig läuft zu Recht über, winzig durch groß wird null.
+    assert!(!(Complex::new(huge, huge) / Complex::new(tiny, tiny)).re.is_finite());
+    assert_eq!(Complex::new(tiny, tiny) / Complex::new(huge, huge), Complex::new(T::ZERO, T::ZERO));
+    // Division durch null und unendliche Nenner wie bisher.
+    assert!((one / Complex::new(T::ZERO, T::ZERO)).re.is_nan());
+    assert_eq!(one / Complex::new(T::INFINITY, T::ZERO), Complex::new(T::ZERO, T::ZERO));
+    assert_eq!(Complex::new(T::ZERO, T::ZERO) / Complex::new(huge, huge), Complex::new(T::ZERO, T::ZERO));
+}
+
 #[test]
 fn algebra_f32() {
     algebra::<f32>();
     division_avoids_overflow::<f32>();
+    division_at_the_limits::<f32>(1.0e38, 1.0e-42);
 }
 
 #[test]
 fn algebra_f64() {
     algebra::<f64>();
     division_avoids_overflow::<f64>();
+    division_at_the_limits::<f64>(1.0e308, 1.0e-320);
 }
 
 #[test]

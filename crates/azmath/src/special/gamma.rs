@@ -24,8 +24,9 @@ const LANCZOS: [f64; 9] = [
     1.505_632_735_149_311_6e-7,
 ];
 
-/// Höchstzahl der Glieder von Reihe und Kettenbruch.
-const MAX_TERMS: usize = 500;
+/// Höchstzahl der Glieder von Reihe und Kettenbruch. Nahe `x ≈ a` wächst
+/// der Bedarf etwa mit der Wurzel aus `a`; das reicht bis `a` um 10⁶.
+const MAX_TERMS: usize = 10_000;
 
 /// Die Lanczos-Summe `A(x)` und die Hilfsgröße `t = x + g − 1/2` für
 /// `Γ(x) = √(2π)·t^(x − 1/2)·e^(−t)·A(x)`, gültig für `x >= 1/2`.
@@ -79,7 +80,8 @@ fn prefactor<T: RealElementary>(a: T, x: T) -> T {
     (a * x.ln() - x - ln_gamma(a)).exp()
 }
 
-/// `P(a, x)` über die Reihe; konvergiert schnell für `x < a + 1`.
+/// `P(a, x)` über die Reihe; konvergiert schnell für `x < a + 1`. NaN, wenn
+/// die Reihe nach [`MAX_TERMS`] Gliedern nicht konvergiert ist.
 fn series<T: RealElementary>(a: T, x: T) -> T {
     let mut denominator = a;
     let mut term = a.recip();
@@ -89,14 +91,15 @@ fn series<T: RealElementary>(a: T, x: T) -> T {
         term *= x / denominator;
         sum += term;
         if term.abs() <= sum.abs() * T::EPSILON {
-            break;
+            return sum * prefactor(a, x);
         }
     }
-    sum * prefactor(a, x)
+    T::NAN
 }
 
 /// `Q(a, x)` über den Kettenbruch (Verfahren von Lentz); konvergiert schnell
-/// für `x >= a + 1`.
+/// für `x >= a + 1`. NaN, wenn er nach [`MAX_TERMS`] Gliedern nicht
+/// konvergiert ist.
 fn continued_fraction<T: RealElementary>(a: T, x: T) -> T {
     let tiny = T::EPSILON * T::EPSILON * T::EPSILON;
     let guard = |value: T| if value.abs() < tiny { tiny } else { value };
@@ -114,17 +117,42 @@ fn continued_fraction<T: RealElementary>(a: T, x: T) -> T {
         let factor = d * c;
         fraction *= factor;
         if (factor - T::ONE).abs() <= T::EPSILON {
-            break;
+            return fraction * prefactor(a, x);
         }
     }
-    fraction * prefactor(a, x)
+    T::NAN
+}
+
+/// Grenzwerte von `P(a, x)` für unendliche Argumente; `None`, wenn beide
+/// endlich sind.
+fn limit_p<T: RealElementary>(a: T, x: T) -> Option<T> {
+    match (a.is_finite(), x.is_finite()) {
+        (true, true) => None,
+        // Das Integral bis unendlich ist die ganze Gammafunktion.
+        (true, false) => Some(T::ONE),
+        (false, true) => Some(T::ZERO),
+        (false, false) => Some(T::NAN),
+    }
+}
+
+/// `true`, wenn `a` so groß ist, dass `a + 1` nicht mehr von `a` zu
+/// unterscheiden ist. Reihe und Kettenbruch zählen in Einerschritten und
+/// liefern dann Unsinn.
+fn unresolved<T: RealElementary>(a: T) -> bool {
+    a + T::ONE == a
 }
 
 /// Regularisierte untere unvollständige Gammafunktion
 /// `P(a, x) = γ(a, x) / Γ(a)` für `a > 0`, `x >= 0`.
 ///
-/// Wächst von 0 bei `x = 0` auf 1 für `x → ∞`. Außerhalb des
-/// Definitionsbereichs NaN.
+/// Wächst von 0 bei `x = 0` auf 1 für `x → ∞`; für unendliches `x` ist das
+/// Ergebnis 1. Außerhalb des Definitionsbereichs NaN.
+///
+/// Für sehr große `a` (über etwa 10⁶) mit `x` in der Nähe von `a`
+/// konvergieren Reihe und Kettenbruch nicht in der vorgesehenen Zahl von
+/// Gliedern; das Ergebnis ist dann NaN statt eines ungenauen Werts. Dasselbe
+/// gilt, wenn `a` so groß ist, dass der Zahltyp `a + 1` nicht mehr von `a`
+/// unterscheidet.
 pub fn gamma_p<T: RealElementary>(a: T, x: T) -> T {
     if a <= T::ZERO || x < T::ZERO || a.is_nan() || x.is_nan() {
         return T::NAN;
@@ -132,17 +160,30 @@ pub fn gamma_p<T: RealElementary>(a: T, x: T) -> T {
     if x == T::ZERO {
         return T::ZERO;
     }
+    if let Some(limit) = limit_p(a, x) {
+        return limit;
+    }
+    if unresolved(a) {
+        return T::NAN;
+    }
     if x < a + T::ONE { series(a, x) } else { T::ONE - continued_fraction(a, x) }
 }
 
 /// Regularisierte obere unvollständige Gammafunktion
-/// `Q(a, x) = 1 − P(a, x)`, ohne Auslöschung für große `x`.
+/// `Q(a, x) = 1 − P(a, x)`, ohne Auslöschung für große `x`; für unendliches
+/// `x` ist das Ergebnis 0. Grenzen wie bei [`gamma_p`].
 pub fn gamma_q<T: RealElementary>(a: T, x: T) -> T {
     if a <= T::ZERO || x < T::ZERO || a.is_nan() || x.is_nan() {
         return T::NAN;
     }
     if x == T::ZERO {
         return T::ONE;
+    }
+    if let Some(limit) = limit_p(a, x) {
+        return T::ONE - limit;
+    }
+    if unresolved(a) {
+        return T::NAN;
     }
     if x < a + T::ONE { T::ONE - series(a, x) } else { continued_fraction(a, x) }
 }

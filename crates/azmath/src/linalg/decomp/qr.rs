@@ -1,6 +1,6 @@
 //! QR-Zerlegung `A = Q·R` mit Householder-Spiegelungen.
 
-use super::util::is_positive;
+use super::util::{is_positive, left_divide};
 use crate::linalg::{LinalgError, Matrix, Vector};
 use crate::scalar::{Algebra, Conjugate, Elementary, Field, RealElementary};
 use core::ops::IndexMut;
@@ -121,7 +121,7 @@ impl<T: Field + Conjugate, const R: usize, const C: usize> Qr<T, R, C> {
                 .iter()
                 .zip(&x[i + 1..])
                 .fold(projected.0[i], |acc, (&u, &xj)| acc - u * xj);
-            x[i] = diagonal.recip() * rest;
+            x[i] = left_divide(diagonal, rest);
         }
         Ok(Vector(x))
     }
