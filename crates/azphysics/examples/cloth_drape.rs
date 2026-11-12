@@ -29,6 +29,7 @@ impl Drape {
         let (across, down) = (Vector([spacing, 0.0, 0.25 * spacing]), Vector([-0.25 * spacing, 0.0, spacing]));
         let mut cloth = Cloth::grid(SIZE, SIZE, Vector([-0.62, 1.35, -1.0]), across, down, 0.005);
         cloth.params.thickness = 0.012;
+        //cloth.params.gravity = Vector([0.0, 0.0, 0.0]);
         cloth.params.bend_compliance = 5.0e-3;
         let colliders = [
             Collider::Sphere { center: Vector([0.0, RADIUS, 0.0]), radius: RADIUS },
