@@ -13,17 +13,10 @@
 //! - ein Punkt tritt durch ein Dreieck ([`vertex_triangle`]),
 //! - zwei Kanten treten durcheinander ([`edge_edge`]).
 //!
-//! In beiden Fällen liegen die vier beteiligten Punkte im Augenblick der
-//! Berührung in einer Ebene. Diese Bedingung ist ein Polynom dritten Grades
-//! in der Zeit. Seine Nullstellen im Schritt werden mit der
-//! Intervall-Einschließung aus azmath gesucht, die keine Nullstelle
-//! übersehen kann; an jeder wird geprüft, ob sich die Teile dort wirklich
-//! treffen.
-//!
-//! Bleiben die vier Punkte die ganze Zeit in einer Ebene (ein flaches Tuch,
-//! das in sich gleitet), sagt das Polynom nichts aus. Dann entscheidet der
-//! Abstand selbst: Er wird schrittweise verfolgt, jeweils so weit, wie sich
-//! die Teile in der Zeit höchstens nähern können.
+//! Bei positivem Kontaktabstand müssen die Teile nicht in einer Ebene
+//! liegen. Deshalb wird der Abstand während des gesamten Schritts verfolgt:
+//! Es wird jeweils höchstens so weit vorgerückt, wie es die obere Schranke
+//! der relativen Bewegung erlaubt. Das gilt auch für koplanare Bewegungen.
 //!
 //! Gerechnet wird mit der Bewegung der Teile gegeneinander. Eine gemeinsame
 //! Verschiebung – das Tuch fliegt als Ganzes – zählt nicht als Annäherung.
@@ -32,10 +25,7 @@
 //! meldet nie „frei“, wenn sich die Teile durchdringen.
 
 use crate::geometry::{Vec3, closest_points_on_segments, point_triangle_distance, segment_segment_distance};
-use azmath::interval::Interval;
-use azmath::poly::{BracketKind, RootBracket, isolate_real_roots, refine_root};
 use azmath::scalar::RealElementary;
-use azmath::solve::Tolerance;
 
 /// Lage am Anfang und am Ende des Zeitschritts.
 pub type Motion<T> = [Vec3<T>; 2];
@@ -49,19 +39,6 @@ fn at<T: RealElementary>(motion: &Motion<T>, t: T) -> Vec3<T> {
 /// Größte Strecke, die einer der Punkte im Schritt zurücklegt.
 fn reach<T: RealElementary>(motions: &[&Motion<T>]) -> T {
     motions.iter().fold(T::ZERO, |longest, motion| longest.max((motion[1] - motion[0]).norm()))
-}
-
-/// Koeffizienten (aufsteigend) von `(e1(t) × e2(t)) · d(t)`, wenn sich
-/// `e1`, `e2` und `d` geradlinig ändern.
-fn coplanarity<T: RealElementary>(e1: Motion<T>, e2: Motion<T>, d: Motion<T>) -> [T; 4] {
-    let (e1_0, e1_v) = (e1[0], e1[1] - e1[0]);
-    let (e2_0, e2_v) = (e2[0], e2[1] - e2[0]);
-    let (d_0, d_v) = (d[0], d[1] - d[0]);
-    // Normale n(t) = n0 + t·n1 + t²·n2
-    let n0 = e1_0.cross(e2_0);
-    let n1 = e1_0.cross(e2_v) + e1_v.cross(e2_0);
-    let n2 = e1_v.cross(e2_v);
-    [n0.dot(d_0), n0.dot(d_v) + n1.dot(d_0), n1.dot(d_v) + n2.dot(d_0), n2.dot(d_v)]
 }
 
 /// Zieht von vier Bewegungen ihre mittlere Verschiebung ab.
@@ -108,55 +85,14 @@ fn advance<T: RealElementary>(
     Some(t)
 }
 
-/// Sucht den frühesten Zeitpunkt in [0, 1], an dem die Koplanaritäts-
-/// bedingung erfüllt ist und `distance(t)` höchstens `tolerance` beträgt.
-///
-/// `reach` ist die größte Strecke, um die sich die Teile im Schritt
-/// annähern können; sie begrenzt, wie stark sich der Abstand innerhalb
-/// einer Zeitspanne ändern kann.
-fn earliest_contact<T: RealElementary>(
-    coefficients: [T; 4],
-    reach: T,
-    tolerance: T,
-    distance: impl Fn(T) -> T,
-) -> Option<T> {
-    let unit = Interval::new(T::ZERO, T::ONE)?;
-    let placeholder = RootBracket { interval: unit, kind: BracketKind::Unresolved };
-    let mut brackets = [placeholder; 16];
-    let min_width = T::EPSILON * T::from_f64(4096.0);
-    let Ok(count) = isolate_real_roots(&coefficients, unit, min_width, &mut brackets) else {
-        // Polynom identisch null (die vier Punkte bleiben in einer Ebene)
-        // oder zu viele Kandidaten: Die Nullstellen helfen nicht weiter,
-        // der Abstand selbst entscheidet.
-        return advance(T::ZERO, T::ONE, reach, tolerance, distance);
-    };
-    let tol = Tolerance::default();
-    for bracket in brackets.iter().take(count) {
-        let (lo, hi) = (bracket.interval.lo().max(T::ZERO), bracket.interval.hi().min(T::ONE));
-        if bracket.kind == BracketKind::Unique {
-            if let Ok(root) = refine_root(&coefficients, bracket, &tol) {
-                // Die Nullstelle ist bis auf Rundung bekannt.
-                let slack = reach * T::EPSILON.sqrt();
-                if distance(root.x) <= tolerance + slack {
-                    return Some(root.x.max(T::ZERO).min(T::ONE));
-                }
-                continue;
-            }
-        }
-        // Nicht aufgelöst: Die Nullstelle liegt irgendwo in der Klammer.
-        if let Some(t) = advance(lo, hi, reach, tolerance, &distance) {
-            return Some(t);
-        }
-    }
-    None
-}
-
 /// Wann berührt der bewegte Punkt `p` das bewegte Dreieck `a`, `b`, `c`?
 ///
 /// Jedes Argument ist die Lage am Anfang und am Ende des Schritts.
 /// `tolerance` ist der Abstand, der als Berührung gilt (größer als null,
 /// klein gegen die Abmessungen). Liefert den frühesten Zeitpunkt in [0, 1]
 /// oder `None`, wenn der Punkt das Dreieck im Schritt sicher nicht berührt.
+/// Wird die Iterationsgrenze erreicht, wird vorsichtshalber der zuletzt
+/// erreichte Zeitpunkt gemeldet; das kann einen Kontakt zu früh melden.
 pub fn vertex_triangle<T: RealElementary>(
     p: Motion<T>,
     a: Motion<T>,
@@ -175,12 +111,7 @@ pub fn vertex_triangle<T: RealElementary>(
     if start <= tolerance {
         return Some(T::ZERO);
     }
-    let coefficients = coplanarity(
-        [b[0] - a[0], b[1] - a[1]],
-        [c[0] - a[0], c[1] - a[1]],
-        [p[0] - a[0], p[1] - a[1]],
-    );
-    earliest_contact(coefficients, travel, tolerance, |t| {
+    advance(T::ZERO, T::ONE, travel, tolerance, |t| {
         point_triangle_distance(at(&p, t), at(&a, t), at(&b, t), at(&c, t))
     })
 }
@@ -204,12 +135,7 @@ pub fn edge_edge<T: RealElementary>(
     if start <= tolerance {
         return Some(T::ZERO);
     }
-    let coefficients = coplanarity(
-        [b[0] - a[0], b[1] - a[1]],
-        [d[0] - c[0], d[1] - c[1]],
-        [c[0] - a[0], c[1] - a[1]],
-    );
-    earliest_contact(coefficients, travel, tolerance, |t| {
+    advance(T::ZERO, T::ONE, travel, tolerance, |t| {
         let (first, second, _, _) =
             closest_points_on_segments(at(&a, t), at(&b, t), at(&c, t), at(&d, t));
         (first - second).norm()
@@ -371,4 +297,45 @@ mod tests {
         }
         assert!(crossings > 100);
     }
+    #[test]
+    fn positive_tolerance_without_plane_crossing() {
+        let (a, b, c) = (still(v(0.0, 0.0, 0.0)), still(v(2.0, 0.0, 0.0)), still(v(0.0, 2.0, 0.0)));
+        let tolerance = 0.01;
+        // Erreicht den Kontaktabstand, ohne die Dreiecksebene zu erreichen.
+        let hit = vertex_triangle([v(0.5, 0.5, 1.0), v(0.5, 0.5, 0.005)], a, b, c, tolerance);
+        let expected = (1.0 - tolerance) / (1.0 - 0.005);
+        assert!(hit.is_some_and(|t| (t - expected).abs() < 1.0e-6));
+
+        // Kontakt nur mitten im Schritt: Die Endlagen allein reichen nicht.
+        let hit = vertex_triangle([v(-1.0, 0.5, 0.005), v(3.0, 0.5, 0.005)], a, b, c, tolerance);
+        assert!(hit.is_some_and(|t| t > 0.24 && t < 0.26));
+        // Dieselbe Bahn mit ausreichendem Abstand bleibt frei.
+        assert!(vertex_triangle([v(-1.0, 0.5, 0.2), v(3.0, 0.5, 0.2)], a, b, c, tolerance).is_none());
+    }
+
+    #[test]
+    fn edge_tolerance_without_plane_crossing() {
+        let (c, d) = (still(v(0.0, -1.0, 0.0)), still(v(0.0, 1.0, 0.0)));
+        let tolerance = 0.01;
+        let hit = edge_edge(
+            [v(-1.0, 0.0, 1.0), v(-1.0, 0.0, 0.005)],
+            [v(1.0, 0.0, 1.0), v(1.0, 0.0, 0.005)],
+            c, d, tolerance,
+        );
+        let expected = (1.0 - tolerance) / (1.0 - 0.005);
+        assert!(hit.is_some_and(|t| (t - expected).abs() < 1.0e-6));
+        // Windschiefe Kanten erreichen den Kontaktabstand nur mitten im Schritt.
+        let hit = edge_edge(
+            [v(-1.0, -2.0, 0.005), v(-1.0, 2.0, 0.005)],
+            [v(1.0, -2.0, 0.005), v(1.0, 2.0, 0.005)],
+            c, d, tolerance,
+        );
+        assert!(hit.is_some_and(|t| t > 0.24 && t < 0.26));
+        assert!(edge_edge(
+            [v(-1.0, -2.0, 0.2), v(-1.0, 2.0, 0.2)],
+            [v(1.0, -2.0, 0.2), v(1.0, 2.0, 0.2)],
+            c, d, tolerance,
+        ).is_none());
+    }
+
 }
