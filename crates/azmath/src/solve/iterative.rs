@@ -19,6 +19,6 @@ mod util;
 mod tests;
 
 pub use bicgstab::bicgstab;
-pub use cg::conjugate_gradient;
+pub use cg::{conjugate_gradient, preconditioned_conjugate_gradient};
 pub use gmres::{gmres, gmres_work_len};
 pub use util::LinearResult;

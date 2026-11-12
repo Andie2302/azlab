@@ -2,7 +2,7 @@
 
 #![cfg(any(feature = "std", feature = "libm"))]
 
-use super::{bicgstab, conjugate_gradient, gmres, gmres_work_len};
+use super::{bicgstab, conjugate_gradient, gmres, gmres_work_len, preconditioned_conjugate_gradient};
 use crate::linalg::{CsrMatrix, LinearOperator, Matrix, Vector};
 use crate::scalar::RealElementary;
 use crate::solve::{SolveError, Tolerance};
@@ -139,6 +139,78 @@ fn check_gmres<T: RealElementary>() {
         Err(SolveError::NotConverged(s)) if s.iterations == 0
     ));
     assert!(gmres_work_len(usize::MAX, 2).is_none());
+}
+
+fn check_preconditioned<T: RealElementary>() {
+    let f = T::from_f64;
+    let tol = Tolerance::<T>::default().with_rel_x(T::EPSILON.sqrt()).with_max_iterations(50);
+    // Symmetrisch positiv definit, aber schlecht skaliert: Die Diagonale
+    // überstreicht sechs Größenordnungen.
+    let a = Matrix([
+        [f(1.0e3), f(1.0), f(0.0), f(0.01)],
+        [f(1.0), f(1.0), f(0.01), f(0.0)],
+        [f(0.0), f(0.01), f(1.0e-2), f(1.0e-3)],
+        [f(0.01), f(0.0), f(1.0e-3), f(1.0e-3)],
+    ]);
+    let b = [f(1.0), f(-2.0), f(0.5), f(0.25)];
+    // Jacobi: Kehrwerte der Diagonale.
+    let mut jacobi = Matrix::<T, 4, 4>::ZERO;
+    for index in 0..4 {
+        jacobi[(index, index)] = a[(index, index)].recip();
+    }
+    let mut x = [T::ZERO; 4];
+    let mut work = [T::ZERO; 16];
+    let solved = preconditioned_conjugate_gradient(&a, &jacobi, &b, &mut x, &mut work, &tol);
+    assert!(solved.is_ok());
+    assert!(a.solve(Vector(b)).is_ok_and(|e| near(&x, &e.0)));
+    // Mit der Einheitsmatrix als Vorkonditionierer ist es das gewöhnliche
+    // Verfahren und braucht hier mehr Schritte.
+    let mut plain = [T::ZERO; 4];
+    let unpreconditioned =
+        preconditioned_conjugate_gradient(&a, &Matrix::<T, 4, 4>::identity(), &b, &mut plain, &mut work, &tol);
+    let steps = |result: &Result<crate::solve::Solution<(), T>, SolveError<(), T>>| match result {
+        Ok(state) | Err(SolveError::NotConverged(state)) => state.iterations,
+        Err(_) => u32::MAX,
+    };
+    assert!(steps(&solved) <= steps(&unpreconditioned));
+
+    // Fehlerfälle: zu wenig Arbeitsspeicher, unpassender oder nicht positiv
+    // definiter Vorkonditionierer, keine Iterationen erlaubt.
+    let mut small = [T::ZERO; 15];
+    assert_eq!(
+        preconditioned_conjugate_gradient(&a, &jacobi, &b, &mut x, &mut small, &tol),
+        Err(SolveError::InvalidInput)
+    );
+    assert_eq!(
+        preconditioned_conjugate_gradient(&a, &Matrix::<T, 3, 3>::identity(), &b, &mut x, &mut work, &tol),
+        Err(SolveError::InvalidInput)
+    );
+    let mut x = [T::ZERO; 4];
+    assert!(matches!(
+        preconditioned_conjugate_gradient(&a, &(-jacobi), &b, &mut x, &mut work, &tol),
+        Err(SolveError::Singular(_))
+    ));
+    let none = tol.with_max_iterations(0);
+    assert!(matches!(
+        preconditioned_conjugate_gradient(&a, &jacobi, &b, &mut x, &mut work, &none),
+        Err(SolveError::NotConverged(s)) if s.iterations == 0
+    ));
+    // Null als rechte Seite ist sofort gelöst.
+    let mut zero = [T::ZERO; 4];
+    assert!(
+        preconditioned_conjugate_gradient(&a, &jacobi, &[T::ZERO; 4], &mut zero, &mut work, &tol)
+            .is_ok_and(|state| state.iterations == 0)
+    );
+}
+
+#[test]
+fn preconditioned_f32() {
+    check_preconditioned::<f32>();
+}
+
+#[test]
+fn preconditioned_f64() {
+    check_preconditioned::<f64>();
 }
 
 #[test]
