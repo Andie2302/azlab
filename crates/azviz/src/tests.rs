@@ -88,3 +88,15 @@ fn camera() {
             && front.is_some_and(|(red, _, blue)| red > 100 && blue == 0)
     }));
 }
+
+#[test]
+fn depth_image_composites_over_background() {
+    let mut canvas = RasterCanvas::new(4, 4).expect("Bild");
+    canvas.clear(Color::rgb(10, 20, 30));
+    let mut image = crate::depth::DepthImage::new(4, 4);
+    image.triangle([[0.0, 0.0, 1.0], [4.0, 0.0, 1.0], [0.0, 4.0, 1.0]],
+        Color::RED, 0.0, false);
+    canvas.rgba_image(4, 4, &image.rgba);
+    assert_eq!(pixel(&canvas, 0, 0), Some((Color::RED.r, Color::RED.g, Color::RED.b)));
+    assert_eq!(pixel(&canvas, 3, 3), Some((10, 20, 30)));
+}

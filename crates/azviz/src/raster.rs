@@ -41,6 +41,21 @@ impl Canvas for RasterCanvas {
         self.pixmap.fill(tiny_skia::Color::from_rgba8(color.r, color.g, color.b, color.a));
     }
 
+    fn rgba_image(&mut self, width: u16, height: u16, rgba: &[u8]) {
+        // tiny-skia erwartet vormultipliziertes Alpha.
+        let mut bytes = rgba.to_vec();
+        for pixel in bytes.chunks_exact_mut(4) {
+            let alpha = u16::from(pixel[3]);
+            for channel in &mut pixel[..3] {
+                *channel = ((u16::from(*channel) * alpha + 127) / 255) as u8;
+            }
+        }
+        if let Some(image) = tiny_skia::PixmapRef::from_bytes(&bytes, u32::from(width), u32::from(height)) {
+            self.pixmap.draw_pixmap(0, 0, image, &tiny_skia::PixmapPaint::default(),
+                Transform::identity(), None);
+        }
+    }
+
     fn line(&mut self, from: [f32; 2], to: [f32; 2], width: f32, color: Color) {
         let mut builder = PathBuilder::new();
         builder.move_to(from[0], from[1]);

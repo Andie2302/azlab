@@ -26,6 +26,29 @@ pub trait Canvas {
     /// Gefülltes achsenparalleles Rechteck ab der Ecke `corner`.
     fn rect(&mut self, corner: [f32; 2], size: [f32; 2], color: Color);
 
+    /// RGBA-Bild ohne vormultipliziertes Alpha, ab der linken oberen Ecke.
+    /// Standardweg für eigene Zeichenflächen: gleichfarbige Zeilenabschnitte.
+    fn rgba_image(&mut self, width: u16, height: u16, rgba: &[u8]) {
+        let width = usize::from(width);
+        if rgba.len() != width * usize::from(height) * 4 { return; }
+        for y in 0..usize::from(height) {
+            let mut x = 0;
+            while x < width {
+                let at = (y * width + x) * 4;
+                let p = &rgba[at..at + 4];
+                let mut end = x + 1;
+                while end < width && rgba[(y * width + end) * 4..(y * width + end + 1) * 4] == *p {
+                    end += 1;
+                }
+                if p[3] != 0 {
+                    self.rect([x as f32, y as f32], [(end - x) as f32, 1.0],
+                        Color { r: p[0], g: p[1], b: p[2], a: p[3] });
+                }
+                x = end;
+            }
+        }
+    }
+
     /// Text; nur das Fenster stellt ihn dar, Dateien lassen ihn weg.
     fn text(&mut self, _position: [f32; 2], _text: &str, _size: f32, _color: Color) {}
 }

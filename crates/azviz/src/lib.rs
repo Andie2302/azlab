@@ -22,6 +22,7 @@ extern crate alloc;
 mod camera;
 mod canvas;
 mod color;
+mod depth;
 mod plane;
 mod raster;
 mod runner;

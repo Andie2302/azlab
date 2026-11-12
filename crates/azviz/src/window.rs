@@ -45,6 +45,12 @@ impl Canvas for WindowCanvas {
         mq::draw_rectangle(corner[0], corner[1], size[0], size[1], convert(color));
     }
 
+    fn rgba_image(&mut self, width: u16, height: u16, rgba: &[u8]) {
+        let texture = mq::Texture2D::from_rgba8(width, height, rgba);
+        texture.set_filter(mq::FilterMode::Nearest);
+        mq::draw_texture(&texture, 0.0, 0.0, mq::WHITE);
+    }
+
     fn text(&mut self, position: [f32; 2], text: &str, size: f32, color: Color) {
         mq::draw_text(text, position[0], position[1], size, convert(color));
     }

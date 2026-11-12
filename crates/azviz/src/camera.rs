@@ -65,14 +65,15 @@ impl Camera {
 }
 
 /// Sammlung von Dreiecken im Raum, die gemeinsam gezeichnet werden:
-/// schattiert nach ihrer Neigung zum Licht und von hinten nach vorn sortiert,
-/// damit Vorderes Hinteres verdeckt.
+/// schattiert nach ihrer Neigung zum Licht und mit Tiefenprüfung je Bildpunkt.
+/// Gedacht für undurchsichtige Flächen; transparente Flächen werden nicht
+/// lagenweise gemischt. Pro Bildpunkt bleibt nur die nächste Fläche sichtbar.
 #[derive(Clone, Debug, Default)]
 pub struct Batch {
     triangles: Vec<([Point; 3], Color, Color, f32)>,
     /// Vorrang der Dreiecke, die als Nächstes hinzukommen.
     priority: f32,
-    /// Boden: liegt unter allem und wird deshalb zuerst gezeichnet.
+    /// Unbeleuchtete Bodenflächen; nehmen ebenfalls an der Tiefenprüfung teil.
     ground: Vec<([Point; 4], Color)>,
 }
 
@@ -83,7 +84,7 @@ impl Batch {
     }
 
     /// Gibt allen danach hinzugefügten Dreiecken Vorrang: Sie werden so
-    /// einsortiert, als lägen sie um `distance` näher an der Kamera. Damit
+    /// tiefengeprüft, als lägen sie um `distance` näher an der Kamera. Damit
     /// bleibt etwas sichtbar, das dicht auf einer anderen Fläche aufliegt
     /// (ein Tuch auf einer Platte). Null stellt den Normalfall wieder her.
     pub fn set_priority(&mut self, distance: f32) {
@@ -107,9 +108,8 @@ impl Batch {
     }
 
     /// Ein ebenes Viereck mit den Ecken reihum, zerlegt in
-    /// `divisions × divisions` Felder. Kleine Felder ordnen sich beim
-    /// Zeichnen richtig zwischen andere Dreiecke ein; ein einziges großes
-    /// Viereck verdeckt sonst leicht, was davor liegt.
+    /// `divisions × divisions` Felder. Die Verdeckung wird unabhängig von der
+    /// Unterteilung je Bildpunkt bestimmt.
     pub fn quad(&mut self, corners: [Point; 4], divisions: usize, front: Color, back: Color) {
         let divisions = divisions.max(1);
         let point = |column: usize, row: usize| {
@@ -155,7 +155,7 @@ impl Batch {
 
     /// Ein waagrechter Boden in der Höhe `height`, als Schachbrett aus
     /// `tiles × tiles` Feldern der Kantenlänge `tile` um den Ursprung. Er
-    /// wird vor allem anderen gezeichnet, liegt also immer dahinter.
+    /// nimmt wie die übrigen Flächen an der Tiefenprüfung teil.
     pub fn floor(&mut self, height: f32, tile: f32, tiles: usize, light: Color, dark: Color) {
         let half = tiles as f32 * tile * 0.5;
         for row in 0..tiles {
@@ -171,40 +171,33 @@ impl Batch {
 
     /// Zeichnet alles; mit `wire` werden die Kanten nachgezogen.
     pub fn draw(&self, canvas: &mut dyn Canvas, camera: &Camera, wire: bool) {
+        let width = canvas.width().ceil().clamp(0.0, u16::MAX as f32) as usize;
+        let height = canvas.height().ceil().clamp(0.0, u16::MAX as f32) as usize;
+        if width == 0 || height == 0 { return; }
+        let mut image = crate::depth::DepthImage::new(width, height);
+        let project = |corners: [Point; 3]| {
+            let points = corners.map(|p| camera.project(p, canvas));
+            if let [Some(a), Some(b), Some(c)] = points {
+                Some([[a.0[0], a.0[1], a.1], [b.0[0], b.0[1], b.1], [c.0[0], c.0[1], c.1]])
+            } else { None }
+        };
         for &(corners, color) in &self.ground {
-            let projected = corners.map(|corner| camera.project(corner, canvas));
-            if let [Some(a), Some(b), Some(c), Some(d)] = projected {
-                canvas.triangle(a.0, b.0, c.0, color);
-                canvas.triangle(a.0, c.0, d.0, color);
-                // Die Naht zwischen den beiden Dreiecken schließen.
-                canvas.line(a.0, c.0, 1.5, color);
+            for tri in [[corners[0], corners[1], corners[2]], [corners[0], corners[2], corners[3]]] {
+                if let Some(points) = project(tri) {
+                    image.triangle(points, color, 0.0, false);
+                }
             }
         }
         let light = normalize([0.4, 1.0, 0.6]);
-        let mut visible: Vec<(f32, [[f32; 2]; 3], Color)> = Vec::new();
-        for &([a, b, c], front, back, priority) in &self.triangles {
-            let (Some(pa), Some(pb), Some(pc)) =
-                (camera.project(a, canvas), camera.project(b, canvas), camera.project(c, canvas))
-            else {
-                continue;
-            };
+        for &(corners @ [a, b, c], front, back, priority) in &self.triangles {
+            let Some(points) = project(corners) else { continue; };
             let normal = normalize(cross(sub(b, a), sub(c, a)));
             let facing = dot(normal, sub(camera.eye, a)) >= 0.0;
-            // Beleuchtung der sichtbaren Seite.
             let lit = dot(if facing { normal } else { [-normal[0], -normal[1], -normal[2]] }, light);
             let brightness = 0.45 + 0.55 * lit.max(0.0);
             let color = if facing { front } else { back }.shade(brightness);
-            visible.push(((pa.1 + pb.1 + pc.1) / 3.0 - priority, [pa.0, pb.0, pc.0], color));
+            image.triangle(points, color, priority, wire);
         }
-        visible.sort_by(|a, b| b.0.total_cmp(&a.0));
-        for (_, [a, b, c], color) in visible {
-            canvas.triangle(a, b, c, color);
-            if wire {
-                let edge = color.shade(0.75);
-                canvas.line(a, b, 1.0, edge);
-                canvas.line(b, c, 1.0, edge);
-                canvas.line(c, a, 1.0, edge);
-            }
-        }
+        canvas.rgba_image(width as u16, height as u16, &image.rgba);
     }
 }
