@@ -45,11 +45,11 @@ impl MotionDiagnostics {
     fn update(&mut self, velocities: &[Vector<f32, 3>], dt: f32) {
         if !dt.is_finite() || dt <= 0.0 { return; }
         let acceleration: Vec<Sample> = velocities.iter().zip(&self.previous_velocity)
-            .map(|(v, old)| std::array::from_fn(|axis|
+            .map(|(v, old)| core::array::from_fn(|axis|
                 (f64::from(v[axis]) - old[axis]) / f64::from(dt))).collect();
         self.jerk = self.previous_acceleration.as_ref().map(|old| {
             let jerk: Vec<Sample> = acceleration.iter().zip(old)
-                .map(|(a, previous)| std::array::from_fn(|axis|
+                .map(|(a, previous)| core::array::from_fn(|axis|
                     (a[axis] - previous[axis]) / f64::from(dt))).collect();
             Self::summary(&jerk)
         });
@@ -160,7 +160,7 @@ impl Scene for FreeFlight {
         canvas.text([12.0, 120.0], &MotionDiagnostics::line("a", "m/s²", self.diagnostics.acceleration), 17.0, Color::WHITE);
         canvas.text([12.0, 144.0], &MotionDiagnostics::line("Ruck", "m/s³", self.diagnostics.jerk), 17.0, Color::WHITE);
         let drift: Vec<Sample> = self.cloth.velocities().iter()
-            .map(|v| std::array::from_fn(|axis| f64::from(v[axis]) - f64::from(VELOCITY[axis]))).collect();
+            .map(|v| core::array::from_fn(|axis| f64::from(v[axis]) - f64::from(VELOCITY[axis]))).collect();
         let (mean, _) = MotionDiagnostics::summary(&drift);
         canvas.text([12.0, 168.0], &format!(
             "Mittlerer Geschw.-Fehler xyz=({:+.3e}, {:+.3e}, {:+.3e}) m/s",

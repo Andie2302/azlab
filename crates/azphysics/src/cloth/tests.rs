@@ -239,8 +239,8 @@ fn motion_restore_validates_before_modifying() {
 
 /// Der Diagnosemodus muss echte freie Teilchen liefern: Ein gedehntes Netz
 /// darf bei null Iterationen keine versteckte Mindestiteration ausführen.
-/// Die erwartete Bewegung enthält dieselbe Substep-Integration und
-/// Geschwindigkeitsrekonstruktion, aber keinerlei Abstandsbedingungen.
+/// Jedes freie Teilchen behält seine Geschwindigkeit bitgenau und liegt bis
+/// auf Rundung bei Anfangslage plus Geschwindigkeit mal Zeit.
 fn zero_iterations_preserves_free_particle_path<T: RealElementary>() {
     let mut cloth = sheet::<T>(3, 0.0);
     cloth.params.iterations = 0;
@@ -250,23 +250,71 @@ fn zero_iterations_preserves_free_particle_path<T: RealElementary>() {
     cloth.params.damping = T::ZERO;
     cloth.pin(0);
     cloth.set_position(4, v(0.7, 0.3, -0.2));
-    cloth.set_all_velocities(v(0.15, 0.0, 0.05));
-    let mut expected_positions = cloth.positions().to_vec();
-    let mut expected_velocities = cloth.velocities().to_vec();
+    let velocity = v::<T>(0.15, 0.0, 0.05);
+    cloth.set_all_velocities(velocity);
+    let start = cloth.positions().to_vec();
     let dt = T::from_f64(1.0 / 60.0);
-    let h = dt / T::from_f64(f64::from(cloth.params.substeps));
-    for _ in 0..3 {
-        for _ in 0..cloth.params.substeps {
-            for index in 1..expected_positions.len() {
-                let previous = expected_positions[index];
-                expected_positions[index] += expected_velocities[index] * h;
-                expected_velocities[index] = (expected_positions[index] - previous) / h;
-            }
-        }
+    for step in 1..=3 {
         cloth.step(dt, &[]);
-        assert_eq!(cloth.positions(), expected_positions.as_slice());
-        assert_eq!(cloth.velocities(), expected_velocities.as_slice());
+        let time = dt * T::from_f64(f64::from(step));
+        assert_eq!(cloth.positions()[0], start[0]);
+        assert_eq!(cloth.velocities()[0], v(0.0, 0.0, 0.0));
+        for (index, &began) in start.iter().enumerate().skip(1) {
+            assert_eq!(cloth.velocities()[index], velocity);
+            let error = cloth.positions()[index] - (began + velocity * time);
+            assert!(error.norm() <= T::EPSILON * T::from_f64(4.0), "Teilchen {index}: {:?}", error.norm().to_f64());
+        }
     }
+}
+
+/// Freier Flug weit weg vom Ursprung, mit allen Korrekturen eingeschaltet.
+///
+/// Dort ist das Raster der Lage grob. Früher wurde die Geschwindigkeit in
+/// jedem Teilschritt aus dem gerundeten Weg zurückgerechnet und rastete auf
+/// dieses Raster ein; Nachbarn wurden verschieden gerundet, und die
+/// Verbindungen verteilten Stöße in Rastergröße. Das Tuch trieb stetig ab –
+/// in jeder Richtung, in der es sich bewegte, und umso stärker, je weiter
+/// es vom Ursprung entfernt war.
+fn free_flight_does_not_drift<T: RealElementary>() {
+    let f = T::from_f64;
+    let n = 8;
+    let spacing = 1.0 / (n - 1) as f64;
+    let origin = v::<T>(250.0, -40.0, 90.0);
+    let mut cloth: Cloth<T> = Cloth::grid(n, n, origin, v(spacing, 0.0, 0.0), v(0.0, 0.0, spacing), f(0.005));
+    cloth.params.gravity = v(0.0, 0.0, 0.0);
+    cloth.params.damping = T::ZERO;
+    let velocity = v::<T>(0.15, -0.02, 0.05);
+    cloth.set_all_velocities(velocity);
+    let start = cloth.positions().to_vec();
+    // Ein Rasterschritt der Lage an dieser Stelle.
+    let grid = f(256.0) * T::EPSILON;
+    let dt = f(1.0 / 60.0);
+    let steps = 240;
+    let mut hits = 0;
+    for _ in 0..steps {
+        hits += cloth.step(dt, &[]).ccd_hits;
+    }
+    let time = dt * f(f64::from(steps));
+    assert_eq!(hits, 0);
+    for (index, (&position, &began)) in cloth.positions().iter().zip(&start).enumerate() {
+        // Die Geschwindigkeit ist unverändert, bis auf das letzte Bit.
+        assert_eq!(cloth.velocities()[index], velocity, "Teilchen {index}");
+        // Die Lage stimmt auf wenige Rasterschritte. Die alte Rechnung lag
+        // hier nach vier Sekunden um mehrere hundert daneben.
+        let error = position - (began + velocity * time);
+        assert!(error.norm() <= grid * f(4.0), "Teilchen {index}: {:?} Rasterschritte", (error.norm() / grid).to_f64());
+    }
+    assert!(cloth.max_strain() <= grid * f(64.0));
+}
+
+#[test]
+fn free_flight_f32() {
+    free_flight_does_not_drift::<f32>();
+}
+
+#[test]
+fn free_flight_f64() {
+    free_flight_does_not_drift::<f64>();
 }
 
 #[test]

@@ -19,7 +19,9 @@ Raum, mit Tiefenprüfung je Bildpunkt).
 
 ## Gewebe: Ablauf eines Teilschritts
 
-1. Freie Bewegung unter Schwerkraft und Dämpfung.
+1. Freie Bewegung unter Schwerkraft und Dämpfung. Die Lage wird
+   kompensiert weitergerückt: Was beim Runden verloren geht, bleibt als
+   Rest je Teilchen erhalten (siehe „Lage und Rest“).
 2. Abstandsbedingungen (XPBD) für Dehnung, Scherung, Biegung.
 3. Hindernisse Ebene und Kugel: hinausschieben, Reibung.
 4. Abstoßung Teilchen–Dreieck innerhalb der Dicke; unelastisch, d. h. sie
@@ -29,7 +31,40 @@ Raum, mit Tiefenprüfung je Bildpunkt).
    Berührzeitpunkt beendet (80 %, dann 40 % der Zeit, sonst zurück an den
    Anfang). Wiederholen, bis ein Durchlauf nichts mehr findet; nach vier
    Durchläufen nur noch hartes Zurücksetzen, nach acht alle Teilchen zurück.
-6. Geschwindigkeit aus der erreichten Lage.
+6. Geschwindigkeit: die der freien Bewegung, geändert um das, was die
+   Korrekturen des Teilschritts an der Lage verschoben haben.
+
+### Lage und Rest
+
+Die Lage eines Teilchens ist auf das Raster ihres Zahltyps gerundet, und
+dieses Raster wird gröber, je weiter das Teilchen vom Ursprung entfernt ist
+(`f32`: 6·10⁻⁸ m bei 1 m, 10⁻⁶ m bei 10 m). Der Weg eines Teilschritts ist
+oft nur wenige tausend Rasterschritte lang. Zwei Folgen, beide systematisch
+und nicht zufällig:
+
+- Beim Weiterrücken geht der Rest des Wegs verloren, in jedem Teilschritt
+  derselbe. Das Teilchen ist dauerhaft etwas zu schnell oder zu langsam.
+- Wird die Geschwindigkeit aus dem gerundeten Weg zurückgerechnet, rastet
+  sie auf Vielfache von Rasterschritt durch Teilschritt ein. Nachbarn mit
+  verschiedenem Raster bekommen verschiedene Geschwindigkeiten, und die
+  Verbindungen gleichen den Scheinfehler mit Stößen in Rastergröße aus.
+
+Ein frei fliegendes Tuch trieb deshalb in jeder Richtung ab, in der es sich
+bewegte; eine Richtung ohne Bewegung blieb exakt. Deshalb:
+
+- `shift` rückt die Lage als fehlerfreie Summe weiter und merkt sich den
+  Rest (`carry`). Lage und Rest zusammen sind die genaue Lage.
+- Die Verbindungen rechnen mit der genauen Lage und verschieben über
+  `shift`.
+- Die Geschwindigkeit wird nicht aus dem Weg zurückgerechnet, sondern nur
+  um die Korrekturen des Teilschritts geändert. Ein Teilchen, das nichts
+  korrigiert hat, behält sie bitgenau.
+
+Hindernisse, Abstoßung und Kollisionserkennung lesen nur die gerundete
+Lage; der Rest ist kleiner als ein Rasterschritt und für sie ohne Belang.
+
+Test: `cloth::tests::free_flight_does_not_drift` (250 m vom Ursprung, alle
+Korrekturen eingeschaltet).
 
 ### Warum nichts durchdringt
 

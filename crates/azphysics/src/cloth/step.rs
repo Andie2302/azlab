@@ -1,8 +1,26 @@
 //! Der Zeitschritt: freie Bewegung, Abstandsbedingungen, Hindernisse.
 
 use super::model::{Cloth, Collider, StepStats, StepPhase};
+use crate::geometry::Vec3;
 use azmath::Vector;
 use azmath::scalar::RealElementary;
+
+/// Verschiebt eine Lage um `amount`, ohne dass beim Runden etwas verloren
+/// geht: Was die gerundete Summe nicht aufnimmt, bleibt in `carry` und wird
+/// bei der nächsten Verschiebung nachgeholt (fehlerfreie Summe nach Knuth).
+///
+/// Lage und Rest zusammen sind die genaue Lage. Die Lage allein ist auf das
+/// Raster ihres Zahltyps gerundet, und dieses Raster wird gröber, je weiter
+/// das Teilchen vom Ursprung entfernt ist.
+#[inline]
+fn shift<T: RealElementary>(position: &mut Vec3<T>, carry: &mut Vec3<T>, amount: Vec3<T>) {
+    let start = *position;
+    let path = amount + *carry;
+    let end = start + path;
+    let taken = end - start;
+    *carry = (start - (end - taken)) + (path - taken);
+    *position = end;
+}
 
 impl<T: RealElementary> Cloth<T> {
     /// Rechnet die Simulation um `dt` Sekunden weiter.
@@ -34,14 +52,26 @@ impl<T: RealElementary> Cloth<T> {
 
     fn substep(&mut self, h: T, colliders: &[Collider<T>], stats: &mut StepStats, observe: &mut impl FnMut(StepPhase)) {
         // 1. Freie Bewegung unter Schwerkraft.
+        //
+        // Der Weg eines Teilschritts ist meist nur wenige tausend
+        // Rasterschritte der Lage lang; beim Addieren geht sein Rest
+        // verloren, in jedem Teilschritt derselbe. Ohne Gegenmaßnahme bewegt
+        // sich das Teilchen deshalb dauerhaft etwas zu schnell oder zu
+        // langsam. `shift` merkt sich den Rest und holt ihn nach.
+        let count = self.positions.len();
+        self.carry.resize(count, Vector::ZERO);
+        self.predicted.resize(count, Vector::ZERO);
+        self.predicted_carry.resize(count, Vector::ZERO);
         let keep = (T::ONE - self.params.damping * h).max(T::ZERO);
-        for index in 0..self.positions.len() {
+        for index in 0..count {
             self.previous[index] = self.positions[index];
             if self.inverse_mass[index] > T::ZERO {
                 let velocity = (self.velocities[index] + self.params.gravity * h) * keep;
                 self.velocities[index] = velocity;
-                self.positions[index] += velocity * h;
+                shift(&mut self.positions[index], &mut self.carry[index], velocity * h);
             }
+            self.predicted[index] = self.positions[index];
+            self.predicted_carry[index] = self.carry[index];
         }
 
         observe(StepPhase::Integrate);
@@ -70,12 +100,27 @@ impl<T: RealElementary> Cloth<T> {
             observe(StepPhase::Ccd);
         }
 
-        // 4. Geschwindigkeit aus der tatsächlich erreichten Lage.
+        // 4. Geschwindigkeit: die der freien Bewegung, geändert um das, was
+        // die Korrekturen des Teilschritts an der Lage verschoben haben.
+        //
+        // Die Geschwindigkeit wird nicht aus dem ganzen zurückgelegten Weg
+        // zurückgerechnet. Der ist auf das Raster der Lage gerundet, und die
+        // Geschwindigkeit würde in jedem Teilschritt auf dieses Raster
+        // einrasten: ein Fehler, der mit dem Abstand vom Ursprung wächst und
+        // ein frei fliegendes Tuch stetig abtreiben lässt. Ein Teilchen, das
+        // nichts korrigiert hat, behält seine Geschwindigkeit so bitgenau.
         for index in 0..self.positions.len() {
             if self.inverse_mass[index] <= T::ZERO {
                 continue;
             }
-            let mut velocity = (self.positions[index] - self.previous[index]) / h;
+            let mut velocity = if self.positions[index] == self.previous[index] {
+                // An den Anfang des Teilschritts zurückgesetzt: steht.
+                Vector::ZERO
+            } else {
+                let moved = (self.positions[index] - self.predicted[index])
+                    + (self.carry[index] - self.predicted_carry[index]);
+                self.velocities[index] + moved / h
+            };
             // Abstoßung ist unelastisch: Sie darf die Annäherung aufhalten,
             // aber das Teilchen nicht wegschleudern. Was die Verschiebung an
             // Geschwindigkeit vom Dreieck weg hinzugefügt hat, entfällt.
@@ -100,7 +145,11 @@ impl<T: RealElementary> Cloth<T> {
             if wi + wj <= T::ZERO {
                 continue;
             }
-            let delta = self.positions[link.i] - self.positions[link.j];
+            // Abstand aus den genauen Lagen (Lage plus Rest). Aus den
+            // gerundeten Lagen allein erschiene ein Tuch, das als Ganzes
+            // fliegt, um einen Rasterschritt verzerrt, und die Korrektur
+            // dieses Scheinfehlers verteilte Stöße in Rastergröße.
+            let delta = (self.positions[link.i] - self.positions[link.j]) + (self.carry[link.i] - self.carry[link.j]);
             let length = delta.norm();
             if length <= T::ZERO || length.is_nan() {
                 continue;
@@ -114,8 +163,8 @@ impl<T: RealElementary> Cloth<T> {
             let change = (link.rest - length - alpha * *lambda) / (wi + wj + alpha);
             *lambda += change;
             let direction = delta / length;
-            self.positions[link.i] += direction * (change * wi);
-            self.positions[link.j] -= direction * (change * wj);
+            shift(&mut self.positions[link.i], &mut self.carry[link.i], direction * (change * wi));
+            shift(&mut self.positions[link.j], &mut self.carry[link.j], -direction * (change * wj));
         }
     }
 

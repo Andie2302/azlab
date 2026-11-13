@@ -207,3 +207,51 @@ Flüssigkeit; die Wand ist dafür drei statt zwei Lagen dick.
 
 Regressionstest: `fluid::tests::pool` prüft die Ruhe getrennt an beiden
 Wänden und in der Mitte.
+
+## Gewebe: frei fliegendes Tuch trieb in x und z ab
+
+**Behoben.** Ein Tuch ohne Schwerkraft und Dämpfung, das mit
+(0,15; 0; 0,05) m/s fliegt, änderte stetig seine Geschwindigkeit in x und z;
+y blieb exakt. Mit `f64` war der Fehler am kleinsten.
+
+Die Ursache liegt nicht in der Kollisionserkennung, der Abstoßung oder den
+Verbindungen, sondern im Zeitschritt selbst – der Fehler trat auch ganz ohne
+Korrekturen auf (`iterations = 0`, CCD und Selbstkollision aus):
+
+1. **Die Lage verliert in jedem Teilschritt denselben Rest.** Die Lage ist
+   auf das Raster des Zahltyps gerundet; bei 9 m ist ein Rasterschritt in
+   `f32` knapp 10⁻⁶ m, der Weg eines Teilschritts aber nur 3·10⁻⁴ m. Der
+   abgeschnittene Rest ist jedes Mal gleich, also ein Dauerfehler.
+2. **Die Geschwindigkeit wurde aus dem gerundeten Weg zurückgerechnet** und
+   rastete damit auf Vielfache von Rasterschritt durch Teilschritt ein: bei
+   9 m sind das 4,6·10⁻⁴ m/s – genau die gemessene Größe.
+3. **Nachbarn werden verschieden gerundet.** Die Verbindungen sahen eine
+   Scheinverzerrung von einem Rasterschritt und korrigierten sie mit Stößen
+   in Rastergröße; das hat die Drift mit Stoffbedingungen noch verstärkt.
+
+Das erklärt alle drei Beobachtungen: y ist exakt, weil dort Weg und
+Geschwindigkeit null sind und nichts zu runden ist. `f64` hat denselben
+Fehler, nur zehn Größenordnungen kleiner. Und der Fehler wächst mit der
+Zeit, weil das Tuch sich vom Ursprung entfernt und das Raster dort gröber
+wird.
+
+Behebung in `cloth/step.rs`: Die Lage wird als fehlerfreie Summe
+weitergerückt und der Rest je Teilchen gemerkt; die Verbindungen rechnen mit
+Lage plus Rest; die Geschwindigkeit wird nur noch um die Korrekturen des
+Teilschritts geändert, nicht mehr aus dem Weg zurückgerechnet.
+
+Freier Flug in `f32` nach 60 s, alle Korrekturen eingeschaltet:
+
+| | vorher | nachher |
+|---|---|---|
+| Mittlerer Geschwindigkeitsfehler | bis 4·10⁻³ m/s | exakt 0 |
+| Streuung der Geschwindigkeit zwischen Teilchen | 1,2·10⁻³ m/s | exakt 0 |
+| Ortsfehler des Schwerpunkts | bis 10 cm | 10⁻⁷ m |
+
+Regressionstest: `cloth::tests::free_flight_does_not_drift`. Der Test
+`zero_iterations_preserves_free_particle_path` bildete die alte Rechnung
+bitgenau nach; er prüft jetzt, dass freie Teilchen ihre Geschwindigkeit
+bitgenau behalten.
+
+In den Beispielen stand an drei Stellen `std::array` statt `core::array`
+(vom Workspace-Lint verboten); das ist mit korrigiert.

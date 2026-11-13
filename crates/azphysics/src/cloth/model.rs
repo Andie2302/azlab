@@ -163,6 +163,13 @@ pub struct Cloth<T> {
     /// Je Teilchen die Verschiebung durch Abstoßung im laufenden
     /// Teilschritt.
     pub(super) pushes: Vec<Vec3<T>>,
+    /// Je Teilchen der Rest der freien Bewegung, der beim Runden der Lage
+    /// verloren ging und im nächsten Teilschritt nachgeholt wird.
+    pub(super) carry: Vec<Vec3<T>>,
+    /// Lage nach der freien Bewegung, vor allen Korrekturen des Teilschritts,
+    /// und der Rest dazu.
+    pub(super) predicted: Vec<Vec3<T>>,
+    pub(super) predicted_carry: Vec<Vec3<T>>,
     cloth_triangles: usize,
     columns: usize,
     /// Einstellungen; dürfen zwischen den Schritten geändert werden.
@@ -239,6 +246,9 @@ impl<T: RealElementary> Cloth<T> {
             edges: Vec::new(),
             proximity: Proximity::default(),
             pushes: Vec::new(),
+            carry: Vec::new(),
+            predicted: Vec::new(),
+            predicted_carry: Vec::new(),
             columns,
             params: ClothParams::default(),
         };
@@ -305,6 +315,9 @@ impl<T: RealElementary> Cloth<T> {
     pub fn set_position(&mut self, index: usize, position: Vec3<T>) {
         if let Some(slot) = self.positions.get_mut(index) {
             *slot = position;
+            if let Some(rest) = self.carry.get_mut(index) {
+                *rest = Vector::ZERO;
+            }
             self.proximity.valid = false;
         }
     }
@@ -338,6 +351,7 @@ impl<T: RealElementary> Cloth<T> {
         self.previous.copy_from_slice(positions);
         self.velocities.copy_from_slice(velocities);
         self.lambdas.fill(T::ZERO);
+        self.carry.clear();
         self.proximity.valid = false;
         Ok(())
     }
