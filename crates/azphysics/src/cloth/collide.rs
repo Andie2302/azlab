@@ -3,7 +3,7 @@
 
 use super::model::{Cloth, StepStats, StepPhase};
 use crate::broadphase::SpatialHash;
-use crate::ccd::{edge_edge, vertex_triangle};
+use crate::ccd::{Contact, edge_edge, vertex_triangle};
 use crate::geometry::{
     Aabb, Vec3, closest_point_on_triangle, point_triangle_distance, segment_intersects_triangle,
     segment_segment_distance, triangle_normal,
@@ -271,12 +271,15 @@ impl<T: RealElementary> Cloth<T> {
                 }
                 let hit =
                     vertex_triangle(self.motion(vertex), self.motion(a), self.motion(b), self.motion(c), tolerance);
-                if let Some(contact) = hit {
+                // Unentschieden zählt wie eine Berührung: Die Bewegung endet
+                // vor dem Zeitpunkt, bis zu dem sie nachweislich frei ist.
+                if let Some(contact) = hit.safe_until() {
                     self.retreat(&involved, contact, tolerance, gentle, |cloth| {
                         let at = |index: usize| cloth.positions[index];
                         point_triangle_distance(at(vertex), at(a), at(b), at(c))
                     });
                     stats.ccd_hits += 1;
+                    stats.ccd_undecided += u32::from(matches!(hit, Contact::Undecided(_)));
                     clean = false;
                 }
             }
@@ -290,12 +293,13 @@ impl<T: RealElementary> Cloth<T> {
                     continue;
                 }
                 let hit = edge_edge(self.motion(a), self.motion(b), self.motion(c), self.motion(d), tolerance);
-                if let Some(contact) = hit {
+                if let Some(contact) = hit.safe_until() {
                     self.retreat(&involved, contact, tolerance, gentle, |cloth| {
                         let at = |index: usize| cloth.positions[index];
                         segment_segment_distance(at(a), at(b), at(c), at(d))
                     });
                     stats.ccd_hits += 1;
+                    stats.ccd_undecided += u32::from(matches!(hit, Contact::Undecided(_)));
                     clean = false;
                 }
             }

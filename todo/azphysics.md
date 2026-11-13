@@ -43,8 +43,12 @@ Raum, mit Tiefenprüfung je Bildpunkt).
   frühere Fassung suchte nur die Zeitpunkte, an denen die vier Punkte in
   einer Ebene liegen; sie ließ Annäherungen unter die Toleranz ohne
   Durchtritt zu, und solche Paare blieben danach aneinander stehen.
-- Nach 64 Schritten ohne Entscheidung (schleichende Annäherung) wird
-  vorsichtshalber eine Berührung gemeldet.
+- Das Ergebnis (`ccd::Contact`) kennt drei Fälle: `Free` (sicher keine
+  Berührung), `Touch(t)` (sicher Berührung zur Zeit `t`) und `Undecided(t)`
+  (bis `t` sicher frei, danach nach 64 Schritten nicht entschieden –
+  schleichende Annäherung). Das Gewebe behandelt `Undecided` wie eine
+  Berührung und kürzt die Bewegung; `StepStats::ccd_undecided` zählt mit.
+  In den Beispielen kommt der Fall nicht vor.
 - Gerechnet wird mit der Relativbewegung (mittlere Verschiebung abgezogen).
   Ein Tuch im freien Flug stößt so nicht scheinbar mit sich selbst zusammen.
 - Bewegungen werden nur gekürzt. Der letzte Durchlauf hat alle Paare frei

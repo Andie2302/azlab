@@ -146,7 +146,9 @@ fn pool<T: RealElementary>() {
     // Becken bis zur Höhe 0,4 gefüllt: Das Wasser bleibt, wo es ist.
     assert_eq!(fluid.add_block(v(0.0, 0.0), v(2.0, 0.4)), 40 * 8);
     let start = centre(&fluid);
-    for _ in 0..240 {
+    // Acht Sekunden einschwingen: Das Gitter der Teilchen ordnet sich um,
+    // einzelne sind bis etwa zur sechsten Sekunde noch schneller als 0,1 m/s.
+    for _ in 0..480 {
         fluid.step(f(1.0 / 60.0));
     }
     let moved = centre(&fluid) - start;

@@ -8,6 +8,7 @@ pub struct ClothProfiler {
     totals: [f64; 7],
     samples: u32,
     hits: u64,
+    undecided: u64,
     rollbacks: u64,
 }
 
@@ -31,6 +32,7 @@ impl ClothProfiler {
         });
         self.samples += 1;
         self.hits += u64::from(stats.ccd_hits);
+        self.undecided += u64::from(stats.ccd_undecided);
         self.rollbacks += u64::from(stats.full_rollbacks);
     }
 
@@ -39,11 +41,12 @@ impl ClothProfiler {
         let n = f64::from(self.samples);
         let t = self.totals.map(|x| x / n);
         let text = format!(
-            "Gewebe ms/Schritt: frei {:.3}, XPBD {:.3}, Hindernisse {:.3}, Nachbarn {:.3}, Abstoßung {:.3}, CCD {:.3}, Geschwindigkeit {:.3}; CCD-Treffer {}, Rücksetzungen {} ({} Tuchschritte)",
-            t[0], t[1], t[2], t[3], t[4], t[5], t[6], self.hits, self.rollbacks, self.samples);
+            "Gewebe ms/Schritt: frei {:.3}, XPBD {:.3}, Hindernisse {:.3}, Nachbarn {:.3}, Abstoßung {:.3}, CCD {:.3}, Geschwindigkeit {:.3}; CCD-Treffer {} (davon unentschieden {}), Rücksetzungen {} ({} Tuchschritte)",
+            t[0], t[1], t[2], t[3], t[4], t[5], t[6], self.hits, self.undecided, self.rollbacks, self.samples);
         self.totals.fill(0.0);
         self.samples = 0;
         self.hits = 0;
+        self.undecided = 0;
         self.rollbacks = 0;
         Some(text)
     }

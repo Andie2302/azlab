@@ -74,8 +74,13 @@ pub enum Collider<T> {
 pub struct StepStats {
     /// Abstoßungen zwischen Teilchen und Dreiecken.
     pub repulsions: u32,
-    /// Von der kontinuierlichen Prüfung gefundene Berührungen.
+    /// Paare, deren Bewegung die kontinuierliche Prüfung gekürzt hat:
+    /// sicher festgestellte Berührungen und unentschiedene Fälle zusammen.
     pub ccd_hits: u32,
+    /// Davon unentschieden: Die Prüfung erreichte ihre Höchstzahl an
+    /// Schritten, ohne eine Berührung zu finden oder auszuschließen. Die
+    /// Bewegung wurde dann vorsichtshalber gekürzt.
+    pub ccd_undecided: u32,
     /// Teilschritte, in denen alle Teilchen zurückgesetzt werden mussten.
     pub full_rollbacks: u32,
 }
