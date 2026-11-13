@@ -152,21 +152,25 @@ fn pool<T: RealElementary>() {
     let moved = centre(&fluid) - start;
     assert!(moved.norm() < f(0.03), "Schwerpunkt um {:?} verschoben", moved.norm().to_f64());
     assert!(fluid.mean_compression() < f(0.05));
-    // Es kehrt Ruhe ein – auch an den Wänden. Eine Wand, die kein
-    // Druckgefälle mit der Tiefe trägt, lässt die Spalte neben ihr dauerhaft
-    // absinken; die mittlere Geschwindigkeit dort lag dann bei 0,2 m/s.
-    let speed = |low: f64, high: f64| {
-        let (sum, count) = fluid
-            .positions()
-            .iter()
-            .zip(fluid.velocities())
-            .filter(|(point, _)| point[0] >= f(low) && point[0] < f(high))
-            .fold((T::ZERO, T::ZERO), |(sum, count), (_, velocity)| (sum + velocity.norm(), count + T::ONE));
-        sum / count.max(T::ONE)
-    };
-    for (low, high) in [(0.0, 0.15), (0.6, 1.4), (1.85, 2.0)] {
-        let speed = speed(low, high);
-        assert!(speed < f(0.02), "zwischen {low} und {high} noch in Bewegung: {:?}", speed.to_f64());
+    // Nach dem Einschwingen zwei weitere Sekunden beobachten, nicht nur ein Bild.
+    for _ in 0..120 {
+        fluid.step(f(1.0 / 60.0));
+        for (low, high) in [(0.0, 0.15), (0.6, 1.4), (1.85, 2.0)] {
+            let mut count = 0usize;
+            let (mut sum, mut maximum) = (T::ZERO, T::ZERO);
+            for (point, velocity) in fluid.positions().iter().zip(fluid.velocities()) {
+                if point[0] >= f(low) && point[0] < f(high) {
+                    let speed = velocity.norm();
+                    assert!(speed.is_finite());
+                    count += 1;
+                    sum += speed;
+                    maximum = maximum.max(speed);
+                }
+            }
+            assert!(count > 0, "leere Messregion {low}..{high}");
+            assert!(sum / f(count as f64) < f(0.02), "Randströmung {low}..{high}");
+            assert!(maximum < f(0.1), "schnelles Einzelteilchen {low}..{high}: {:?}", maximum.to_f64());
+        }
     }
     // Ungültige Schrittweite ändert nichts.
     let before = fluid.positions()[0];
@@ -231,4 +235,57 @@ fn particles_f32() {
 fn particles_f64() {
     pool::<f64>();
     dam_break::<f64>();
+}
+
+#[cfg(feature = "std")]
+#[test]
+#[ignore = "Parametervergleich über 20 simulierte Sekunden; mit --ignored --nocapture starten"]
+fn particle_resolution_and_obstacle_sweep() {
+    // Messung statt behaupteter universeller Ruheschwelle: dünne Wände sind
+    // ausdrücklich eingeschränkt. Sicherheit gilt bei jeder getesteten Dicke.
+    for spacing in [0.05f64, 0.1] {
+        for layers in [1.0, 3.0, 5.0] {
+            let mut fluid = ParticleFluid::new(
+                Aabb { min: v(0.0, 0.0), max: v(2.0, 1.2) }, spacing);
+            fluid.add_obstacle(v(1.0, 0.0), v(1.0 + layers * spacing, 0.2));
+            fluid.add_block(v(0.0, 0.0), v(2.0, 0.4));
+            let mut peak = 0.0f64;
+            for frame in 0..1200 {
+                fluid.step(1.0 / 60.0);
+                for (&p, velocity) in fluid.positions().iter().zip(fluid.velocities()) {
+                    assert!(fluid.bounds().contains(p));
+                    assert!(!fluid.obstacles()[0].contains(p));
+                    let speed = velocity.norm();
+                    assert!(speed.is_finite());
+                    if frame >= 900 { peak = peak.max(speed); }
+                }
+            }
+            std::println!("spacing={spacing}, obstacle_layers={layers}, maximum_15_to_20s={peak} m/s");
+        }
+    }
+}
+
+#[test]
+#[ignore = "Kleines volles Kontrollbecken, 20 simulierte Sekunden"]
+fn small_full_pool_defaults() {
+    let mut fluid = ParticleFluid::<f32>::new(
+        Aabb { min: v(0.0, 0.0), max: v(1.0, 1.0) }, 0.1);
+    assert_eq!(fluid.params.substeps, 2);
+    assert!((fluid.params.anti_clumping - 0.002).abs() < 1.0e-7);
+    assert_eq!(fluid.add_block(v(0.0, 0.0), v(1.0, 1.0)), 100);
+    for frame in 0..1200 {
+        fluid.step(1.0 / 60.0);
+        if frame < 900 { continue; }
+        for (low, high) in [(0.0, 0.15), (0.3, 0.7), (0.85, 1.0)] {
+            let speeds: alloc::vec::Vec<_> = fluid.positions().iter().zip(fluid.velocities())
+                .filter(|(p, _)| p[0] >= low && p[0] < high)
+                .map(|(_, v)| v.norm()).collect();
+            assert!(!speeds.is_empty());
+            assert!(speeds.iter().all(|s| s.is_finite()));
+            let mean = speeds.iter().sum::<f32>() / speeds.len() as f32;
+            let max = speeds.iter().copied().fold(0.0f32, f32::max);
+            assert!(mean < 0.02, "frame={frame}, region={low}..{high}, mean={mean}");
+            assert!(max < 0.1, "frame={frame}, region={low}..{high}, max={max}");
+        }
+    }
 }

@@ -445,3 +445,32 @@ Stand auf `master` besteht `scripts/pruefen.sh`.
 ## Lizenz
 
 Im Workspace-Manifest ist `MIT OR Apache-2.0` als Lizenz angegeben.
+
+
+### Simulationen untersuchen
+
+`cargo demo cloth_drape -- --paused --profile` startet vor dem ersten
+Simulationsschritt pausiert. Leertaste schaltet die Pause um; **N** führt
+genau einen festen Zeitschritt aus und bleibt danach pausiert. In den drei
+Gewebe-Beispielen drehen die Pfeiltasten die Kamera, Bild auf/ab zoomt und
+**G** blendet den Boden aus oder ein. Kamerabewegungen ändern die Physik
+nicht. PNG/GIF ignorieren den Pausenschalter und rechnen wie bisher die
+angeforderte Bildzahl.
+
+`--profile` protokolliert im Fenster alle 120 Bilder die mittlere CPU-Zeit
+je Physikschritt und je Zeichenaufbau. GPU-Ausführung, Präsentation und
+Wartezeit sind darin nicht enthalten. Vergleiche im Release-Profil bei
+gleicher Fenstergröße und gleichem Simulationszustand durchführen.
+
+Längere Teilchen-Kontrollversuche sind separat aufrufbar:
+
+```bash
+cargo test -p azphysics --features std --release small_full_pool_defaults -- --ignored --nocapture
+cargo test -p azphysics --features std --release particle_resolution_and_obstacle_sweep -- --ignored --nocapture
+```
+
+Der Hindernisvergleich misst unterschiedliche Dicken und Auflösungen, ohne
+dünnen Wänden bereits dieselbe Ruhegarantie wie dicken Wänden zuzuschreiben.
+CG und vorkonditioniertes CG melden bei nicht endlichen Zwischenwerten
+`SolveError::NonFinite` statt Erfolg. Systeme mit extremen Größenordnungen
+benötigen gegebenenfalls eine vorherige Skalierung.

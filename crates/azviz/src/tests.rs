@@ -100,3 +100,18 @@ fn depth_image_composites_over_background() {
     assert_eq!(pixel(&canvas, 0, 0), Some((Color::RED.r, Color::RED.g, Color::RED.b)));
     assert_eq!(pixel(&canvas, 3, 3), Some((10, 20, 30)));
 }
+
+#[test]
+fn camera_orbit_preserves_target_projection() {
+    let canvas = RasterCanvas::new(200, 100).expect("Bild");
+    let mut camera = Camera::look_at([0.0, 0.0, 5.0], [0.0, 0.0, 0.0], 60.0);
+    camera.orbit(0.5, 0.25, 0.0);
+    let (p, depth) = camera.project([0.0, 0.0, 0.0], &canvas).expect("Ziel sichtbar");
+    assert!((p[0] - 100.0).abs() < 1.0e-4 && (p[1] - 50.0).abs() < 1.0e-4);
+    assert!((depth - 5.0).abs() < 1.0e-4);
+    camera.orbit(0.0, 0.0, 0.2);
+    assert!(camera.project([0.0, 0.0, 0.0], &canvas).expect("Ziel").1 > depth);
+    let before = camera;
+    camera.orbit(f32::NAN, 0.0, 0.0);
+    assert_eq!(camera, before);
+}

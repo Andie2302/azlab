@@ -27,6 +27,7 @@ fn normalize(a: Point) -> Point {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Camera {
     eye: Point,
+    target: Point,
     right: Point,
     up: Point,
     forward: Point,
@@ -42,7 +43,26 @@ impl Camera {
         let right = normalize(cross(forward, [0.0, 1.0, 0.0]));
         let up = cross(right, forward);
         let focal = 0.5 / (field_of_view.to_radians() * 0.5).tan();
-        Self { eye, right, up, forward, focal }
+        Self { eye, target, right, up, forward, focal }
+    }
+
+    /// Dreht um den Zielpunkt; Winkel in Radiant, Zoom logarithmisch.
+    /// Der Zielpunkt und der Öffnungswinkel bleiben unverändert.
+    pub fn orbit(&mut self, yaw: f32, pitch: f32, zoom: f32) {
+        if !yaw.is_finite() || !pitch.is_finite() || !zoom.is_finite() { return; }
+        let offset = sub(self.eye, self.target);
+        let radius = dot(offset, offset).sqrt().max(0.01);
+        let azimuth = offset[0].atan2(offset[2]) + yaw;
+        let elevation = ((offset[1] / radius).clamp(-1.0, 1.0).asin() + pitch).clamp(-1.5, 1.5);
+        let radius = (radius * zoom.clamp(-1.0, 1.0).exp()).clamp(0.01, 10000.0);
+        self.eye = [
+            self.target[0] + radius * elevation.cos() * azimuth.sin(),
+            self.target[1] + radius * elevation.sin(),
+            self.target[2] + radius * elevation.cos() * azimuth.cos(),
+        ];
+        self.forward = normalize(sub(self.target, self.eye));
+        self.right = normalize(cross(self.forward, [0.0, 1.0, 0.0]));
+        self.up = cross(self.right, self.forward);
     }
 
     /// Bildpunkt und Tiefe eines Raumpunkts; `None`, wenn er hinter der

@@ -13,7 +13,9 @@ use crate::solve::{SolveError, Tolerance};
 ///
 /// Fehler: [`SolveError::InvalidInput`] bei unpassenden Größen,
 /// [`SolveError::Singular`], wenn die Matrix nicht positiv definit ist,
+/// [`SolveError::NonFinite`] bei Überlauf oder nicht endlichen Zwischenwerten,
 /// sonst [`SolveError::NotConverged`] mit dem letzten Restfehler.
+/// Extrem skalierte Systeme müssen gegebenenfalls vor dem Aufruf skaliert werden.
 pub fn conjugate_gradient<T, A>(
     a: &A,
     b: &[T],
@@ -37,12 +39,19 @@ where
 
     initial_residual(a, b, x, r)?;
     p.copy_from_slice(r);
+    if !tol.abs_f.is_finite() || !tol.rel_x.is_finite()
+        || tol.abs_f < T::ZERO || tol.rel_x < T::ZERO {
+        return Err(SolveError::InvalidInput);
+    }
     let threshold = tol.abs_f + tol.rel_x * dot(b, b).sqrt();
+    if !threshold.is_finite() {
+        return Err(SolveError::NonFinite(state(threshold, 0)));
+    }
     let mut rr = dot(r, r);
 
     for iteration in 1..=tol.max_iterations {
         let residual = rr.sqrt();
-        if residual.is_nan() {
+        if !residual.is_finite() || x.iter().any(|v| !v.is_finite()) {
             return Err(SolveError::NonFinite(state(residual, iteration - 1)));
         }
         if residual <= threshold {
@@ -52,14 +61,26 @@ where
             return Err(SolveError::InvalidInput);
         }
         let curvature = dot(p, ap);
-        if curvature <= T::ZERO || curvature.is_nan() {
+        if !curvature.is_finite() {
+            return Err(SolveError::NonFinite(state(residual, iteration - 1)));
+        }
+        if curvature <= T::ZERO {
             return Err(SolveError::Singular(state(residual, iteration - 1)));
         }
         let alpha = rr / curvature;
+        if !alpha.is_finite() {
+            return Err(SolveError::NonFinite(state(residual, iteration - 1)));
+        }
         axpy(alpha, p, x);
         axpy(-alpha, ap, r);
         let next_rr = dot(r, r);
+        if !next_rr.is_finite() {
+            return Err(SolveError::NonFinite(state(next_rr.sqrt(), iteration)));
+        }
         let beta = next_rr / rr;
+        if !beta.is_finite() {
+            return Err(SolveError::NonFinite(state(residual, iteration)));
+        }
         for (direction, &rest) in p.iter_mut().zip(r.iter()) {
             *direction = rest + beta * *direction;
         }
@@ -67,6 +88,9 @@ where
     }
 
     let residual = rr.sqrt();
+    if !residual.is_finite() || x.iter().any(|v| !v.is_finite()) {
+        return Err(SolveError::NonFinite(state(residual, tol.max_iterations)));
+    }
     if residual <= threshold {
         Ok(state(residual, tol.max_iterations))
     } else {
@@ -116,12 +140,19 @@ where
         return Err(SolveError::InvalidInput);
     }
     p.copy_from_slice(z);
+    if !tol.abs_f.is_finite() || !tol.rel_x.is_finite()
+        || tol.abs_f < T::ZERO || tol.rel_x < T::ZERO {
+        return Err(SolveError::InvalidInput);
+    }
     let threshold = tol.abs_f + tol.rel_x * dot(b, b).sqrt();
+    if !threshold.is_finite() {
+        return Err(SolveError::NonFinite(state(threshold, 0)));
+    }
     let mut rz = dot(r, z);
     let mut residual = dot(r, r).sqrt();
 
     for iteration in 1..=tol.max_iterations {
-        if residual.is_nan() {
+        if !residual.is_finite() || x.iter().any(|v| !v.is_finite()) {
             return Err(SolveError::NonFinite(state(residual, iteration - 1)));
         }
         if residual <= threshold {
@@ -131,10 +162,16 @@ where
             return Err(SolveError::InvalidInput);
         }
         let curvature = dot(p, ap);
-        if curvature <= T::ZERO || curvature.is_nan() || rz <= T::ZERO || rz.is_nan() {
+        if !curvature.is_finite() || !rz.is_finite() {
+            return Err(SolveError::NonFinite(state(residual, iteration - 1)));
+        }
+        if curvature <= T::ZERO || rz <= T::ZERO {
             return Err(SolveError::Singular(state(residual, iteration - 1)));
         }
         let alpha = rz / curvature;
+        if !alpha.is_finite() {
+            return Err(SolveError::NonFinite(state(residual, iteration - 1)));
+        }
         axpy(alpha, p, x);
         axpy(-alpha, ap, r);
         residual = dot(r, r).sqrt();
@@ -142,13 +179,22 @@ where
             return Err(SolveError::InvalidInput);
         }
         let next_rz = dot(r, z);
+        if !residual.is_finite() || !next_rz.is_finite() {
+            return Err(SolveError::NonFinite(state(residual, iteration)));
+        }
         let beta = next_rz / rz;
+        if !beta.is_finite() {
+            return Err(SolveError::NonFinite(state(residual, iteration)));
+        }
         for (direction, &step) in p.iter_mut().zip(z.iter()) {
             *direction = step + beta * *direction;
         }
         rz = next_rz;
     }
 
+    if !residual.is_finite() || x.iter().any(|v| !v.is_finite()) {
+        return Err(SolveError::NonFinite(state(residual, tol.max_iterations)));
+    }
     if residual <= threshold {
         Ok(state(residual, tol.max_iterations))
     } else {

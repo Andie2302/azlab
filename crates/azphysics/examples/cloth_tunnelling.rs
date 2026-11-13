@@ -26,6 +26,8 @@ const LOOP: u32 = 240;
 const LANE: f32 = 1.1;
 
 struct Tunnelling {
+    camera: Camera,
+    show_ground: bool,
     lanes: [Cloth<f32>; 2],
     ground: [Collider<f32>; 1],
     frame: u32,
@@ -68,6 +70,8 @@ impl Tunnelling {
             lanes: [lane(-LANE, false), lane(LANE, true)],
             ground: [Collider::Plane { point: Vector([0.0, 0.0, 0.0]), normal: Vector([0.0, 1.0, 0.0]) }],
             frame: 0,
+            camera: Camera::look_at([-3.0, 2.3, 4.9], [-0.3, 0.75, 0.0], 36.0),
+            show_ground: true,
         }
     }
 }
@@ -80,18 +84,27 @@ impl Scene for Tunnelling {
     fn update(&mut self, dt: f32) {
         self.frame += 1;
         if self.frame >= LOOP {
+            let (camera, show_ground) = (self.camera, self.show_ground);
             *self = Self::new();
+            self.camera = camera;
+            self.show_ground = show_ground;
         }
         for cloth in &mut self.lanes {
             cloth.step(dt * SLOW_MOTION, &self.ground);
         }
     }
 
+    fn orbit(&mut self, yaw: f32, pitch: f32, zoom: f32) {
+        self.camera.orbit(yaw, pitch, zoom);
+    }
+
+    fn toggle_ground(&mut self) { self.show_ground = !self.show_ground; }
+
     fn draw(&self, canvas: &mut dyn Canvas) {
         canvas.clear(Color::BACKGROUND);
-        let camera = Camera::look_at([-3.0, 2.3, 4.9], [-0.3, 0.75, 0.0], 36.0);
+        let camera = self.camera;
         let mut batch = Batch::new();
-        batch.floor(0.0, 0.5, 16, Color::rgb(60, 66, 80), Color::rgb(48, 53, 66));
+        if self.show_ground { batch.floor(0.0, 0.5, 16, Color::rgb(60, 66, 80), Color::rgb(48, 53, 66)); }
         let colors = [(Color::RED, Color::ORANGE), (Color::GREEN, Color::rgb(170, 220, 120))];
         for ((cloth, (front, back)), z) in self.lanes.iter().zip(colors).zip([-LANE, LANE]) {
             let positions: Vec<[f32; 3]> = cloth.positions().iter().map(|point| point.0).collect();

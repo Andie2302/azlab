@@ -17,6 +17,8 @@ const SIZE: usize = 34;
 const RADIUS: f32 = 0.45;
 
 struct Drape {
+    camera: Camera,
+    show_ground: bool,
     cloth: Cloth<f32>,
     colliders: [Collider<f32>; 2],
 }
@@ -35,7 +37,7 @@ impl Drape {
             Collider::Sphere { center: Vector([0.0, RADIUS, 0.0]), radius: RADIUS },
             Collider::Plane { point: Vector([0.0, 0.0, 0.0]), normal: Vector([0.0, 1.0, 0.0]) },
         ];
-        Self { cloth, colliders }
+        Self { cloth, colliders, camera: Camera::look_at([2.3, 1.9, 3.0], [0.0, 0.45, 0.0], 40.0), show_ground: true }
     }
 }
 
@@ -48,11 +50,17 @@ impl Scene for Drape {
         self.cloth.step(dt, &self.colliders);
     }
 
+    fn orbit(&mut self, yaw: f32, pitch: f32, zoom: f32) {
+        self.camera.orbit(yaw, pitch, zoom);
+    }
+
+    fn toggle_ground(&mut self) { self.show_ground = !self.show_ground; }
+
     fn draw(&self, canvas: &mut dyn Canvas) {
         canvas.clear(Color::BACKGROUND);
-        let camera = Camera::look_at([2.3, 1.9, 3.0], [0.0, 0.45, 0.0], 40.0);
+        let camera = self.camera;
         let mut batch = Batch::new();
-        batch.floor(0.0, 0.5, 10, Color::rgb(60, 66, 80), Color::rgb(48, 53, 66));
+        if self.show_ground { batch.floor(0.0, 0.5, 10, Color::rgb(60, 66, 80), Color::rgb(48, 53, 66)); }
         // Etwas kleiner als das Hindernis, damit das Tuch sichtbar aufliegt.
         batch.sphere([0.0, RADIUS, 0.0], RADIUS * 0.97, Color::GRAY);
         let positions: Vec<[f32; 3]> = self.cloth.positions().iter().map(|point| point.0).collect();

@@ -18,6 +18,13 @@ pub trait Scene {
     /// Rechnet um `dt` Sekunden weiter.
     fn update(&mut self, dt: f32);
 
+    /// Ändert die Ansicht, ohne die Simulation fortzuschreiben.
+    /// Standardmäßig ohne Wirkung (etwa bei ebenen Flüssigkeitsbeispielen).
+    fn orbit(&mut self, _yaw: f32, _pitch: f32, _zoom: f32) {}
+
+    /// Blendet in räumlichen Beispielen den Boden ein oder aus.
+    fn toggle_ground(&mut self) {}
+
     /// Zeichnet den aktuellen Zustand.
     fn draw(&self, canvas: &mut dyn Canvas);
 }
@@ -33,11 +40,15 @@ pub struct Options {
     pub fps: u32,
     /// Zahl der Bilder bei Ausgabe in eine Datei, wenn `--frames` fehlt.
     pub frames: u32,
+    /// Fenster pausiert starten; Exporte rechnen unabhängig davon weiter.
+    pub paused: bool,
+    /// CPU-Zeiten für Physik und Zeichenaufbau im Fenster protokollieren.
+    pub profile: bool,
 }
 
 impl Default for Options {
     fn default() -> Self {
-        Self { width: 800, height: 600, fps: 60, frames: 180 }
+        Self { width: 800, height: 600, fps: 60, frames: 180, paused: false, profile: false }
     }
 }
 
@@ -85,6 +96,8 @@ fn parse(mut options: Options) -> Result<(Target, Options), VizError> {
             arguments.next().ok_or_else(|| VizError::Arguments(alloc::format!("{name} braucht einen Wert")))
         };
         match argument.as_str() {
+            "--paused" => options.paused = true,
+            "--profile" => options.profile = true,
             "--gif" => target = Target::Gif(value("--gif")?),
             "--png" => target = Target::Png(value("--png")?),
             "--frames" => {
@@ -102,7 +115,7 @@ fn parse(mut options: Options) -> Result<(Target, Options), VizError> {
             }
             other => {
                 return Err(VizError::Arguments(alloc::format!(
-                    "unbekanntes Argument {other}; erlaubt sind --gif DATEI, --png DATEI, --frames N, --size BxH"
+                    "unbekanntes Argument {other}; erlaubt sind --gif DATEI, --png DATEI, --frames N, --size BxH, --paused, --profile"
                 )));
             }
         }
@@ -136,7 +149,8 @@ fn window<S: Scene + 'static>(mut scene: S, options: Options) {
     };
     let dt = 1.0 / options.fps.max(1) as f32;
     macroquad::Window::from_config(conf, async move {
-        let mut paused = false;
+        let mut paused = options.paused;
+        let (mut update_ms, mut draw_ms, mut steps, mut frames) = (0.0, 0.0, 0u32, 0u32);
         let mut canvas = WindowCanvas;
         loop {
             if mq::is_key_pressed(mq::KeyCode::Escape) {
@@ -145,11 +159,35 @@ fn window<S: Scene + 'static>(mut scene: S, options: Options) {
             if mq::is_key_pressed(mq::KeyCode::Space) {
                 paused = !paused;
             }
-            if !paused {
+            // N führt genau einen Schritt aus und lässt das Fenster pausiert.
+            let single = mq::is_key_pressed(mq::KeyCode::N);
+            if single { paused = true; }
+            if mq::is_key_pressed(mq::KeyCode::G) { scene.toggle_ground(); }
+            let yaw = (i32::from(mq::is_key_down(mq::KeyCode::Right))
+                - i32::from(mq::is_key_down(mq::KeyCode::Left))) as f32 * 0.025;
+            let pitch = (i32::from(mq::is_key_down(mq::KeyCode::Up))
+                - i32::from(mq::is_key_down(mq::KeyCode::Down))) as f32 * 0.025;
+            let zoom = (i32::from(mq::is_key_down(mq::KeyCode::PageDown))
+                - i32::from(mq::is_key_down(mq::KeyCode::PageUp))) as f32 * 0.025;
+            if yaw != 0.0 || pitch != 0.0 || zoom != 0.0 { scene.orbit(yaw, pitch, zoom); }
+            let start = std::time::Instant::now();
+            if should_update(paused, single) {
                 scene.update(dt);
+                steps += 1;
+            }
+            let draw_start = std::time::Instant::now();
+            if should_update(paused, single) {
+                update_ms += (draw_start - start).as_secs_f64() * 1000.0;
             }
             scene.draw(&mut canvas);
-            let hint = if paused { "angehalten – Leertaste: weiter, Esc: Ende" } else { "Leertaste: anhalten, Esc: Ende" };
+            draw_ms += draw_start.elapsed().as_secs_f64() * 1000.0;
+            frames += 1;
+            if options.profile && frames == 120 {
+                eprintln!("azviz CPU: Physik {:.3} ms/Schritt ({}), Zeichnen {:.3} ms/Bild; ohne GPU/Present",
+                    update_ms / f64::from(steps.max(1)), steps, draw_ms / f64::from(frames));
+                (update_ms, draw_ms, steps, frames) = (0.0, 0.0, 0, 0);
+            }
+            let hint = if paused { "Pause: Leertaste weiter, N Schritt, Pfeile Kamera, Bild auf/ab Zoom, Esc Ende" } else { "Leertaste Pause, N Schritt, Pfeile Kamera, Esc Ende" };
             canvas.text([12.0, 22.0], hint, 20.0, Color::GRAY);
             mq::next_frame().await;
         }
@@ -194,4 +232,20 @@ fn gif<S: Scene>(mut scene: S, options: Options, frames: u32, path: &str) -> Res
         encoder.write_frame(&image).map_err(encode)?;
     }
     Ok(())
+}
+
+fn should_update(paused: bool, single: bool) -> bool {
+    !paused || single
+}
+
+#[cfg(test)]
+mod control_tests {
+    use super::*;
+    #[test]
+    fn pause_and_single_step() {
+        assert!(!should_update(true, false));
+        assert!(should_update(true, true));
+        assert!(should_update(false, false));
+        assert!(!Options::default().paused);
+    }
 }

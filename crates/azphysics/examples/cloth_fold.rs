@@ -18,6 +18,8 @@ const COLUMNS: usize = 28;
 const ROWS: usize = 40;
 
 struct Fold {
+    camera: Camera,
+    show_ground: bool,
     cloth: Cloth<f32>,
     ground: [Collider<f32>; 1],
 }
@@ -35,7 +37,7 @@ impl Fold {
         cloth.params.bend_compliance = 2.0e-2;
         cloth.params.friction = 0.6;
         let ground = [Collider::Plane { point: Vector([0.0, 0.0, 0.0]), normal: Vector([0.0, 1.0, 0.0]) }];
-        Self { cloth, ground }
+        Self { cloth, ground, camera: Camera::look_at([1.6, 1.2, 2.0], [0.0, 0.55, 0.15], 40.0), show_ground: true }
     }
 }
 
@@ -48,11 +50,17 @@ impl Scene for Fold {
         self.cloth.step(dt, &self.ground);
     }
 
+    fn orbit(&mut self, yaw: f32, pitch: f32, zoom: f32) {
+        self.camera.orbit(yaw, pitch, zoom);
+    }
+
+    fn toggle_ground(&mut self) { self.show_ground = !self.show_ground; }
+
     fn draw(&self, canvas: &mut dyn Canvas) {
         canvas.clear(Color::BACKGROUND);
-        let camera = Camera::look_at([1.6, 1.2, 2.0], [0.0, 0.55, 0.15], 40.0);
+        let camera = self.camera;
         let mut batch = Batch::new();
-        batch.floor(0.0, 0.5, 10, Color::rgb(60, 66, 80), Color::rgb(48, 53, 66));
+        if self.show_ground { batch.floor(0.0, 0.5, 10, Color::rgb(60, 66, 80), Color::rgb(48, 53, 66)); }
         let positions: Vec<[f32; 3]> = self.cloth.positions().iter().map(|point| point.0).collect();
         batch.mesh(&positions, self.cloth.triangles(), Color::BLUE, Color::GREEN);
         batch.draw(canvas, &camera, true);

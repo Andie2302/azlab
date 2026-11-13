@@ -232,3 +232,45 @@ fn iterative_f32() {
 fn iterative_f64() {
     check::<f64>();
 }
+
+fn cg_overflow<T: RealElementary>(huge: T) {
+    let identity = Matrix::<T, 1, 1>::identity();
+    for iterations in [0, 1, 10] {
+        let tol = Tolerance::<T>::default().with_max_iterations(iterations);
+        let mut x = [T::ZERO];
+        let mut work = [T::ZERO; 4];
+        assert!(matches!(conjugate_gradient(&identity, &[huge], &mut x, &mut work, &tol),
+            Err(SolveError::NonFinite(_))));
+        assert_eq!(x, [T::ZERO]);
+        assert!(matches!(preconditioned_conjugate_gradient(
+            &identity, &identity, &[huge], &mut x, &mut work, &tol),
+            Err(SolveError::NonFinite(_))));
+        assert_eq!(x, [T::ZERO]);
+    }
+
+}
+
+#[test]
+fn cg_nonfinite_f32() { cg_overflow::<f32>(1.0e38); }
+
+#[test]
+fn cg_nonfinite_f64() { cg_overflow::<f64>(1.0e307); }
+
+#[test]
+fn cg_reported_overflow_regression() { cg_overflow::<f64>(1.0e200); }
+
+#[test]
+fn cg_operator_overflow_does_not_report_success() {
+    let a = Matrix([[1.0e308f64]]);
+    let identity = Matrix::<f64, 1, 1>::identity();
+    let mut x = [0.0];
+    let mut work = [0.0; 4];
+    let tol = Tolerance::<f64>::default().with_max_iterations(1);
+    assert!(matches!(conjugate_gradient(&a, &[10.0], &mut x, &mut work, &tol),
+        Err(SolveError::NonFinite(_))));
+    assert_eq!(x, [0.0]);
+    assert!(matches!(preconditioned_conjugate_gradient(
+        &a, &identity, &[10.0], &mut x, &mut work, &tol),
+        Err(SolveError::NonFinite(_))));
+    assert_eq!(x, [0.0]);
+}
