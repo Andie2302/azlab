@@ -33,7 +33,8 @@ pub struct ClothParams<T> {
     pub damping: T,
     /// Dicke des Tuchs: Mindestabstand zu Hindernissen und zu sich selbst.
     pub thickness: T,
-    /// Reibwert an Ebene und Kugel (Coulomb); null ist glatt. Ein ruhendes
+    /// Reibwert (Coulomb) an Ebene, Kugel und Dreiecken, auch zwischen den
+    /// Lagen des Tuchs selbst; null ist glatt. Ein ruhendes
     /// Tuch bleibt auf einer Schräge liegen, solange deren Steigung kleiner
     /// ist als der Reibwert, und rutscht sonst gebremst ab.
     pub friction: T,

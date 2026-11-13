@@ -186,6 +186,27 @@ impl<T: RealElementary> Cloth<T> {
                 self.positions[index] += shift;
                 self.pushes[index] += shift;
             }
+            // Reibung nach Coulomb, wie an Ebene und Kugel: Die Strecke, um
+            // die auseinandergeschoben wurde, steht für die Kraft, mit der
+            // Teilchen und Dreieck aufeinander drücken. Das Gleiten des
+            // Teilchens gegenüber seinem Berührpunkt auf dem Dreieck wird um
+            // höchstens Reibwert mal diese Strecke gekürzt; gleitet es
+            // weniger weit, haftet es.
+            let friction = self.params.friction.max(T::ZERO);
+            if friction > T::ZERO {
+                let travel = |index: usize| self.positions[index] - self.previous[index];
+                let relative =
+                    travel(vertex) - travel(a) * weights[0] - travel(b) * weights[1] - travel(c) * weights[2];
+                let along = relative - direction * relative.dot(direction);
+                let slip = along.norm();
+                if slip > T::ZERO {
+                    let cut = along * (slip.min(friction * gap) / slip / share);
+                    self.positions[vertex] -= cut * inverse[0];
+                    self.positions[a] += cut * (weights[0] * inverse[1]);
+                    self.positions[b] += cut * (weights[1] * inverse[2]);
+                    self.positions[c] += cut * (weights[2] * inverse[3]);
+                }
+            }
             stats.repulsions += 1;
         }
         self.proximity = near;

@@ -392,14 +392,50 @@ fn friction_on_a_slope<T: RealElementary>() {
     }
 }
 
+/// Dasselbe auf einer geneigten Platte aus Dreiecken: Unter der
+/// Grenzsteigung bleibt das Tuch liegen, darüber rutscht es. Früher gab es
+/// an Dreiecken und zwischen Tuchlagen gar keine Reibung.
+fn friction_on_triangles<T: RealElementary>() {
+    let f = T::from_f64;
+    let slide = |tangent: f64| {
+        let length = (1.0 + tangent * tangent).sqrt();
+        let normal = v::<T>(-tangent / length, 1.0 / length, 0.0);
+        let along = v::<T>(1.0 / length, tangent / length, 0.0);
+        let across = v::<T>(0.0, 0.0, 1.0);
+        let start = normal * f(0.012) - along * f(0.125) - across * f(0.125);
+        let mut cloth: Cloth<T> = Cloth::grid(6, 6, start, along * f(0.05), across * f(0.05), f(0.005));
+        cloth.params.damping = T::ZERO;
+        let corner = |a: f64, b: f64| along * f(a) + across * f(b);
+        cloth.add_obstacle_triangle(corner(-3.0, -1.0), corner(1.0, -1.0), corner(1.0, 1.0));
+        cloth.add_obstacle_triangle(corner(-3.0, -1.0), corner(1.0, 1.0), corner(-3.0, 1.0));
+        let mut hits = 0;
+        for _ in 0..40 {
+            hits += cloth.step(f(1.0 / 60.0), &[]).ccd_hits;
+        }
+        assert_eq!(cloth.intersections(), 0);
+        assert_eq!(hits, 0);
+        // Das Tuch liegt im Abstand seiner Dicke auf der Platte.
+        let height = (cloth.positions()[0]).dot(normal);
+        assert!((height - cloth.params.thickness).abs() < f(1.0e-4));
+        -(cloth.positions()[0] - start).dot(along)
+    };
+    let (flat, steep) = (slide(0.2), slide(0.6));
+    assert!(flat.abs() < f(0.005), "auf flacher Platte um {:?} m gerutscht", flat.to_f64());
+    // 9,81·(0,6 − 0,3)/√1,36 ≈ 2,5 m/s²; nach zwei Dritteln einer Sekunde
+    // gut einen halben Meter.
+    assert!(steep > f(0.4) && steep < f(0.6), "auf steiler Platte {:?} m", steep.to_f64());
+}
+
 #[test]
 fn friction_f32() {
     friction_on_a_slope::<f32>();
+    friction_on_triangles::<f32>();
 }
 
 #[test]
 fn friction_f64() {
     friction_on_a_slope::<f64>();
+    friction_on_triangles::<f64>();
 }
 
 #[test]
