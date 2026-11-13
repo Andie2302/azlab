@@ -13,6 +13,9 @@
 //! cargo demo cloth_tunnelling
 //! ```
 
+#[path = "common/cloth_profile.rs"]
+mod cloth_profile;
+
 use azmath::Vector;
 use azphysics::cloth::{Cloth, Collider};
 use azviz::{Batch, Camera, Canvas, Color, Options, Scene, VizError};
@@ -27,6 +30,7 @@ const LANE: f32 = 1.1;
 
 struct Tunnelling {
     camera: Camera,
+    profiler: cloth_profile::ClothProfiler,
     show_ground: bool,
     lanes: [Cloth<f32>; 2],
     ground: [Collider<f32>; 1],
@@ -70,6 +74,7 @@ impl Tunnelling {
             lanes: [lane(-LANE, false), lane(LANE, true)],
             ground: [Collider::Plane { point: Vector([0.0, 0.0, 0.0]), normal: Vector([0.0, 1.0, 0.0]) }],
             frame: 0,
+            profiler: cloth_profile::ClothProfiler::default(),
             camera: Camera::look_at([-3.0, 2.3, 4.9], [-0.3, 0.75, 0.0], 36.0),
             show_ground: true,
         }
@@ -85,14 +90,20 @@ impl Scene for Tunnelling {
         self.frame += 1;
         if self.frame >= LOOP {
             let (camera, show_ground) = (self.camera, self.show_ground);
+            let profiler = core::mem::take(&mut self.profiler);
             *self = Self::new();
+            self.profiler = profiler;
             self.camera = camera;
             self.show_ground = show_ground;
         }
         for cloth in &mut self.lanes {
-            cloth.step(dt * SLOW_MOTION, &self.ground);
+            self.profiler.step(cloth, dt * SLOW_MOTION, &self.ground);
         }
     }
+
+    fn set_profiling(&mut self, enabled: bool) { self.profiler.enabled = enabled; }
+
+    fn profile_details(&mut self) -> Option<String> { self.profiler.report() }
 
     fn orbit(&mut self, yaw: f32, pitch: f32, zoom: f32) {
         self.camera.orbit(yaw, pitch, zoom);

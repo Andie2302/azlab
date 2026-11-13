@@ -18,6 +18,12 @@ pub trait Scene {
     /// Rechnet um `dt` Sekunden weiter.
     fn update(&mut self, dt: f32);
 
+    /// Aktiviert zusätzliche Messungen, wenn die Szene sie unterstützt.
+    fn set_profiling(&mut self, _enabled: bool) {}
+
+    /// Liefert und leert zusätzliche Messwerte nach einem Messfenster.
+    fn profile_details(&mut self) -> Option<String> { None }
+
     /// Ändert die Ansicht, ohne die Simulation fortzuschreiben.
     /// Standardmäßig ohne Wirkung (etwa bei ebenen Flüssigkeitsbeispielen).
     fn orbit(&mut self, _yaw: f32, _pitch: f32, _zoom: f32) {}
@@ -149,9 +155,10 @@ fn window<S: Scene + 'static>(mut scene: S, options: Options) {
     };
     let dt = 1.0 / options.fps.max(1) as f32;
     macroquad::Window::from_config(conf, async move {
+        scene.set_profiling(options.profile);
         let mut paused = options.paused;
         let (mut update_ms, mut draw_ms, mut steps, mut frames) = (0.0, 0.0, 0u32, 0u32);
-        let mut canvas = WindowCanvas;
+        let mut canvas = WindowCanvas::default();
         loop {
             if mq::is_key_pressed(mq::KeyCode::Escape) {
                 break;
@@ -185,6 +192,7 @@ fn window<S: Scene + 'static>(mut scene: S, options: Options) {
             if options.profile && frames == 120 {
                 eprintln!("azviz CPU: Physik {:.3} ms/Schritt ({}), Zeichnen {:.3} ms/Bild; ohne GPU/Present",
                     update_ms / f64::from(steps.max(1)), steps, draw_ms / f64::from(frames));
+                if let Some(details) = scene.profile_details() { eprintln!("{details}"); }
                 (update_ms, draw_ms, steps, frames) = (0.0, 0.0, 0, 0);
             }
             let hint = if paused { "Pause: Leertaste weiter, N Schritt, Pfeile Kamera, Bild auf/ab Zoom, Esc Ende" } else { "Leertaste Pause, N Schritt, Pfeile Kamera, Esc Ende" };

@@ -7,12 +7,14 @@ use tiny_skia::{FillRule, LineCap, Paint, PathBuilder, Pixmap, Rect, Stroke, Tra
 /// Zeichnet mit Kantenglättung in ein Bild im Speicher.
 pub(crate) struct RasterCanvas {
     pixmap: Pixmap,
+    depth: Option<crate::DepthImage>,
+    premultiplied: alloc::vec::Vec<u8>,
 }
 
 impl RasterCanvas {
     /// Neue Fläche; `None` bei Größe null.
     pub(crate) fn new(width: u32, height: u32) -> Option<Self> {
-        Pixmap::new(width, height).map(|pixmap| Self { pixmap })
+        Pixmap::new(width, height).map(|pixmap| Self { pixmap, depth: None, premultiplied: alloc::vec::Vec::new() })
     }
 
     /// Das Bild.
@@ -41,16 +43,29 @@ impl Canvas for RasterCanvas {
         self.pixmap.fill(tiny_skia::Color::from_rgba8(color.r, color.g, color.b, color.a));
     }
 
+    fn acquire_depth_image(&mut self, width: u16, height: u16) -> crate::DepthImage {
+        let mut image = self.depth.take().unwrap_or_else(|| crate::DepthImage::new(0, 0));
+        image.prepare(usize::from(width), usize::from(height));
+        image
+    }
+
+    fn present_depth_image(&mut self, image: crate::DepthImage) {
+        self.rgba_image(image.width as u16, image.height as u16, &image.rgba);
+        self.depth = Some(image);
+    }
+
     fn rgba_image(&mut self, width: u16, height: u16, rgba: &[u8]) {
         // tiny-skia erwartet vormultipliziertes Alpha.
-        let mut bytes = rgba.to_vec();
+        self.premultiplied.resize(rgba.len(), 0);
+        self.premultiplied.copy_from_slice(rgba);
+        let bytes = &mut self.premultiplied;
         for pixel in bytes.chunks_exact_mut(4) {
             let alpha = u16::from(pixel[3]);
             for channel in &mut pixel[..3] {
                 *channel = ((u16::from(*channel) * alpha + 127) / 255) as u8;
             }
         }
-        if let Some(image) = tiny_skia::PixmapRef::from_bytes(&bytes, u32::from(width), u32::from(height)) {
+        if let Some(image) = tiny_skia::PixmapRef::from_bytes(bytes, u32::from(width), u32::from(height)) {
             self.pixmap.draw_pixmap(0, 0, image, &tiny_skia::PixmapPaint::default(),
                 Transform::identity(), None);
         }

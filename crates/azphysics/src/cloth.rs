@@ -29,4 +29,4 @@ mod step;
 #[cfg(all(test, any(feature = "std", feature = "libm")))]
 mod tests;
 
-pub use model::{Cloth, ClothParams, Collider, StepStats};
+pub use model::{Cloth, ClothParams, Collider, StepStats, StepPhase};

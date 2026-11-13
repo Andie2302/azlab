@@ -80,6 +80,25 @@ pub struct StepStats {
     pub full_rollbacks: u32,
 }
 
+/// Abgeschlossener Abschnitt eines Gewebe-Teilschritts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum StepPhase {
+    /// Freie Bewegung.
+    Integrate,
+    /// XPBD-Abstandsbedingungen.
+    Links,
+    /// Ebene und Kugel.
+    Obstacles,
+    /// Aufbau oder Gültigkeitsprüfung der Nachbarschaftslisten.
+    Proximity,
+    /// Abstoßung ohne Nachbarschaftssuche.
+    Repulsion,
+    /// CCD ohne Nachbarschaftssuche.
+    Ccd,
+    /// Rekonstruktion der Geschwindigkeit.
+    Velocities,
+}
+
 /// Abstandsbedingung zwischen zwei Teilchen.
 #[derive(Clone, Copy, Debug)]
 pub(super) struct Link<T> {

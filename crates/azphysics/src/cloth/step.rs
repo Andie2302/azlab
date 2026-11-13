@@ -1,6 +1,6 @@
 //! Der Zeitschritt: freie Bewegung, Abstandsbedingungen, Hindernisse.
 
-use super::model::{Cloth, Collider, StepStats};
+use super::model::{Cloth, Collider, StepStats, StepPhase};
 use azmath::Vector;
 use azmath::scalar::RealElementary;
 
@@ -10,6 +10,16 @@ impl<T: RealElementary> Cloth<T> {
     /// Der Schritt wird in `params.substeps` Teilschritte zerlegt. Für eine
     /// Bildfolge sind `dt = 1/60` und acht bis zwanzig Teilschritte üblich.
     pub fn step(&mut self, dt: T, colliders: &[Collider<T>]) -> StepStats {
+        self.step_observed(dt, colliders, &mut |_| {})
+    }
+
+    /// Wie `step`, ruft nach jedem Abschnitt `observe` auf.
+    /// Der Callback darf messen, verändert aber weder Zeitschritt noch Physik.
+    /// Ohne Messbedarf eliminiert der Compiler den leeren Callback.
+    pub fn step_observed(
+        &mut self, dt: T, colliders: &[Collider<T>],
+        observe: &mut impl FnMut(StepPhase),
+    ) -> StepStats {
         let substeps = self.params.substeps.max(1);
         let h = dt / T::from_f64(f64::from(substeps));
         let mut stats = StepStats::default();
@@ -17,12 +27,12 @@ impl<T: RealElementary> Cloth<T> {
             return stats;
         }
         for _ in 0..substeps {
-            self.substep(h, colliders, &mut stats);
+            self.substep(h, colliders, &mut stats, observe);
         }
         stats
     }
 
-    fn substep(&mut self, h: T, colliders: &[Collider<T>], stats: &mut StepStats) {
+    fn substep(&mut self, h: T, colliders: &[Collider<T>], stats: &mut StepStats, observe: &mut impl FnMut(StepPhase)) {
         // 1. Freie Bewegung unter Schwerkraft.
         let keep = (T::ONE - self.params.damping * h).max(T::ZERO);
         for index in 0..self.positions.len() {
@@ -34,23 +44,30 @@ impl<T: RealElementary> Cloth<T> {
             }
         }
 
+        observe(StepPhase::Integrate);
+
         // 2. Abstandsbedingungen (XPBD).
         self.lambdas.fill(T::ZERO);
         for _ in 0..self.params.iterations.max(1) {
             self.solve_links(h);
         }
 
+        observe(StepPhase::Links);
+
         // 3. Hindernisse.
         for collider in colliders {
             self.collide(collider);
         }
+        observe(StepPhase::Obstacles);
         self.pushes.clear();
         self.pushes.resize(self.positions.len(), Vector::ZERO);
         if self.params.self_collision {
-            self.repel(stats);
+            self.repel(stats, observe);
+            observe(StepPhase::Repulsion);
         }
         if self.params.ccd {
-            self.prevent_penetration(stats);
+            self.prevent_penetration(stats, observe);
+            observe(StepPhase::Ccd);
         }
 
         // 4. Geschwindigkeit aus der tatsächlich erreichten Lage.
@@ -72,6 +89,7 @@ impl<T: RealElementary> Cloth<T> {
             }
             self.velocities[index] = velocity;
         }
+        observe(StepPhase::Velocities);
     }
 
     /// Ein Durchlauf über alle Abstandsbedingungen.

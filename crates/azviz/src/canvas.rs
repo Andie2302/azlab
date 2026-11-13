@@ -26,6 +26,17 @@ pub trait Canvas {
     /// Gefülltes achsenparalleles Rechteck ab der Ecke `corner`.
     fn rect(&mut self, corner: [f32; 2], size: [f32; 2], color: Color);
 
+    /// Holt einen gelöschten Tiefenspeicher. Eigene Zeichenflächen dürfen
+    /// den Standardweg verwenden; Fenster und Raster recyceln ihren Speicher.
+    fn acquire_depth_image(&mut self, width: u16, height: u16) -> crate::DepthImage {
+        crate::DepthImage::new(usize::from(width), usize::from(height))
+    }
+
+    /// Zeichnet den Tiefenspeicher und gibt ihn an die Zeichenfläche zurück.
+    fn present_depth_image(&mut self, image: crate::DepthImage) {
+        self.rgba_image(image.width as u16, image.height as u16, &image.rgba);
+    }
+
     /// RGBA-Bild ohne vormultipliziertes Alpha, ab der linken oberen Ecke.
     /// Standardweg für eigene Zeichenflächen: gleichfarbige Zeilenabschnitte.
     fn rgba_image(&mut self, width: u16, height: u16, rgba: &[u8]) {

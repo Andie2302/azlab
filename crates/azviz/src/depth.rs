@@ -3,7 +3,9 @@ use alloc::vec;
 use alloc::vec::Vec;
 use crate::Color;
 
-pub(crate) struct DepthImage {
+/// Wiederverwendbarer Farb- und Tiefenspeicher für die räumliche Anzeige.
+/// Zeichenflächen können ihn zwischen Bildern aufbewahren.
+pub struct DepthImage {
     pub(crate) width: usize,
     pub(crate) height: usize,
     pub(crate) rgba: Vec<u8>,
@@ -14,6 +16,15 @@ impl DepthImage {
     pub(crate) fn new(width: usize, height: usize) -> Self {
         Self { width, height, rgba: vec![0; width * height * 4],
             depth: vec![f32::INFINITY; width * height] }
+    }
+
+    pub(crate) fn prepare(&mut self, width: usize, height: usize) {
+        self.width = width;
+        self.height = height;
+        self.rgba.resize(width * height * 4, 0);
+        self.depth.resize(width * height, f32::INFINITY);
+        self.rgba.fill(0);
+        self.depth.fill(f32::INFINITY);
     }
 
     /// Bildkoordinaten und positive Kameratiefe je Ecke.
@@ -102,5 +113,32 @@ mod tests {
         image.triangle([[f32::NAN, 1.0, 1.0]; 3], Color::RED, 0.0, false);
         assert_eq!(image.rgba, before);
         assert!(DepthImage::new(4, 4).rgba.iter().all(|&v| v == 0));
+    }
+}
+
+#[cfg(test)]
+mod reuse_tests {
+    use super::*;
+    #[test]
+    fn reused_frame_matches_fresh_frame() {
+        let mut reused = DepthImage::new(8, 8);
+        let rgba_ptr = reused.rgba.as_ptr();
+        let depth_ptr = reused.depth.as_ptr();
+        let tri = [[0.0, 0.0, 1.0], [8.0, 0.0, 1.0], [0.0, 8.0, 1.0]];
+        reused.triangle(tri, Color::RED, 0.0, true);
+        reused.prepare(8, 8);
+        assert_eq!(rgba_ptr, reused.rgba.as_ptr());
+        assert_eq!(depth_ptr, reused.depth.as_ptr());
+        let mut fresh = DepthImage::new(8, 8);
+        // Ein ferneres Objekt muss nach dem Löschen wieder sichtbar sein.
+        let far = tri.map(|[x, y, _]| [x, y, 5.0]);
+        reused.triangle(far, Color::BLUE, 0.0, false);
+        fresh.triangle(far, Color::BLUE, 0.0, false);
+        assert_eq!(reused.rgba, fresh.rgba);
+        assert_eq!(reused.depth, fresh.depth);
+        reused.prepare(3, 5);
+        assert_eq!(reused.rgba.len(), 60);
+        assert!(reused.rgba.iter().all(|&x| x == 0));
+        assert!(reused.depth.iter().all(|&x| x == f32::INFINITY));
     }
 }

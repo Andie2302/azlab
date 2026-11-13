@@ -34,5 +34,6 @@ mod tests;
 pub use camera::{Batch, Camera};
 pub use canvas::Canvas;
 pub use color::Color;
+pub use depth::DepthImage;
 pub use plane::Plane;
 pub use runner::{Options, Scene, VizError, run};

@@ -194,7 +194,7 @@ impl Batch {
         let width = canvas.width().ceil().clamp(0.0, u16::MAX as f32) as usize;
         let height = canvas.height().ceil().clamp(0.0, u16::MAX as f32) as usize;
         if width == 0 || height == 0 { return; }
-        let mut image = crate::depth::DepthImage::new(width, height);
+        let mut image = canvas.acquire_depth_image(width as u16, height as u16);
         let project = |corners: [Point; 3]| {
             let points = corners.map(|p| camera.project(p, canvas));
             if let [Some(a), Some(b), Some(c)] = points {
@@ -218,6 +218,6 @@ impl Batch {
             let color = if facing { front } else { back }.shade(brightness);
             image.triangle(points, color, priority, wire);
         }
-        canvas.rgba_image(width as u16, height as u16, &image.rgba);
+        canvas.present_depth_image(image);
     }
 }

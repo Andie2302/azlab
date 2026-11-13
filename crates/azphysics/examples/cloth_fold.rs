@@ -10,6 +10,9 @@
 //! cargo demo cloth_fold
 //! ```
 
+#[path = "common/cloth_profile.rs"]
+mod cloth_profile;
+
 use azmath::Vector;
 use azphysics::cloth::{Cloth, Collider};
 use azviz::{Batch, Camera, Canvas, Color, Options, Scene, VizError};
@@ -19,6 +22,7 @@ const ROWS: usize = 40;
 
 struct Fold {
     camera: Camera,
+    profiler: cloth_profile::ClothProfiler,
     show_ground: bool,
     cloth: Cloth<f32>,
     ground: [Collider<f32>; 1],
@@ -37,7 +41,7 @@ impl Fold {
         cloth.params.bend_compliance = 2.0e-2;
         cloth.params.friction = 0.6;
         let ground = [Collider::Plane { point: Vector([0.0, 0.0, 0.0]), normal: Vector([0.0, 1.0, 0.0]) }];
-        Self { cloth, ground, camera: Camera::look_at([1.6, 1.2, 2.0], [0.0, 0.55, 0.15], 40.0), show_ground: true }
+        Self { profiler: cloth_profile::ClothProfiler::default(), cloth, ground, camera: Camera::look_at([1.6, 1.2, 2.0], [0.0, 0.55, 0.15], 40.0), show_ground: true }
     }
 }
 
@@ -47,8 +51,12 @@ impl Scene for Fold {
     }
 
     fn update(&mut self, dt: f32) {
-        self.cloth.step(dt, &self.ground);
+        self.profiler.step(&mut self.cloth, dt, &self.ground);
     }
+
+    fn set_profiling(&mut self, enabled: bool) { self.profiler.enabled = enabled; }
+
+    fn profile_details(&mut self) -> Option<String> { self.profiler.report() }
 
     fn orbit(&mut self, yaw: f32, pitch: f32, zoom: f32) {
         self.camera.orbit(yaw, pitch, zoom);

@@ -474,3 +474,24 @@ dünnen Wänden bereits dieselbe Ruhegarantie wie dicken Wänden zuzuschreiben.
 CG und vorkonditioniertes CG melden bei nicht endlichen Zwischenwerten
 `SolveError::NonFinite` statt Erfolg. Systeme mit extremen Größenordnungen
 benötigen gegebenenfalls eine vorherige Skalierung.
+
+
+### Detaillierte Gewebe-Messung
+
+Mit `--profile` liefern `cloth_drape`, `cloth_fold` und
+`cloth_tunnelling` zusätzlich CPU-Zeiten für freie Bewegung, XPBD,
+Hindernisse, Nachbarschaftssuche, Abstoßung, CCD und Geschwindigkeiten.
+Die Nachbarschaftszeit umfasst auch die Gültigkeitsprüfung der Listen;
+Abstoßung und CCD enthalten diese Suche nicht nochmals.
+CCD-Treffer und vollständige Rücksetzungen werden je Messfenster gezählt.
+Beim Tunnelbeispiel zählen beide Tücher als eigene Tuchschritte.
+Die Messaufrufe verursachen selbst etwas Aufwand; ohne `--profile` laufen
+keine Abschnittsuhren. `azphysics` bleibt dabei ohne `std` nutzbar:
+`Cloth::step_observed` meldet nur abgeschlossene Abschnitte an einen Callback.
+
+Farb- und Tiefenspeicher werden zwischen Bildern wiederverwendet und vor
+jedem Batch gelöscht. Das Fenster aktualisiert vorhandene Texturen;
+Größenänderungen erzeugen neue Texturen. PNG/GIF verwenden ebenfalls den
+wiederverwendbaren CPU-Speicher. Die Tiefenprüfung und Simulationsparameter
+bleiben unverändert. Eine Beschleunigung muss auf dem Zielrechner mit
+gleicher Szene und Fenstergröße gemessen werden.

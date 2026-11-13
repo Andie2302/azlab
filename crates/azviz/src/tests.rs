@@ -115,3 +115,21 @@ fn camera_orbit_preserves_target_projection() {
     camera.orbit(f32::NAN, 0.0, 0.0);
     assert_eq!(camera, before);
 }
+
+#[test]
+fn raster_depth_cache_clears_and_reuses_storage() {
+    let mut canvas = RasterCanvas::new(16, 16).expect("Bild");
+    canvas.clear(Color::BACKGROUND);
+    let mut image = canvas.acquire_depth_image(16, 16);
+    let pointer = image.rgba.as_ptr();
+    image.triangle([[0.0, 0.0, 1.0], [16.0, 0.0, 1.0], [0.0, 16.0, 1.0]],
+        Color::RED, 0.0, false);
+    canvas.present_depth_image(image);
+    assert_eq!(pixel(&canvas, 1, 1), Some((Color::RED.r, Color::RED.g, Color::RED.b)));
+    canvas.clear(Color::BACKGROUND);
+    let image = canvas.acquire_depth_image(16, 16);
+    assert_eq!(pointer, image.rgba.as_ptr());
+    assert!(image.rgba.iter().all(|&x| x == 0));
+    canvas.present_depth_image(image);
+    assert_eq!(pixel(&canvas, 1, 1), Some((Color::BACKGROUND.r, Color::BACKGROUND.g, Color::BACKGROUND.b)));
+}

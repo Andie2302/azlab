@@ -9,6 +9,9 @@
 //! cargo demo cloth_drape
 //! ```
 
+#[path = "common/cloth_profile.rs"]
+mod cloth_profile;
+
 use azmath::Vector;
 use azphysics::cloth::{Cloth, Collider};
 use azviz::{Batch, Camera, Canvas, Color, Options, Scene, VizError};
@@ -18,6 +21,7 @@ const RADIUS: f32 = 0.45;
 
 struct Drape {
     camera: Camera,
+    profiler: cloth_profile::ClothProfiler,
     show_ground: bool,
     cloth: Cloth<f32>,
     colliders: [Collider<f32>; 2],
@@ -37,7 +41,7 @@ impl Drape {
             Collider::Sphere { center: Vector([0.0, RADIUS, 0.0]), radius: RADIUS },
             Collider::Plane { point: Vector([0.0, 0.0, 0.0]), normal: Vector([0.0, 1.0, 0.0]) },
         ];
-        Self { cloth, colliders, camera: Camera::look_at([2.3, 1.9, 3.0], [0.0, 0.45, 0.0], 40.0), show_ground: true }
+        Self { profiler: cloth_profile::ClothProfiler::default(), cloth, colliders, camera: Camera::look_at([2.3, 1.9, 3.0], [0.0, 0.45, 0.0], 40.0), show_ground: true }
     }
 }
 
@@ -47,8 +51,12 @@ impl Scene for Drape {
     }
 
     fn update(&mut self, dt: f32) {
-        self.cloth.step(dt, &self.colliders);
+        self.profiler.step(&mut self.cloth, dt, &self.colliders);
     }
+
+    fn set_profiling(&mut self, enabled: bool) { self.profiler.enabled = enabled; }
+
+    fn profile_details(&mut self) -> Option<String> { self.profiler.report() }
 
     fn orbit(&mut self, yaw: f32, pitch: f32, zoom: f32) {
         self.camera.orbit(yaw, pitch, zoom);

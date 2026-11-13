@@ -1,7 +1,7 @@
 //! Kollision des Tuchs mit Dreiecken: Abstoßung und Sicherung gegen
 //! Durchdringung.
 
-use super::model::{Cloth, StepStats};
+use super::model::{Cloth, StepStats, StepPhase};
 use crate::broadphase::SpatialHash;
 use crate::ccd::{edge_edge, vertex_triangle};
 use crate::geometry::{
@@ -126,9 +126,10 @@ impl<T: RealElementary> Cloth<T> {
 
     /// Schiebt Teilchen und Dreiecke auseinander, die sich näher kommen als
     /// die Dicke des Tuchs.
-    pub(super) fn repel(&mut self, stats: &mut StepStats) {
+    pub(super) fn repel(&mut self, stats: &mut StepStats, observe: &mut impl FnMut(StepPhase)) {
         let thickness = self.params.thickness;
         self.refresh_proximity();
+        observe(StepPhase::Proximity);
         let near = core::mem::take(&mut self.proximity);
         for &(vertex, id) in &near.vertex_triangle {
             let [a, b, c] = self.triangles[id];
@@ -240,9 +241,10 @@ impl<T: RealElementary> Cloth<T> {
     /// Bewegungen werden nur gekürzt, nie verlängert, und der letzte
     /// Durchlauf hat alle Paare frei gefunden: Es gibt keine neue
     /// Durchdringung.
-    pub(super) fn prevent_penetration(&mut self, stats: &mut StepStats) {
+    pub(super) fn prevent_penetration(&mut self, stats: &mut StepStats, observe: &mut impl FnMut(StepPhase)) {
         let tolerance = self.params.thickness * T::from_f64(0.1);
         self.refresh_proximity();
+        observe(StepPhase::Proximity);
         let near = core::mem::take(&mut self.proximity);
         // Hüllquader der Bewegungen, einmal berechnet. Zurücksetzen
         // verkleinert Bewegungen nur; die Quader bleiben also gültig. Paare

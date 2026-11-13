@@ -193,3 +193,23 @@ fn cloth_f64() {
     folding::<f64>();
     editing::<f64>();
 }
+
+#[test]
+fn observing_does_not_change_cloth() {
+    let mut plain = sheet::<f64>(4, 0.03);
+    let mut observed = plain.clone();
+    let colliders = [Collider::Plane { point: v(0.0, 0.0, 0.0), normal: v(0.0, 1.0, 0.0) }];
+    let mut phases = alloc::vec::Vec::new();
+    for _ in 0..10 {
+        let a = plain.step(1.0 / 60.0, &colliders);
+        let b = observed.step_observed(1.0 / 60.0, &colliders, &mut |phase| phases.push(phase));
+        assert_eq!(a, b);
+        assert_eq!(plain.positions(), observed.positions());
+        assert_eq!(plain.velocities(), observed.velocities());
+    }
+    assert!(phases.contains(&super::StepPhase::Proximity));
+    assert!(phases.contains(&super::StepPhase::Ccd));
+    phases.clear();
+    observed.step_observed(0.0, &colliders, &mut |phase| phases.push(phase));
+    assert!(phases.is_empty());
+}
