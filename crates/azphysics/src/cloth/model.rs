@@ -95,6 +95,10 @@ pub struct StepStats {
     pub ccd_undecided: u32,
     /// Teilschritte, in denen alle Teilchen zurückgesetzt werden mussten.
     pub full_rollbacks: u32,
+    /// Wie oft die Nachbarschaftslisten der Kollision neu gebaut wurden.
+    /// Das ist der teuerste Einzelschritt; im Idealfall deutlich seltener
+    /// als einmal je Teilschritt.
+    pub proximity_rebuilds: u32,
 }
 
 /// Abgeschlossener Abschnitt eines Gewebe-Teilschritts.
@@ -141,6 +145,9 @@ pub(super) struct Proximity<T> {
     pub(super) vertex_triangle: Vec<(usize, usize)>,
     /// Paare aus zwei Kanten.
     pub(super) edge_edge: Vec<(usize, usize)>,
+    /// `true`, wenn beim Bau kein Teilchen festgehalten war. Nur dann darf
+    /// eine gemeinsame Verschiebung aller Teilchen herausgerechnet werden.
+    pub(super) all_movable: bool,
     /// `false`, wenn die Listen neu gebaut werden müssen.
     pub(super) valid: bool,
 }
@@ -153,6 +160,7 @@ impl<T: RealElementary> Default for Proximity<T> {
             thickness: T::ZERO,
             vertex_triangle: Vec::new(),
             edge_edge: Vec::new(),
+            all_movable: false,
             valid: false,
         }
     }
@@ -315,6 +323,7 @@ impl<T: RealElementary> Cloth<T> {
     pub fn pin(&mut self, index: usize) {
         if let Some(inverse) = self.inverse_mass.get_mut(index) {
             *inverse = T::ZERO;
+            self.proximity.valid = false;
         }
         if let Some(velocity) = self.velocities.get_mut(index) {
             *velocity = Vector::ZERO;

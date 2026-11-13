@@ -14,6 +14,10 @@ use azmath::scalar::RealElementary;
 /// Durchläufe der Sicherung, bevor alles zurückgesetzt wird.
 const MAX_PASSES: usize = 8;
 
+/// Sicherheitsabstand der Nachbarschaftslisten in Maschenweiten. Größer
+/// heißt seltener neu bauen, aber mehr Paare in jedem Teilschritt.
+const SLACK: f64 = 0.25;
+
 impl<T: RealElementary> Cloth<T> {
     /// Kantenlänge der Suchzellen: etwa eine Maschenweite.
     fn cell_size(&self) -> T {
@@ -23,6 +27,11 @@ impl<T: RealElementary> Cloth<T> {
         );
         let mesh = if count > T::ZERO { sum / count } else { T::ONE };
         mesh.max(self.params.thickness * T::from_f64(2.0))
+    }
+
+    /// Abstand, den die Sicherung als Berührung wertet.
+    fn ccd_tolerance(&self) -> T {
+        self.params.thickness * T::from_f64(0.1)
     }
 
     /// Hüllquader von Punkten in Anfangs- und Endlage des Teilschritts.
@@ -48,24 +57,38 @@ impl<T: RealElementary> Cloth<T> {
     /// aus seinem Bereich beim Bau entfernt hat; erst dann wird neu gebaut.
     /// Ein Paar, das nicht in der Liste steht, kann sich also nicht
     /// berühren.
-    fn refresh_proximity(&mut self) {
+    fn refresh_proximity(&mut self, stats: &mut StepStats) {
         let thickness = self.params.thickness;
         let near = &self.proximity;
-        let current = near.valid
-            && near.thickness == thickness
-            && near.anchors.len() == self.positions.len()
-            && near
+        let mut current =
+            near.valid && near.thickness == thickness && near.anchors.len() == self.positions.len();
+        if current {
+            // Bewegt sich das Tuch als Ganzes, ändert das nichts daran,
+            // welche Teile sich nahe sind. Die gemeinsame Verschiebung seit
+            // dem Bau wird deshalb herausgerechnet – sonst würden die Listen
+            // im freien Fall in fast jedem Teilschritt neu gebaut. Das geht
+            // nur, wenn sich alle Teilchen bewegen können: Gegenüber einem
+            // festen Teilchen ist die Verschiebung eine echte Annäherung.
+            let shift = if near.all_movable && !self.positions.is_empty() {
+                let sum = near.anchors.iter().zip(&self.positions).fold(Vec3::ZERO, |sum, (anchor, &position)| {
+                    sum + (position - (anchor.min + anchor.max) * T::from_f64(0.5))
+                });
+                sum * T::from_f64(self.positions.len() as f64).recip()
+            } else {
+                Vec3::ZERO
+            };
+            current = near
                 .anchors
                 .iter()
                 .zip(&self.positions)
-                .all(|(anchor, &position)| anchor.expanded(near.slack).contains(position));
+                .all(|(anchor, &position)| anchor.expanded(near.slack).contains(position - shift));
+        }
         if current {
             return;
         }
 
-        let cell = self.cell_size();
-        let slack = cell * T::from_f64(0.25);
-        let reach = slack + thickness;
+        let mesh = self.cell_size();
+        let slack = mesh * T::from_f64(SLACK);
         let mut near = core::mem::take(&mut self.proximity);
         near.anchors.clear();
         near.anchors.extend(
@@ -74,16 +97,28 @@ impl<T: RealElementary> Cloth<T> {
                 max: from.zip_map(to, |a, b| a.max(b)),
             }),
         );
-        let hull = |indices: &[usize]| {
-            indices[1..].iter().fold(near.anchors[indices[0]], |hull, &i| hull.union(near.anchors[i])).expanded(reach)
+        // Bis zum nächsten Bau bleibt jedes Teilchen in seinem Bereich,
+        // vergrößert um `slack`. Ein Paar kann sich also nur dann näher als
+        // `contact` kommen, wenn die Bereiche des einen, vergrößert um
+        // `slack`, und des anderen, vergrößert um `slack + contact`,
+        // einander berühren.
+        let hull = |indices: &[usize], margin: T| {
+            indices[1..].iter().fold(near.anchors[indices[0]], |hull, &i| hull.union(near.anchors[i])).expanded(margin)
         };
+        let two = T::from_f64(2.0);
 
-        let triangle_boxes: Vec<Aabb<T, 3>> = self.triangles.iter().map(|tri| hull(tri)).collect();
-        let mut hash = SpatialHash::build(cell, triangle_boxes.iter().copied().enumerate());
+        // Teilchen gegen Dreieck: gebraucht von der Abstoßung (Abstand bis
+        // zur Dicke) und von der Sicherung (Abstand bis zur Toleranz).
+        let reach = slack + thickness;
+        let triangle_boxes: Vec<Aabb<T, 3>> = self.triangles.iter().map(|tri| hull(tri, reach)).collect();
+        // Zellen so groß wie die Quader, die hineinsortiert werden: Jeder
+        // fällt dann in wenige Zellen. Kleinere Zellen vervielfachen die
+        // Einträge und machen den Bau um ein Vielfaches teurer.
+        let mut hash = SpatialHash::build(mesh + reach * two, triangle_boxes.iter().copied().enumerate());
         let mut candidates = Vec::new();
         near.vertex_triangle.clear();
         for vertex in 0..self.positions.len() {
-            let bounds = hull(&[vertex]);
+            let bounds = hull(&[vertex], slack);
             hash.query(bounds, &mut candidates);
             for &id in &candidates {
                 let triangle = self.triangles[id];
@@ -96,16 +131,21 @@ impl<T: RealElementary> Cloth<T> {
             }
         }
 
-        let edge_boxes: Vec<Aabb<T, 3>> = self.edges.iter().map(|edge| hull(edge)).collect();
-        let mut hash = SpatialHash::build(cell, edge_boxes.iter().copied().enumerate());
+        // Kante gegen Kante: nur von der Sicherung gebraucht, deshalb mit
+        // der kleineren Reichweite. Beide Kanten bekommen die halbe
+        // Toleranz dazu; so ist die Prüfung in beiden Richtungen dieselbe
+        // und jedes Paar wird nur einmal betrachtet.
+        let reach = slack + self.ccd_tolerance() * T::from_f64(0.5);
+        let edge_boxes: Vec<Aabb<T, 3>> = self.edges.iter().map(|edge| hull(edge, reach)).collect();
+        let mut hash = SpatialHash::build(mesh + reach * two, edge_boxes.iter().copied().enumerate());
         near.edge_edge.clear();
         for first in 0..self.edges.len() {
             let [a, b] = self.edges[first];
             hash.query(edge_boxes[first], &mut candidates);
             for &second in &candidates {
                 let [c, d] = self.edges[second];
-                // Jedes Paar einmal; Kanten mit gemeinsamem Teilchen können
-                // sich nicht durchdringen.
+                // Kanten mit gemeinsamem Teilchen können sich nicht
+                // durchdringen.
                 if second > first
                     && a != c
                     && a != d
@@ -118,8 +158,10 @@ impl<T: RealElementary> Cloth<T> {
                 }
             }
         }
+        stats.proximity_rebuilds += 1;
         near.slack = slack;
         near.thickness = thickness;
+        near.all_movable = self.inverse_mass.iter().all(|&inverse| inverse > T::ZERO);
         near.valid = true;
         self.proximity = near;
     }
@@ -128,7 +170,7 @@ impl<T: RealElementary> Cloth<T> {
     /// die Dicke des Tuchs.
     pub(super) fn repel(&mut self, stats: &mut StepStats, observe: &mut impl FnMut(StepPhase)) {
         let thickness = self.params.thickness;
-        self.refresh_proximity();
+        self.refresh_proximity(stats);
         observe(StepPhase::Proximity);
         let near = core::mem::take(&mut self.proximity);
         for &(vertex, id) in &near.vertex_triangle {
@@ -263,8 +305,8 @@ impl<T: RealElementary> Cloth<T> {
     /// Durchlauf hat alle Paare frei gefunden: Es gibt keine neue
     /// Durchdringung.
     pub(super) fn prevent_penetration(&mut self, stats: &mut StepStats, observe: &mut impl FnMut(StepPhase)) {
-        let tolerance = self.params.thickness * T::from_f64(0.1);
-        self.refresh_proximity();
+        let tolerance = self.ccd_tolerance();
+        self.refresh_proximity(stats);
         observe(StepPhase::Proximity);
         let near = core::mem::take(&mut self.proximity);
         // Hüllquader der Bewegungen, einmal berechnet. Zurücksetzen

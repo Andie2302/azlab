@@ -426,6 +426,27 @@ fn friction_on_triangles<T: RealElementary>() {
     assert!(steep > f(0.4) && steep < f(0.6), "auf steiler Platte {:?} m", steep.to_f64());
 }
 
+/// Im freien Fall bewegt sich das Tuch als Ganzes. Die Nachbarschaftslisten
+/// der Kollision bleiben dabei gültig und werden nicht in jedem Teilschritt
+/// neu gebaut – das wäre der teuerste Teil des Schritts.
+#[test]
+fn falling_cloth_keeps_its_proximity_lists() {
+    let mut cloth = sheet::<f64>(8, 5.0);
+    let mut rebuilds = 0;
+    for _ in 0..30 {
+        rebuilds += cloth.step(1.0 / 60.0, &[]).proximity_rebuilds;
+    }
+    // Ein halbe Sekunde Fall, gut ein Meter Weg, 240 Teilschritte.
+    assert!(cloth.positions()[0][1] < 4.0);
+    assert!(rebuilds <= 2, "{rebuilds} Neubauten");
+    // Mit einem festgehaltenen Teilchen ist die gemeinsame Bewegung eine
+    // echte Annäherung; dann wird wieder gebaut.
+    let mut pinned = sheet::<f64>(8, 5.0);
+    pinned.pin(0);
+    let rebuilds = (0..30).fold(0, |sum, _| sum + pinned.step(1.0 / 60.0, &[]).proximity_rebuilds);
+    assert!(rebuilds > 2);
+}
+
 #[test]
 fn friction_f32() {
     friction_on_a_slope::<f32>();

@@ -143,8 +143,10 @@ Korrekturen eingeschaltet).
   gefunden, oder nichts hat sich bewegt.
 - Die Kandidatenpaare stammen aus Nachbarschaftslisten mit
   Sicherheitsabstand. Sie werden neu gebaut, sobald ein Teilchen seinen
-  Bereich um mehr als den halben Sicherheitsabstand verlässt; ein Paar, das
-  nicht in der Liste steht, kann sich nicht berühren.
+  Bereich um mehr als den Sicherheitsabstand verlässt; ein Paar, das nicht
+  in der Liste steht, kann sich nicht berühren. Bewegen sich alle Teilchen
+  frei, wird ihre gemeinsame Verschiebung vorher herausgerechnet: Ein Tuch
+  im freien Fall behält seine Listen.
 
 Tests dazu: `ccd::tests` (darunter 5000 zufällige Durchstöße, keiner
 übersehen), `cloth::tests::tunnelling` (300 m/s gegen ein Dreieck; das Tuch
@@ -159,6 +161,33 @@ kommt an und bleibt davor; im freien Flug greift die Sicherung nicht ein),
   und bewegen sich nicht mehr gegeneinander, bis die Abstoßung sie trennt.
 - Abstoßung und Reibung nur Teilchen–Dreieck, nicht Kante–Kante.
 - Die Sicherung hält an, statt abprallen zu lassen: kein Stoßgesetz.
+
+### Rechenzeit
+
+Stand nach der ersten Runde, Millisekunden je Bild (8 Teilschritte) auf dem
+Entwicklungsrechner:
+
+| Szene | Teilchen | vorher | nachher |
+|---|---|---|---|
+| `cloth_fold` | 28 × 40 | 27 | 14 |
+| `cloth_drape` | 34 × 34 | 17 | 11 |
+| Tuch über Kugel | 68 × 68 | 185 | 70 |
+
+Der größte Posten war der Bau der Nachbarschaftslisten: Die Zellen des
+Suchgitters waren kleiner als die vergrößerten Hüllquader, jedes Element
+stand in bis zu 64 Zellen. Jetzt sind die Zellen so groß wie die Quader, die
+Reichweite ist für jede Liste so klein wie möglich (Kantenpaare braucht nur
+die Sicherung), und im freien Fall wird gar nicht gebaut.
+
+Bei 68 × 68 verteilt sich die Zeit auf Listenbau (35 ms, 1,6-mal je Bild),
+Verbindungen (13 ms), Sicherung (11 ms) und Abstoßung (10 ms). Der
+Sicherheitsabstand von einem Viertel der Maschenweite ist der gemessene
+Bestwert; größer heißt seltener bauen, aber mehr Paare je Teilschritt.
+`StepStats::proximity_rebuilds` zählt die Neubauten.
+
+Nicht bewährt: die Teilchen statt der Dreiecke ins Gitter zu sortieren. Die
+Zahl der Kandidaten sinkt, die Gesamtzeit nicht, und die Abstoßung wird
+durch die andere Reihenfolge der Paare langsamer.
 
 ## Strömung
 
