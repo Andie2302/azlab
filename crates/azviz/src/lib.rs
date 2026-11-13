@@ -26,6 +26,7 @@ mod depth;
 mod plane;
 mod raster;
 mod runner;
+mod scene;
 mod window;
 
 #[cfg(test)]
@@ -36,4 +37,5 @@ pub use canvas::Canvas;
 pub use color::Color;
 pub use depth::DepthImage;
 pub use plane::Plane;
-pub use runner::{Options, Scene, VizError, run};
+pub use runner::{Options, VizError, run};
+pub use scene::Scene;

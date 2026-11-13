@@ -1,7 +1,7 @@
 [package]
 name = "azviz"
 description = "Anzeige für die Beispiele des azlab-Workspace: Live-Fenster oder Bilddateien"
-version.workspace = true
+version = "0.1.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true

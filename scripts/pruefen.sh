@@ -56,6 +56,11 @@ for crate in azmath azphysics; do
     done
 done
 
+# Öffentliche Scene-Schnittstelle und ALLE Example-Testtargets ausdrücklich prüfen.
+# Der normale Bibliothekstest führt die Tests unter examples/ nicht aus.
+run cargo check -p azphysics --features std --examples
+run cargo test -p azphysics --features std --release --examples
+
 # Die Anzeige für die Beispiele braucht std und hat keine Feature-Schalter.
 run cargo test -p azviz
 run cargo clippy -p azviz --all-targets -- -D warnings

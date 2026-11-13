@@ -20,7 +20,7 @@ alloc = ["azmath/alloc"]
 azmath = { workspace = true }
 
 [dev-dependencies]
-azviz = { path = "../azviz" }
+azviz = { path = "../azviz", version = "=0.1.1" }
 
 [lints]
 workspace = true
