@@ -139,7 +139,7 @@ Rücksetzungen und die CPU-Zeit des letzten Physikschritts.
 | **3** | Hängendes Tuch mit Haltepunkten und Dämpfung |
 | **4** | Fall auf eine Kugel mit Boden und Reibung |
 | **Leertaste** / **N** | Weiter/Pause / genau ein Physikschritt |
-| **S** | Sichtbare Messhistorie nach `cloth_diagnostics.csv` schreiben (überschreibt die Datei) |
+| **S** | Sichtbare Messhistorie nach `FreierFall-Daten.csv` schreiben (überschreibt die Datei) |
 | **Pfeile** / **Bild auf/ab** | Kamera drehen / zoomen |
 
 Die Tasten **1–4** setzen den Versuch einschließlich Zeit und Referenzwerten
