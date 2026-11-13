@@ -25,6 +25,10 @@ azviz = { path = "../azviz", version = "=0.1.1" }
 [lints]
 workspace = true
 
+[[example]]
+name = "cloth_diagnostics"
+required-features = ["std"]
+
 # Die Beispiele zeigen die Simulationen im Fenster und brauchen dafür den Heap:
 #   cargo demo cloth_drape
 

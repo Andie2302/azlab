@@ -23,6 +23,7 @@
 //! Dreiecken. Ebene und Kugel schieben Teilchen nur hinaus.
 
 mod collide;
+mod diagnostics;
 mod model;
 mod step;
 
@@ -30,3 +31,4 @@ mod step;
 mod tests;
 
 pub use model::{Cloth, ClothParams, Collider, StepStats, StepPhase};
+pub use diagnostics::ClothDiagnostics;
