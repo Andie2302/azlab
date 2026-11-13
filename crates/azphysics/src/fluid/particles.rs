@@ -41,13 +41,17 @@ impl<T: RealElementary> Default for ParticleParams<T> {
 /// Reichweite der Kerne in Teilchenabständen.
 const SUPPORT: f64 = 2.4;
 
+/// Dicke der Wände in Teilchenlagen.
+const WALL_LAYERS: f64 = 3.0;
+
 /// Flüssigkeit mit freier Oberfläche in einem rechteckigen Becken.
 ///
 /// Verfahren nach Macklin und Müller, „Position Based Fluids“ (2013): Die
 /// Dichte an jedem Teilchen ergibt sich aus den Nachbarn im Umkreis; liegt
 /// sie über der Ruhedichte, werden die Teilchen auseinandergeschoben. Die
 /// Wände und Hindernisse bestehen aus ruhenden Teilchen, die zur Dichte
-/// beitragen.
+/// beitragen und selbst Druck aufbauen, wenn die Flüssigkeit sich an ihnen
+/// staut.
 #[derive(Clone, Debug)]
 pub struct ParticleFluid<T> {
     bounds: Aabb<T, 2>,
@@ -106,9 +110,9 @@ impl<T: RealElementary> ParticleFluid<T> {
             }
         }
         fluid.rest_density = density;
-        // Wände: zwei Lagen ruhender Teilchen rund um das Becken.
-        let two = T::from_f64(2.0);
-        let outer = bounds.expanded(spacing * two);
+        // Wände: drei Lagen ruhender Teilchen rund um das Becken. So viele
+        // braucht die innerste Lage, um selbst die volle Dichte zu sehen.
+        let outer = bounds.expanded(spacing * T::from_f64(WALL_LAYERS));
         fluid.lattice(outer.min, outer.max, |point, fluid| {
             if !bounds.contains(point) {
                 fluid.walls.push(point);
@@ -159,12 +163,15 @@ impl<T: RealElementary> ParticleFluid<T> {
         self.previous.resize(count, Vector::ZERO);
         self.velocities.resize(count, Vector::ZERO);
         self.densities.resize(count, T::ONE);
-        self.lambdas.resize(count, T::ZERO);
         self.deltas.resize(count, Vector::ZERO);
         count - before
     }
 
     /// Stellt ein festes rechteckiges Hindernis in das Becken.
+    ///
+    /// Es sollte mindestens drei Teilchenabstände dick sein: Dünnere
+    /// Hindernisse bauen nicht den vollen Gegendruck auf, und das Wasser
+    /// kommt an ihnen nicht ganz zur Ruhe.
     pub fn add_obstacle(&mut self, min: Vec2<T>, max: Vec2<T>) {
         self.lattice(min, max, |point, fluid| fluid.walls.push(point));
         self.obstacles.push(Aabb { min, max });
@@ -282,13 +289,14 @@ impl<T: RealElementary> ParticleFluid<T> {
         point
     }
 
-    /// Sortiert alle Teilchen in Zellen und sammelt zu jedem
-    /// Flüssigkeitsteilchen die Nachbarn in Reichweite.
+    /// Sortiert alle Teilchen in Zellen und sammelt zu jedem – auch zu den
+    /// Wandteilchen – die Nachbarn in Reichweite.
     fn find_neighbours(&mut self) {
         let count = self.positions.len();
         let total = count + self.walls.len();
-        let origin = self.bounds.min - Vector::splat(self.spacing * T::from_f64(3.0));
-        let extent = self.bounds.max - origin + Vector::splat(self.spacing * T::from_f64(3.0));
+        let border = Vector::splat(self.spacing * T::from_f64(WALL_LAYERS));
+        let origin = self.bounds.min - border;
+        let extent = self.bounds.max - origin + border;
         let cells_along = |length: T| {
             let cells = (length / self.support).ceil().to_f64();
             if cells.is_finite() { (cells as usize).clamp(1, 4096) } else { 1 }
@@ -324,9 +332,9 @@ impl<T: RealElementary> ParticleFluid<T> {
 
         self.neighbour_start.clear();
         self.neighbours.clear();
-        for index in 0..count {
+        for index in 0..total {
             self.neighbour_start.push(self.neighbours.len());
-            let here = self.positions[index];
+            let here = self.point(index);
             let (cx, cy) = cell_of(here);
             for ny in cy.saturating_sub(1)..=(cy + 1).min(height - 1) {
                 for nx in cx.saturating_sub(1)..=(cx + 1).min(width - 1) {
@@ -346,15 +354,24 @@ impl<T: RealElementary> ParticleFluid<T> {
     fn correct_density(&mut self) {
         let count = self.positions.len();
         let softness = self.params.relaxation.max(T::ZERO) / (self.support * self.support);
-        for index in 0..count {
-            let here = self.positions[index];
+        // Dichte und Druckfaktor an jedem Teilchen, auch an denen der Wand.
+        // Eine Wand, die nur den Druck ihres Gegenübers spiegelt, trägt kein
+        // Druckgefälle mit der Tiefe: Der Spalte an der Wand fehlt dann die
+        // halbe Stütze gegen die Schwerkraft, sie sinkt, und es entsteht
+        // eine Umwälzung, die nie zur Ruhe kommt. Mit eigener Dichte wächst
+        // der Druck in der Wand mit der Tiefe wie in der Flüssigkeit.
+        for index in 0..count + self.walls.len() {
+            let here = self.point(index);
+            let movable = index < count;
             let mut density = self.density_kernel(T::ZERO);
             let mut own_gradient: Vec2<T> = Vector::ZERO;
             let mut squares = T::ZERO;
+            let mut wet = movable;
             for &other in &self.neighbours[self.neighbour_start[index]..self.neighbour_start[index + 1]] {
                 let offset = here - self.point(other);
                 let distance = offset.norm();
                 density += self.density_kernel(distance);
+                wet |= other < count;
                 if distance > T::ZERO {
                     let slope = self.gradient_kernel(distance) / self.rest_density;
                     own_gradient -= offset * (slope / distance);
@@ -362,10 +379,13 @@ impl<T: RealElementary> ParticleFluid<T> {
                 }
             }
             let relative = density / self.rest_density;
-            self.densities[index] = relative;
+            if movable {
+                self.densities[index] = relative;
+            }
             // Nur Druck, kein Zug: Zu dünn besetzte Stellen (die freie
-            // Oberfläche) ziehen nichts an.
-            let excess = (relative - T::ONE).max(T::ZERO);
+            // Oberfläche) ziehen nichts an. Wandteilchen ohne Flüssigkeit in
+            // Reichweite drücken auf nichts.
+            let excess = if wet { (relative - T::ONE).max(T::ZERO) } else { T::ZERO };
             self.lambdas[index] = -excess / (squares + own_gradient.norm_sqr() + softness);
         }
 
@@ -386,8 +406,7 @@ impl<T: RealElementary> ParticleFluid<T> {
                 } else {
                     Vector([-T::ONE, T::ZERO])
                 };
-                // Eine Wand drückt so stark zurück wie das Teilchen selbst.
-                let partner = if other < count { self.lambdas[other] } else { self.lambdas[index] };
+                let partner = self.lambdas[other];
                 let ratio = self.density_kernel(distance) / reference;
                 let ratio = ratio * ratio;
                 let weight = self.lambdas[index] + partner - clump * ratio * ratio;
@@ -446,6 +465,7 @@ impl<T: RealElementary> ParticleFluid<T> {
                 self.previous[index] = self.positions[index];
                 self.positions[index] = self.confine(self.positions[index] + self.velocities[index] * h);
             }
+            self.lambdas.resize(self.positions.len() + self.walls.len(), T::ZERO);
             self.find_neighbours();
             for _ in 0..self.params.iterations.max(1) {
                 self.correct_density();

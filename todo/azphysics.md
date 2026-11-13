@@ -15,7 +15,7 @@ Stand: erste Fassung umgesetzt und geprüft.
 
 azviz: `Canvas` (Zeichenfläche), `Scene` + `run` (Fenster, `--png`, `--gif`),
 `Plane` (Ausschnitt der Ebene), `Camera` + `Batch` (schattierte Dreiecke im
-Raum, von hinten nach vorn sortiert).
+Raum, mit Tiefenprüfung je Bildpunkt).
 
 ## Gewebe: Ablauf eines Teilschritts
 
@@ -34,15 +34,17 @@ Raum, von hinten nach vorn sortiert).
 ### Warum nichts durchdringt
 
 - Zwei Dreiecksnetze können sich nur durchdringen, indem ein Punkt durch
-  ein Dreieck oder eine Kante durch eine Kante tritt. Im Augenblick der
-  Berührung liegen die vier Punkte in einer Ebene: Polynom dritten Grades.
-- `azmath::poly::isolate_real_roots` schließt jede reelle Nullstelle in
-  [0, 1] ein; keine geht verloren. An jeder Einschließung wird der Abstand
-  geprüft.
-- Ist das Polynom identisch null (die vier Punkte bleiben in einer Ebene)
-  oder eine Einschließung nicht auflösbar, entscheidet vorsichtiges
-  Vorrücken über den Abstand selbst (`advance`): Der Abstand ändert sich je
-  Zeit höchstens um die zurückgelegten Wege.
+  ein Dreieck oder eine Kante durch eine Kante tritt. Vorher sinkt der
+  Abstand des Paars unter die Toleranz.
+- Der Abstand wird über den ganzen Teilschritt verfolgt (`advance`): Er
+  ändert sich je Zeit höchstens um die zurückgelegten Wege, also wird
+  jeweils um `(Abstand − Toleranz) / Weg` vorgerückt. Das übersieht keine
+  Annäherung, auch keine, bei der die Teile nie in einer Ebene liegen. Eine
+  frühere Fassung suchte nur die Zeitpunkte, an denen die vier Punkte in
+  einer Ebene liegen; sie ließ Annäherungen unter die Toleranz ohne
+  Durchtritt zu, und solche Paare blieben danach aneinander stehen.
+- Nach 64 Schritten ohne Entscheidung (schleichende Annäherung) wird
+  vorsichtshalber eine Berührung gemeldet.
 - Gerechnet wird mit der Relativbewegung (mittlere Verschiebung abgezogen).
   Ein Tuch im freien Flug stößt so nicht scheinbar mit sich selbst zusammen.
 - Bewegungen werden nur gekürzt. Der letzte Durchlauf hat alle Paare frei
@@ -77,7 +79,17 @@ Einlass, offen. Hindernisse sind ganze Zellen.
 
 `ParticleFluid` (*position based fluids*): Dichte aus den Nachbarn, Korrektur
 der Lagen bis zur Ruhedichte, nur Druck (kein Zug), Abstoßung gegen
-Verklumpen, XSPH-Zähigkeit. Wände und Hindernisse sind ruhende Teilchen.
+Verklumpen, XSPH-Zähigkeit. Wände und Hindernisse sind ruhende Teilchen in
+drei Lagen.
+
+Die Wandteilchen haben eine eigene Dichte und einen eigenen Druckfaktor. Das
+ist nötig, damit Wasser an einer Wand zur Ruhe kommt: Spiegelt die Wand nur
+den Druck ihres Gegenübers, trägt sie kein Druckgefälle mit der Tiefe. Der
+Spalte an der Wand fehlt dann etwa die halbe Stütze gegen die Schwerkraft,
+sie sinkt mit rund 0,3 m/s ab, und es bleibt eine Umwälzung an jeder Wand
+(Test `fluid::tests::pool`). Drei Lagen braucht die innerste Lage, um selbst
+die volle Dichte zu sehen; Hindernisse sollten deshalb mindestens drei
+Teilchenabstände dick sein.
 
 Grenzen: nur in der Ebene; erster Ordnung in der Zeit; keine
 Oberflächenspannung; Teilchenflüssigkeit ohne Kopplung an das Gitter.

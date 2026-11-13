@@ -181,3 +181,29 @@ Nebenbei gefunden und behoben (azphysics): Die kontinuierliche
 Kollisionserkennung meldete für ein schnell fliegendes ebenes Tuch
 Berührungen mit sich selbst. Der zugehörige Test bestand, ohne dass sich das
 Tuch bewegte; er prüft jetzt, dass es am Hindernis ankommt.
+
+## Teilchenflüssigkeit: Wasser kam an den Wänden nicht zur Ruhe
+
+**Behoben.** In `fluid_dam_break` bekam das Wasser an beiden Rändern des
+Beckens dauerhaft „Stöße“. Schon ein ruhendes, eben gefülltes Becken zeigte
+es: Die Spalte direkt an der Wand sank über die ganze Höhe mit etwa 0,3 m/s
+ab, oben floss Wasser nach – eine Umwälzung an jeder Wand, die kein
+Parameter beseitigte.
+
+Ursache: Die Wandteilchen spiegelten nur den Druck des jeweiligen
+Flüssigkeitsteilchens. In der Senkrechten heben sich ihre Beiträge dann auf;
+die Wand trägt kein Druckgefälle mit der Tiefe. Dem Teilchen an der Wand
+fehlt damit die Stütze gegen die Schwerkraft von der ganzen Wandseite.
+
+Behebung in `fluid/particles.rs`: Wandteilchen bekommen eine eigene Dichte
+und einen eigenen Druckfaktor, der mit der Tiefe wächst wie in der
+Flüssigkeit; die Wand ist dafür drei statt zwei Lagen dick.
+
+| | vorher | nachher |
+|---|---|---|
+| Ruhendes Becken, mittlere Geschwindigkeit an der Wand nach 20 s | 0,20 m/s | 0,000 m/s |
+| Dammbruch, mittlere Geschwindigkeit an den Wänden nach 50 s | 0,08 bis 0,13 m/s | 0,002 m/s |
+| Dammbruch, schnellstes Teilchen nach 50 s | 0,5 m/s | 0,06 m/s |
+
+Regressionstest: `fluid::tests::pool` prüft die Ruhe getrennt an beiden
+Wänden und in der Mitte.

@@ -146,15 +146,28 @@ fn pool<T: RealElementary>() {
     // Becken bis zur Höhe 0,4 gefüllt: Das Wasser bleibt, wo es ist.
     assert_eq!(fluid.add_block(v(0.0, 0.0), v(2.0, 0.4)), 40 * 8);
     let start = centre(&fluid);
-    for _ in 0..90 {
+    for _ in 0..240 {
         fluid.step(f(1.0 / 60.0));
     }
     let moved = centre(&fluid) - start;
     assert!(moved.norm() < f(0.03), "Schwerpunkt um {:?} verschoben", moved.norm().to_f64());
     assert!(fluid.mean_compression() < f(0.05));
-    let speed = fluid.velocities().iter().fold(T::ZERO, |sum, velocity| sum + velocity.norm())
-        / f(fluid.velocities().len() as f64);
-    assert!(speed < f(0.1), "noch in Bewegung: {:?}", speed.to_f64());
+    // Es kehrt Ruhe ein – auch an den Wänden. Eine Wand, die kein
+    // Druckgefälle mit der Tiefe trägt, lässt die Spalte neben ihr dauerhaft
+    // absinken; die mittlere Geschwindigkeit dort lag dann bei 0,2 m/s.
+    let speed = |low: f64, high: f64| {
+        let (sum, count) = fluid
+            .positions()
+            .iter()
+            .zip(fluid.velocities())
+            .filter(|(point, _)| point[0] >= f(low) && point[0] < f(high))
+            .fold((T::ZERO, T::ZERO), |(sum, count), (_, velocity)| (sum + velocity.norm(), count + T::ONE));
+        sum / count.max(T::ONE)
+    };
+    for (low, high) in [(0.0, 0.15), (0.6, 1.4), (1.85, 2.0)] {
+        let speed = speed(low, high);
+        assert!(speed < f(0.02), "zwischen {low} und {high} noch in Bewegung: {:?}", speed.to_f64());
+    }
     // Ungültige Schrittweite ändert nichts.
     let before = fluid.positions()[0];
     fluid.step(T::ZERO);

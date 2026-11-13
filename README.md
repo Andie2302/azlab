@@ -279,12 +279,11 @@ Durchdringung wirken zwei Stufen:
    Tuchs, werden beide auseinandergeschoben.
 2. **Sicherung:** Am Ende jedes Teilschritts prüft die kontinuierliche
    Kollisionserkennung die ganze Bewegung jedes Paars aus Punkt und Dreieck
-   und aus zwei Kanten. Die vier beteiligten Punkte liegen im Augenblick der
-   Berührung in einer Ebene – ein Polynom dritten Grades in der Zeit. Seine
-   Nullstellen sucht die Intervall-Einschließung aus azmath, die keine
-   Nullstelle übersehen kann. Würden sich Teile durchdringen, wird ihre
-   Bewegung gekürzt; notfalls kehren alle Teilchen an den Anfang des
-   Teilschritts zurück.
+   und aus zwei Kanten. Sie verfolgt den Abstand der beiden Teile über den
+   Teilschritt und rückt dabei jeweils nur so weit vor, wie sich die Teile
+   in der Zeit höchstens nähern können; so entgeht ihr keine Berührung.
+   Kämen sich Teile näher als die Toleranz, wird ihre Bewegung gekürzt;
+   notfalls kehren alle Teilchen an den Anfang des Teilschritts zurück.
 
 Damit gilt: War das Netz vor dem Schritt frei von Durchdringungen, ist es
 das danach auch – gleich wie schnell es sich bewegt und wie dünn es ist. Die
