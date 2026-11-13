@@ -387,7 +387,7 @@ impl Scene for Diagnostics {
         self.camera.orbit(yaw, pitch, zoom);
     }
     fn state_path(&self) -> Option<&str> {
-        Some("cloth_diagnostics.csv")
+        Some("FreierFall-Daten.csv")
     }
     fn save_state(&self, path: &Path) -> Result<(), VizError> {
         std::fs::write(path, self.csv())?;
