@@ -319,6 +319,8 @@ cargo demo cloth_drape -- --png tuch.png --frames 200
 | `fluid_smoke` | Rauch steigt in einem geschlossenen Kasten auf und umströmt ein Hindernis |
 | `fluid_vortex_street` | Kármánsche Wirbelstraße hinter einem angeströmten Zylinder |
 | `fluid_dam_break` | Dammbruch: Eine Wassersäule aus Teilchen stürzt in ein Becken |
+| `cloth_free_flight` | Kontrollversuch: gleichförmiger freier Flug, Orts-/Geschwindigkeitsfehler, S/L-Zustandsdateien |
+| `fluid_rest_lab` | Sechs Kontrollbecken mit getrennten Randmessungen und S/L-Zustandsdateien |
 
 | | |
 |---|---|
@@ -495,3 +497,54 @@ Größenänderungen erzeugen neue Texturen. PNG/GIF verwenden ebenfalls den
 wiederverwendbaren CPU-Speicher. Die Tiefenprüfung und Simulationsparameter
 bleiben unverändert. Eine Beschleunigung muss auf dem Zielrechner mit
 gleicher Szene und Fenstergröße gemessen werden.
+
+
+### Kontrollbeispiele und Zustandsdateien
+
+```bash
+cargo demo cloth_free_flight -- --paused
+cargo demo fluid_rest_lab -- --paused
+```
+
+**Freier Flug:** Ein Tuch fliegt ohne Schwerkraft, Dämpfung oder Hindernisse,
+mit Selbstkollision und CCD. Die Kameraansicht bewegt sich rechnerisch mit
+der erwarteten Translation; dadurch bleibt das Tuch im Bild. Angezeigt
+werden der größte Orts- und Geschwindigkeitsfehler gegenüber gleichförmiger
+Translation sowie die Dehnung. Grün bedeutet lediglich, dass die angezeigten
+Diagnoseschwellen eingehalten werden, keine allgemeine Genauigkeitsgarantie.
+
+**Ruhebecken:** Die Tasten **1–6** starten feste Versuchsvarianten neu und
+pausieren: kleines volles Becken, flaches grobes Becken, flaches feines
+Becken, dünnes Hindernis, dickes Hindernis und volles Becken ohne Schwerkraft.
+Die Standardparameter werden bis auf die ausdrücklich ausgeschaltete
+Schwerkraft der letzten Variante beibehalten. Für linke Wand, Mitte und
+rechte Wand werden Besetzung, mittlere und maximale Geschwindigkeit gezeigt.
+Die Dichteanzeige ist unmittelbar nach dem Laden noch nicht neu berechnet.
+Ein höheres anfängliches Tempo kann das Einschwingen zeigen; für Ruhe müssen
+die Messwerte über die Zeit betrachtet werden.
+
+In diesen beiden Beispielen speichert **S** den Zustand im aktuellen
+Arbeitsverzeichnis (`cloth_free_flight.azstate` beziehungsweise
+`fluid_rest_lab.azstate`). **L** lädt die Datei und pausiert; **N** rechnet
+anschließend einen Schritt. Eine vorhandene Datei gleichen Namens wird
+überschrieben. Andere Beispiele unterstützen Zustandsdateien vorerst nicht.
+
+Das versionierte Textformat speichert Versuchsvariante, Schrittzähler,
+simulierte Zeit sowie Positionen und Geschwindigkeiten als exakte
+Gleitkomma-Bitmuster. Beim Laden werden Variante, Punktzahl und endliche
+Werte geprüft; fehlerhafte Daten ersetzen den laufenden Zustand nicht.
+Geometrie, Massen und Parameter werden aus der festen Variante aufgebaut:
+Dateien sind nur für dieselbe Beispielversion bestimmt, keine universellen
+oder über Codeänderungen hinweg garantierten Checkpoints.
+Kamera und temporäre Suchlisten werden nicht gespeichert. Das Laden dient
+der geometrischen Diagnose und Fortsetzung; bitidentische Fortsetzung bei
+allen Szenen oder Plattformen wird nicht zugesagt.
+
+Die Physik-APIs `Cloth::restore_motion` und
+`ParticleFluid::restore_motion` verwenden vorhandene Topologie und Parameter
+und sind unabhängig von Datei-I/O auch mit `alloc` ohne `std` nutzbar.
+Tests für die Beispiele (einschließlich Dateiformat) lassen sich so starten:
+
+```bash
+cargo test -p azphysics --features std --release --examples
+```

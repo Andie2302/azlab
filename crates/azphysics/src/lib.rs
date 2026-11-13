@@ -65,3 +65,6 @@ pub mod cloth;
 #[cfg(feature = "alloc")]
 pub mod fluid;
 pub mod geometry;
+
+mod motion;
+pub use motion::MotionError;

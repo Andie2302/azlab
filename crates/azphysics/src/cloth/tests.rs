@@ -213,3 +213,25 @@ fn observing_does_not_change_cloth() {
     observed.step_observed(0.0, &colliders, &mut |phase| phases.push(phase));
     assert!(phases.is_empty());
 }
+
+#[test]
+fn motion_restore_validates_before_modifying() {
+    let mut cloth = sheet::<f64>(4, 1.0);
+    let positions = cloth.positions().to_vec();
+    let velocities = cloth.velocities().to_vec();
+    assert_eq!(cloth.restore_motion(&positions[..2], &velocities), Err(crate::MotionError::DimensionMismatch));
+    let mut bad = positions.clone();
+    bad[0][0] = f64::NAN;
+    assert_eq!(cloth.restore_motion(&bad, &velocities), Err(crate::MotionError::NonFinite));
+    assert_eq!(cloth.positions(), positions);
+    cloth.step(1.0 / 60.0, &[]);
+    assert!(cloth.restore_motion(&positions, &velocities).is_ok());
+    assert_eq!(cloth.positions(), positions);
+    assert_eq!(cloth.velocities(), velocities);
+    let mut expected = sheet::<f64>(4, 1.0);
+    for _ in 0..3 {
+        cloth.step(1.0 / 60.0, &[]);
+        expected.step(1.0 / 60.0, &[]);
+    }
+    assert_eq!(cloth.positions(), expected.positions());
+}

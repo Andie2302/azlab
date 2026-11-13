@@ -51,3 +51,11 @@ required-features = ["std"]
 [[example]]
 name = "cloth_tunnelling"
 required-features = ["std"]
+
+[[example]]
+name = "cloth_free_flight"
+required-features = ["std"]
+
+[[example]]
+name = "fluid_rest_lab"
+required-features = ["std"]

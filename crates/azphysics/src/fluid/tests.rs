@@ -289,3 +289,28 @@ fn small_full_pool_defaults() {
         }
     }
 }
+
+#[test]
+fn fluid_motion_restore_is_atomic_and_can_continue() {
+    let mut fluid = tank::<f64>();
+    fluid.add_block(v(0.0, 0.0), v(2.0, 0.4));
+    let positions = fluid.positions().to_vec();
+    let velocities = fluid.velocities().to_vec();
+    let mut bad = positions.clone();
+    bad[0] = v(-1.0, 0.0);
+    assert_eq!(fluid.restore_motion(&bad, &velocities), Err(crate::MotionError::InvalidPosition));
+    assert_eq!(fluid.positions(), positions);
+    let mut bad_velocity = velocities.clone();
+    bad_velocity[0][0] = f64::INFINITY;
+    assert_eq!(fluid.restore_motion(&positions, &bad_velocity), Err(crate::MotionError::NonFinite));
+    fluid.step(1.0 / 60.0);
+    assert!(fluid.restore_motion(&positions, &velocities).is_ok());
+    let mut expected = tank::<f64>();
+    expected.add_block(v(0.0, 0.0), v(2.0, 0.4));
+    for _ in 0..3 {
+        fluid.step(1.0 / 60.0);
+        expected.step(1.0 / 60.0);
+    }
+    assert_eq!(fluid.positions(), expected.positions());
+    assert_eq!(fluid.velocities(), expected.velocities());
+}

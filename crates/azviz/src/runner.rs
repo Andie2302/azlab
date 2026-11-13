@@ -31,6 +31,22 @@ pub trait Scene {
     /// Blendet in räumlichen Beispielen den Boden ein oder aus.
     fn toggle_ground(&mut self) {}
 
+    /// Zustandsdatei für S/L; nur Szenen mit expliziter Unterstützung.
+    fn state_path(&self) -> Option<&str> { None }
+
+    /// Speichert einen Zustand. Standardmäßig nicht unterstützt.
+    fn save_state(&self, _path: &std::path::Path) -> Result<(), VizError> {
+        Err(VizError::Arguments("Szene unterstützt keine Zustandsdateien".into()))
+    }
+
+    /// Lädt einen Zustand; Implementierungen müssen Fehler atomar behandeln.
+    fn load_state(&mut self, _path: &std::path::Path) -> Result<(), VizError> {
+        Err(VizError::Arguments("Szene unterstützt keine Zustandsdateien".into()))
+    }
+
+    /// Wählt eine Diagnosevariante (Tasten 1 bis 6).
+    fn select_variant(&mut self, _variant: u32) {}
+
     /// Zeichnet den aktuellen Zustand.
     fn draw(&self, canvas: &mut dyn Canvas);
 }
@@ -159,6 +175,7 @@ fn window<S: Scene + 'static>(mut scene: S, options: Options) {
         let mut paused = options.paused;
         let (mut update_ms, mut draw_ms, mut steps, mut frames) = (0.0, 0.0, 0u32, 0u32);
         let mut canvas = WindowCanvas::default();
+        let mut state_message = String::new();
         loop {
             if mq::is_key_pressed(mq::KeyCode::Escape) {
                 break;
@@ -167,9 +184,30 @@ fn window<S: Scene + 'static>(mut scene: S, options: Options) {
                 paused = !paused;
             }
             // N führt genau einen Schritt aus und lässt das Fenster pausiert.
-            let single = mq::is_key_pressed(mq::KeyCode::N);
+            let mut single = mq::is_key_pressed(mq::KeyCode::N);
             if single { paused = true; }
             if mq::is_key_pressed(mq::KeyCode::G) { scene.toggle_ground(); }
+            for (key, variant) in [(mq::KeyCode::Key1, 0), (mq::KeyCode::Key2, 1),
+                (mq::KeyCode::Key3, 2), (mq::KeyCode::Key4, 3), (mq::KeyCode::Key5, 4), (mq::KeyCode::Key6, 5)] {
+                if mq::is_key_pressed(key) { scene.select_variant(variant); state_message.clear(); paused = true; single = false; }
+            }
+            // Vor dem Update speichern/laden: L stellt exakt das gespeicherte
+            // Bild wieder her und lässt die Simulation angehalten.
+            if mq::is_key_pressed(mq::KeyCode::S) || mq::is_key_pressed(mq::KeyCode::L) {
+                if let Some(path) = scene.state_path().map(std::path::PathBuf::from) {
+                    let loading = mq::is_key_pressed(mq::KeyCode::L);
+                    single = false;
+                    paused = true;
+                    let result = if loading { scene.load_state(&path) } else { scene.save_state(&path) };
+                    state_message = match result {
+                        Ok(()) => format!("{}: {}", if loading { "Geladen" } else { "Gespeichert" }, path.display()),
+                        Err(error) => format!("Zustand: {error}"),
+                    };
+                    eprintln!("{state_message}");
+                } else {
+                    state_message = "Diese Szene unterstützt S/L nicht".into();
+                }
+            }
             let yaw = (i32::from(mq::is_key_down(mq::KeyCode::Right))
                 - i32::from(mq::is_key_down(mq::KeyCode::Left))) as f32 * 0.025;
             let pitch = (i32::from(mq::is_key_down(mq::KeyCode::Up))
@@ -197,6 +235,10 @@ fn window<S: Scene + 'static>(mut scene: S, options: Options) {
             }
             let hint = if paused { "Pause: Leertaste weiter, N Schritt, Pfeile Kamera, Bild auf/ab Zoom, Esc Ende" } else { "Leertaste Pause, N Schritt, Pfeile Kamera, Esc Ende" };
             canvas.text([12.0, 22.0], hint, 20.0, Color::GRAY);
+            if !state_message.is_empty() {
+                let message_y = canvas.height() - 12.0;
+                canvas.text([12.0, message_y], &state_message, 18.0, Color::WHITE);
+            }
             mq::next_frame().await;
         }
     });

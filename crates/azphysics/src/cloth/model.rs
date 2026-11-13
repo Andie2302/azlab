@@ -311,6 +311,30 @@ impl<T: RealElementary> Cloth<T> {
         }
     }
 
+    /// Stellt Positionen und Geschwindigkeiten einer bestehenden Topologie
+    /// wieder her. Massen, Verbindungen, Hindernisse und Parameter bleiben
+    /// erhalten und müssen zur Aufzeichnung passen. Suchlisten werden erneuert.
+    /// Bei ungültigen Daten wird nichts geändert.
+    pub fn restore_motion(&mut self, positions: &[Vec3<T>], velocities: &[Vec3<T>])
+        -> Result<(), crate::MotionError>
+    {
+        if positions.len() != self.positions.len() || velocities.len() != self.velocities.len() {
+            return Err(crate::MotionError::DimensionMismatch);
+        }
+        if positions.iter().chain(velocities).any(|v| v.0.iter().any(|x| !x.is_finite())) {
+            return Err(crate::MotionError::NonFinite);
+        }
+        if self.inverse_mass.iter().zip(velocities).any(|(&w, &v)| w <= T::ZERO && v != Vector::ZERO) {
+            return Err(crate::MotionError::FixedParticle);
+        }
+        self.positions.copy_from_slice(positions);
+        self.previous.copy_from_slice(positions);
+        self.velocities.copy_from_slice(velocities);
+        self.lambdas.fill(T::ZERO);
+        self.proximity.valid = false;
+        Ok(())
+    }
+
     /// Gibt allen beweglichen Teilchen dieselbe Geschwindigkeit.
     pub fn set_all_velocities(&mut self, velocity: Vec3<T>) {
         for index in 0..self.velocities.len() {

@@ -201,6 +201,32 @@ impl<T: RealElementary> ParticleFluid<T> {
         &self.velocities
     }
 
+    /// Stellt Bewegung im bestehenden Becken wieder her. Geometrie und
+    /// Parameter müssen zur Aufzeichnung passen. Dichten werden im nächsten
+    /// Schritt neu berechnet; direkt nach dem Laden stehen sie auf eins.
+    /// Bei ungültigen Daten bleibt der Zustand vollständig erhalten.
+    pub fn restore_motion(&mut self, positions: &[Vec2<T>], velocities: &[Vec2<T>])
+        -> Result<(), crate::MotionError>
+    {
+        if positions.len() != self.positions.len() || velocities.len() != self.velocities.len() {
+            return Err(crate::MotionError::DimensionMismatch);
+        }
+        if positions.iter().chain(velocities).any(|v| v.0.iter().any(|x| !x.is_finite())) {
+            return Err(crate::MotionError::NonFinite);
+        }
+        if positions.iter().any(|&p| !self.bounds.contains(p)
+            || self.obstacles.iter().any(|b| b.contains(p))) {
+            return Err(crate::MotionError::InvalidPosition);
+        }
+        self.positions.copy_from_slice(positions);
+        self.previous.copy_from_slice(positions);
+        self.velocities.copy_from_slice(velocities);
+        self.densities.fill(T::ONE);
+        self.neighbour_start.clear();
+        self.neighbours.clear();
+        Ok(())
+    }
+
     /// Dichte an jedem Teilchen, bezogen auf die Ruhedichte.
     #[inline]
     pub fn densities(&self) -> &[T] {

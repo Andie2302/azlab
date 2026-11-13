@@ -1,1 +1,4 @@
 /target
+
+# Lokale Zustände der Diagnosebeispiele
+/*.azstate
