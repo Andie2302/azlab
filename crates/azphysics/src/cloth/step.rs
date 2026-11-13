@@ -48,7 +48,7 @@ impl<T: RealElementary> Cloth<T> {
 
         // 2. Abstandsbedingungen (XPBD).
         self.lambdas.fill(T::ZERO);
-        for _ in 0..self.params.iterations.max(1) {
+        for _ in 0..self.params.iterations {
             self.solve_links(h);
         }
 

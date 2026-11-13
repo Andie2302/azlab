@@ -15,6 +15,8 @@ pub struct ClothParams<T> {
     /// steifer und die Kollisionen genauer.
     pub substeps: u32,
     /// Durchläufe über alle Abstandsbedingungen je Teilschritt.
+    /// Null schaltet Dehn-, Scher- und Biegekorrekturen aus, etwa zur Diagnose.
+    /// Integration, Hindernisse, Selbstkollision und CCD bleiben davon unabhängig.
     pub iterations: u32,
     /// Nachgiebigkeit gegen Dehnen; null ist undehnbar.
     pub stretch_compliance: T,

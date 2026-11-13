@@ -548,3 +548,53 @@ Tests für die Beispiele (einschließlich Dateiformat) lassen sich so starten:
 ```bash
 cargo test -p azphysics --features std --release --examples
 ```
+
+
+### Drift im freien Flug eingrenzen
+
+Die folgenden Beispiele vergleichen sich mit `cloth_free_flight_no_self_collision`.
+CCD und Selbstkollision sind in allen drei Versuchen ausgeschaltet.
+
+| Beispiel | Physik | Stoffkorrekturen |
+| --- | --- | --- |
+| `cloth_free_flight_no_self_collision` | f32 | an |
+| `cloth_free_flight_f64` | f64 | an |
+| `cloth_free_flight_unconstrained` | f32 | aus (`iterations = 0`) |
+
+```bash
+cargo demo cloth_free_flight_f64 -- --paused
+cargo demo cloth_free_flight_unconstrained -- --paused
+```
+
+**N** rechnet einen Schritt. Orts-/Geschwindigkeitsfehler, vorzeichenbehaftete
+mittlere Geschwindigkeitsabweichung, Beschleunigung und Ruck bleiben sichtbar.
+Die f64-Variante zeigt kleine Fehler in wissenschaftlicher Schreibweise;
+nur die Darstellung wird in f32 umgewandelt. Der vom Runner vorgegebene
+Zeitschritt bleibt derselbe. Ihre Startgeschwindigkeiten, Gitterabstände,
+Masse und Nachgiebigkeit übernehmen die repräsentierten f32-Parameter.
+Gitterpositionen und Ruhelängen entstehen anschließend mit f64-Rechnung.
+
+Die freien Teilchen durchlaufen weiterhin die normale Substep-Integration
+und Geschwindigkeitsrekonstruktion von `Cloth::step`. Die Dreiecke dienen
+hier der Darstellung; sie erzwingen keine Verbindung mehr. Dehnung ist
+deshalb eine Messgröße, keine durchgesetzte Bedingung.
+`ClothParams::iterations = 0` bedeutet jetzt ausdrücklich null
+Stoffkorrekturen; positive Werte und Standardparameter bleiben unverändert.
+
+Die f32-Variante unterstützt **S/L** mit einer eigenen Zustandsdatei.
+Die f64-Variante unterstützt vorerst keine Zustandsdateien, damit das
+bisherige f32-Dateiformat keine Genauigkeit verliert.
+
+```bash
+cargo test -p azphysics --features std --release --example cloth_free_flight_f64 -- --nocapture
+cargo test -p azphysics --features std --release --example cloth_free_flight_unconstrained -- --nocapture
+cargo test -p azphysics --features std --release zero_iterations_free_path
+```
+
+Der f64-Bewegungstest läuft 1200 Schritte, über den beobachteten ersten
+Schwellwertübertritt bei Schritt 1044 hinaus. Der freie f32-Langlauf
+protokolliert die Fehler bei Schritt 1043, 1044 und 1200 und prüft endliche
+Werte; er behauptet nicht, dass die untersuchte Drift bereits behoben sei.
+Separate Physiktests prüfen bei f32 und f64 an einem absichtlich gedehnten
+Netz mit einem fixierten Teilchen, dass null Iterationen tatsächlich dem
+Rechenweg freier Teilchen entsprechen.

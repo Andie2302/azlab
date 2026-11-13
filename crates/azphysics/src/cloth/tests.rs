@@ -235,3 +235,46 @@ fn motion_restore_validates_before_modifying() {
     }
     assert_eq!(cloth.positions(), expected.positions());
 }
+
+
+/// Der Diagnosemodus muss echte freie Teilchen liefern: Ein gedehntes Netz
+/// darf bei null Iterationen keine versteckte Mindestiteration ausführen.
+/// Die erwartete Bewegung enthält dieselbe Substep-Integration und
+/// Geschwindigkeitsrekonstruktion, aber keinerlei Abstandsbedingungen.
+fn zero_iterations_preserves_free_particle_path<T: RealElementary>() {
+    let mut cloth = sheet::<T>(3, 0.0);
+    cloth.params.iterations = 0;
+    cloth.params.ccd = false;
+    cloth.params.self_collision = false;
+    cloth.params.gravity = v(0.0, 0.0, 0.0);
+    cloth.params.damping = T::ZERO;
+    cloth.pin(0);
+    cloth.set_position(4, v(0.7, 0.3, -0.2));
+    cloth.set_all_velocities(v(0.15, 0.0, 0.05));
+    let mut expected_positions = cloth.positions().to_vec();
+    let mut expected_velocities = cloth.velocities().to_vec();
+    let dt = T::from_f64(1.0 / 60.0);
+    let h = dt / T::from_f64(f64::from(cloth.params.substeps));
+    for _ in 0..3 {
+        for _ in 0..cloth.params.substeps {
+            for index in 1..expected_positions.len() {
+                let previous = expected_positions[index];
+                expected_positions[index] += expected_velocities[index] * h;
+                expected_velocities[index] = (expected_positions[index] - previous) / h;
+            }
+        }
+        cloth.step(dt, &[]);
+        assert_eq!(cloth.positions(), expected_positions.as_slice());
+        assert_eq!(cloth.velocities(), expected_velocities.as_slice());
+    }
+}
+
+#[test]
+fn zero_iterations_free_path_f32() {
+    zero_iterations_preserves_free_particle_path::<f32>();
+}
+
+#[test]
+fn zero_iterations_free_path_f64() {
+    zero_iterations_preserves_free_particle_path::<f64>();
+}

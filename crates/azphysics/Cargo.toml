@@ -67,3 +67,11 @@ required-features = ["std"]
 [[example]]
 name = "cloth_free_flight_no_self_collision"
 required-features = ["std"]
+
+[[example]]
+name = "cloth_free_flight_f64"
+required-features = ["std"]
+
+[[example]]
+name = "cloth_free_flight_unconstrained"
+required-features = ["std"]
