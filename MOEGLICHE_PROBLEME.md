@@ -255,3 +255,60 @@ bitgenau behalten.
 
 In den Beispielen stand an drei Stellen `std::array` statt `core::array`
 (vom Workspace-Lint verboten); das ist mit korrigiert.
+
+## Fehlersuche mit gezielten Versuchen
+
+Fünf Versuche am Gewebe und einer an der Strömung, alle als Rechnung mit
+Zahlen statt im Fenster. Zwei Fehler gefunden und behoben, eine Lücke
+geschlossen, drei Eigenschaften des Verfahrens vermessen.
+
+### Behoben: ein ruhig hängendes Tuch schaukelte sich auf
+
+Ein Tuch aus 24 × 24 Teilchen, senkrecht in seiner Ruhelage aufgehängt, mit
+den Standardwerten: nach einer halben Sekunde mehrere Meter je Sekunde, dann
+in der eigenen Ebene zusammengefaltet (Dehnung über 60 %) oder bis zum
+Überlauf davongelaufen. Mit 12 × 12 trat es nicht auf, deshalb fiel es
+bisher nicht auf. Der Stand vor der Drift-Korrektur zeigte dasselbe.
+
+Ursache: Die Verbindungen wurden stets in derselben Reihenfolge korrigiert.
+Das ist als Ganzes unsymmetrisch und kann Fehler im Kreis drehen, statt sie
+nur zu verkleinern. Jetzt laufen die Durchläufe paarweise vor und zurück;
+eine ungerade Zahl wird aufgerundet.
+
+| Hängendes Tuch, 10 s | vorher | nachher |
+|---|---|---|
+| 24 × 24, Standardwerte: Dehnung am Ende | 70 % | 1,6 % |
+| 24 × 24: Höchsttempo | über 5 m/s | 0,14 m/s |
+| 40 × 40: Resttempo | 6 m/s | 0 |
+| 48 × 48, 20 Teilschritte, 1 Durchlauf | Überlauf | Dehnung 0,7 %, Ruhe |
+
+### Behoben: nichts haftete
+
+Die Reibung kürzte das Gleiten um einen festen Anteil je Teilschritt. Ein
+mittig auf die Kugel gefallenes Tuch kroch deshalb langsam herunter (nach
+15 s lag der Schwerpunkt 30 bis 50 cm neben der Mitte). Jetzt gilt Coulomb:
+haften unter der Grenzsteigung, sonst rutschen mit `g·(sin α − µ·cos α)`.
+Auf der schiefen Ebene stimmt der Weg auf 0,2 % mit der Formel überein; das
+Tuch bleibt auf der Kugel liegen (Schwerpunkt 2 bis 5 mm neben der Mitte).
+
+`ClothParams::friction` ist damit ein Reibwert, kein Anteil mehr.
+
+### Lücke geschlossen: Reibung an Dreiecken und zwischen Tuchlagen
+
+Dort gab es gar keine. Ein Tuch rutschte von jeder geneigten Platte aus
+Dreiecken reibungsfrei ab. Jetzt gilt dieselbe Coulomb-Reibung.
+
+### Vermessen, kein Fehler
+
+- **Drehender freier Flug:** Impuls exakt erhalten, die Sicherung greift
+  nicht ein. Der Drehimpuls sinkt bei 3 rad/s um 1,8 % je Sekunde,
+  proportional zur Schrittweite – die bekannte Dämpfung des Verfahrens.
+- **Liegen auf einer Platte aus Dreiecken, 20 s:** ruhig, genau im Abstand
+  der Tuchdicke, kein Eingriff der Sicherung, keine Durchdringung.
+- **Abhängigkeit von der Schrittweite:** Die Dehnung unter Last halbiert
+  sich etwa mit doppelt so vielen Teilschritten.
+- **Kanalströmung (Gitter):** Durchfluss exakt, Parabelprofil auf 0,8 %
+  genau (Test `fluid::tests::poiseuille`).
+
+Einzelheiten und Zahlen: `todo/azphysics.md`, Abschnitte „Durchlaufrichtung“,
+„Reibung“ und „Was das Verfahren nicht kann“.

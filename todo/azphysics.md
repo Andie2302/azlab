@@ -22,10 +22,12 @@ Raum, mit Tiefenprüfung je Bildpunkt).
 1. Freie Bewegung unter Schwerkraft und Dämpfung. Die Lage wird
    kompensiert weitergerückt: Was beim Runden verloren geht, bleibt als
    Rest je Teilchen erhalten (siehe „Lage und Rest“).
-2. Abstandsbedingungen (XPBD) für Dehnung, Scherung, Biegung.
-3. Hindernisse Ebene und Kugel: hinausschieben, Reibung.
+2. Abstandsbedingungen (XPBD) für Dehnung, Scherung, Biegung, in
+   Durchläufen paarweise vor und zurück (siehe „Durchlaufrichtung“).
+3. Hindernisse Ebene und Kugel: hinausschieben, Coulomb-Reibung.
 4. Abstoßung Teilchen–Dreieck innerhalb der Dicke; unelastisch, d. h. sie
-   bremst die Annäherung, schleudert aber nicht weg.
+   bremst die Annäherung, schleudert aber nicht weg. Dazu Coulomb-Reibung,
+   auch zwischen den Lagen des Tuchs.
 5. Sicherung: CCD für jedes nahe Paar Punkt–Dreieck und Kante–Kante. Bei
    einer Berührung wird die Bewegung der vier Teilchen kurz vor dem
    Berührzeitpunkt beendet (80 %, dann 40 % der Zeit, sonst zurück an den
@@ -33,6 +35,57 @@ Raum, mit Tiefenprüfung je Bildpunkt).
    Durchläufen nur noch hartes Zurücksetzen, nach acht alle Teilchen zurück.
 6. Geschwindigkeit: die der freien Bewegung, geändert um das, was die
    Korrekturen des Teilschritts an der Lage verschoben haben.
+
+### Durchlaufrichtung
+
+Die Verbindungen werden nacheinander korrigiert. Jede einzelne Korrektur
+verkleinert den Fehler; ihre Hintereinanderschaltung in stets derselben
+Reihenfolge ist als Ganzes aber unsymmetrisch und kann Fehler im Kreis
+drehen. Zusammen mit der Geschwindigkeit aus der Lageänderung wächst das an:
+Ein feines Tuch (ab etwa 24 Teilchen je Kante), das ruhig in seiner Ruhelage
+hing, war nach einer halben Sekunde mehrere Meter je Sekunde schnell und
+faltete sich in der eigenen Ebene zusammen oder lief bis zum Überlauf davon.
+
+Ein Durchlauf vorwärts und einer rückwärts sind zusammen symmetrisch und
+verkleinern jeden Fehler. Die Durchläufe laufen deshalb paarweise; eine
+ungerade Zahl in `ClothParams::iterations` wird aufgerundet. Der Wechsel der
+Richtung nur von Teilschritt zu Teilschritt genügt nicht.
+
+Test: `cloth::tests::hanging_cloth_stays_at_rest`.
+
+### Reibung
+
+Coulomb, an Ebene, Kugel, Dreiecken und zwischen Tuchlagen: Die Strecke, um
+die ein Teilchen aus dem Hindernis geschoben wird, steht für die
+Anpresskraft; das Gleiten längs der Oberfläche wird um höchstens Reibwert
+mal diese Strecke gekürzt. Gleitet das Teilchen weniger weit, haftet es. Auf
+der schiefen Ebene heißt das: liegen bleiben unter der Grenzsteigung, sonst
+rutschen mit `g·(sin α − µ·cos α)` – unabhängig von der Schrittweite.
+
+Die frühere Reibung kürzte das Gleiten um einen festen Anteil je
+Teilschritt. Nichts haftete; ein Tuch kroch von der Kugel, und wie schnell,
+hing von der Schrittweite ab. An Dreiecken gab es gar keine Reibung.
+
+Tests: `friction_on_a_slope` (gegen die Formel, auf ein Prozent),
+`friction_on_triangles`.
+
+### Was das Verfahren nicht kann
+
+Gemessen, kein Fehler, aber gut zu wissen:
+
+- **Dehnung.** Mit wenigen Durchläufen gibt das Tuch unter Last nach: ein
+  hängendes Tuch aus 24 Teilchen je Kante um 1,6 %, aus 40 um 4,7 %
+  (8 Teilschritte, 2 Durchläufe). Doppelt so viele Teilschritte halbieren
+  das etwa; mehr Durchläufe helfen weniger. Beim Aufprall sind kurzzeitig
+  30 bis 40 % möglich.
+- **Drehung wird gebremst.** Ein frei rotierendes Tuch verliert Drehimpuls,
+  bei 3 rad/s und 8 Teilschritten 1,8 % je Sekunde. Der Verlust ist
+  proportional zur Schrittweite und unabhängig von Durchläufen und
+  Auflösung; Impuls und Schwerpunkt bleiben exakt.
+- **Symmetrie.** Ein mittig auf die Kugel fallendes Tuch bleibt nicht
+  spiegelbildlich: Die Reihenfolge der Korrekturen bricht die Symmetrie, und
+  Falten verstärken kleine Unterschiede. Eine bevorzugte Richtung gibt es
+  nicht; der Schwerpunkt bleibt auf wenige Millimeter in der Mitte.
 
 ### Lage und Rest
 
@@ -104,7 +157,7 @@ kommt an und bleibt davor; im freien Flug greift die Sicherung nicht ein),
   Ebene und Kugel sind nicht Teil der Sicherung.
 - Teile innerhalb der Toleranz (ein Zehntel der Dicke) gelten als berührt
   und bewegen sich nicht mehr gegeneinander, bis die Abstoßung sie trennt.
-- Abstoßung nur Teilchen–Dreieck, nicht Kante–Kante.
+- Abstoßung und Reibung nur Teilchen–Dreieck, nicht Kante–Kante.
 - Die Sicherung hält an, statt abprallen zu lassen: kein Stoßgesetz.
 
 ## Strömung
@@ -135,8 +188,8 @@ Oberflächenspannung; Teilchenflüssigkeit ohne Kopplung an das Gitter.
 
 ## Möglicher Ausbau
 
-- Gewebe: Abstoßung Kante–Kante, Stoßgesetz mit Rückprall, Reibung zwischen
-  Lagen, Dreiecksnetze beliebiger Form (bisher Rechteckgitter), bewegte
+- Gewebe: Abstoßung Kante–Kante, Stoßgesetz mit Rückprall, steifere
+  Verbindungen bei gleicher Rechenzeit, Dreiecksnetze beliebiger Form (bisher Rechteckgitter), bewegte
   Hindernisse aus Dreiecken.
 - Kopplung Gewebe–Strömung.
 - Strömung im Raum; freie Oberfläche auf dem Gitter (FLIP/PIC).

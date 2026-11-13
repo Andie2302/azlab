@@ -130,6 +130,34 @@ fn channel<T: RealElementary>() {
     assert!((column.velocity(3, 6) - v(0.0, 1.0)).norm() < f(1.0e-3));
 }
 
+/// Kanalströmung gegen die bekannte Lösung: Zwischen zwei haftenden Wänden
+/// stellt sich ein Parabelprofil ein, in der Mitte anderthalbmal so schnell
+/// wie im Mittel (Hagen-Poiseuille). Prüft Zähigkeit, Haften an der Wand,
+/// Einlass, offenen Auslass und die Erhaltung des Durchflusses zusammen.
+fn poiseuille<T: RealElementary>() {
+    let f = T::from_f64;
+    let (nx, ny) = (60, 12);
+    let cell = 1.0 / ny as f64;
+    let mut fluid: GridFluid<T> = GridFluid::new(nx, ny, f(cell), Edges::channel(f(1.0)));
+    fluid.params.viscosity = f(0.05);
+    fluid.params.pressure_tolerance = loose::<T>() * f(0.01);
+    for _ in 0..500 {
+        fluid.step(f(0.02));
+    }
+    // Profil kurz vor dem Auslass, weit hinter der Einlaufstrecke.
+    let column = nx * 5 / 6;
+    let mut flow = T::ZERO;
+    for row in 0..ny {
+        let speed = fluid.velocity(column, row)[0];
+        let height = (row as f64 + 0.5) * cell;
+        let expected = f(6.0 * height * (1.0 - height));
+        assert!((speed - expected).abs() < f(0.03), "Höhe {height}: {:?} statt {:?}", speed.to_f64(), expected.to_f64());
+        flow += speed * f(cell);
+    }
+    // Was hereinströmt, strömt durch.
+    assert!((flow - T::ONE).abs() < f(1.0e-3), "Durchfluss {:?}", flow.to_f64());
+}
+
 fn tank<T: RealElementary>() -> ParticleFluid<T> {
     ParticleFluid::new(Aabb { min: v(0.0, 0.0), max: v(2.0, 1.2) }, T::from_f64(0.05))
 }
@@ -217,6 +245,7 @@ fn grid_f32() {
     divergence_free::<f32>();
     plume::<f32>();
     channel::<f32>();
+    poiseuille::<f32>();
 }
 
 #[test]
@@ -225,6 +254,7 @@ fn grid_f64() {
     divergence_free::<f64>();
     plume::<f64>();
     channel::<f64>();
+    poiseuille::<f64>();
 }
 
 #[test]

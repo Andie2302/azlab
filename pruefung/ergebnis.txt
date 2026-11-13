@@ -1,4 +1,4 @@
-Fri Nov 13 15:37:49 UTC 2026
+Fri Nov 13 17:18:35 UTC 2026
 rustc 1.97.0 (2d8144b78 2026-07-07)
 cargo 1.97.0 (c980f4866 2026-06-30)
 
@@ -11,52 +11,52 @@ test autodiff::tests::autodiff_f64 ... ok
 test autodiff::tests::autodiff_f32 ... ok
 test autodiff::reverse_tests::algebra_f64 ... ok
 test autodiff::reverse_tests::algebra_f32 ... ok
-test fem::tests::fem_f32 ... ok
 test fem::tests::fem_f64 ... ok
-test interp::tests::basics_f32 ... ok
-test interp::tests::basics_f64 ... ok
 test interval::tests::interval_f32 ... ok
+test fem::tests::fem_f32 ... ok
 test interval::tests::interval_f64 ... ok
-test linalg::decomp::tests::extremes_f32 ... ok
 test linalg::decomp::tests::extremes_f64 ... ok
-test linalg::dynamic_tests::dynamic_f64 ... ok
+test interp::tests::basics_f32 ... ok
+test linalg::decomp::tests::extremes_f32 ... ok
+test interp::tests::basics_f64 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
+test linalg::dynamic_tests::dynamic_f64 ... ok
 test linalg::dynamic_tests::dynamic_f32 ... ok
+test linalg::decomp::tests::lu_f32 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
-test linalg::decomp::tests::lu_f32 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
 test linalg::vector::tests::algebra_f32 ... ok
+test number::cayley_dickson::tests::all_levels_f32 ... ok
 test linalg::vector::tests::concrete_types ... ok
+test number::complex::tests::algebra_f32 ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
-test number::cayley_dickson::tests::all_levels_f32 ... ok
 test number::complex::tests::algebra_f64 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
 test number::dual::tests::algebra_f32 ... ok
 test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
-test number::complex::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
-test poly::tests::evaluation_f64 ... ok
-test poly::tests::evaluation_f32 ... ok
 test number::quaternion::tests::left_scalar ... ok
+test poly::tests::evaluation_f32 ... ok
+test poly::tests::evaluation_f64 ... ok
+test poly::tests::isolation_f64 ... ok
+test quad::tests::rules_f32 ... ok
 test poly::tests::isolation_f32 ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
-test poly::tests::isolation_f64 ... ok
+test quad::tests::rules_f64 ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
 test solve::tests::extremes_f32 ... ok
-test solve::tests::scalar_f32 ... ok
-test solve::tests::extremes_f64 ... ok
 test solve::tests::scalar_f64 ... ok
+test solve::tests::extremes_f64 ... ok
+test solve::tests::scalar_f32 ... ok
 test tensor::tests::tensor_f64 ... ok
 test tensor::tests::tensor_f32 ... ok
-test quad::tests::rules_f64 ... ok
-test quad::tests::rules_f32 ... ok
 
 test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
@@ -68,7 +68,7 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
    OK
 == cargo clippy -p azmath --all-targets --no-default-features -- -D warnings
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
    OK
 == cargo test -p azmath --no-default-features --features libm
     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
@@ -78,78 +78,77 @@ running 116 tests
 test autodiff::reverse_tests::elementary::elementary_f64 ... ok
 test autodiff::reverse_tests::elementary::elementary_f32 ... ok
 test autodiff::tests::autodiff_f64 ... ok
-test autodiff::tests::autodiff_f32 ... ok
 test autodiff::reverse_tests::algebra_f32 ... ok
 test autodiff::reverse_tests::algebra_f64 ... ok
-test fem::tests::fem_f32 ... ok
+test autodiff::tests::autodiff_f32 ... ok
 test fem::tests::fem_f64 ... ok
+test fem::tests::fem_f32 ... ok
 test fft::tests::fft_f64 ... ok
 test fft::tests::fft_f32 ... ok
 test interp::tests::basics_f32 ... ok
-test interp::tests::basics_f64 ... ok
+test fem::tests::problems::problems_f64 ... ok
 test interp::tests::chebyshev::chebyshev_f64 ... ok
+test fem::tests::problems::problems_f32 ... ok
 test interp::tests::chebyshev::chebyshev_f32 ... ok
 test interval::tests::interval_f32 ... ok
-test fem::tests::problems::problems_f32 ... ok
 test interval::tests::interval_f64 ... ok
-test fem::tests::problems::problems_f64 ... ok
-test linalg::decomp::spectral_tests::magnitudes_f64 ... ok
-test linalg::decomp::spectral_tests::magnitudes_f32 ... ok
+test interp::tests::basics_f64 ... ok
 test lie::tests::groups_f32 ... ok
 test lie::tests::groups_f64 ... ok
+test linalg::decomp::spectral_tests::magnitudes_f64 ... ok
+test linalg::decomp::spectral_tests::magnitudes_f32 ... ok
 test linalg::decomp::tests::extremes_f32 ... ok
 test linalg::decomp::tests::extremes_f64 ... ok
-test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
+test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::spectral_tests::spectral_f32 ... ok
+test linalg::decomp::spectral_tests::spectral_f64 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
 test linalg::dynamic_tests::dynamic_f32 ... ok
 test linalg::decomp::tests::with_roots::qr_f32 ... ok
-test linalg::decomp::tests::with_roots::qr_f64 ... ok
 test linalg::dynamic_tests::dynamic_f64 ... ok
-test linalg::decomp::spectral_tests::spectral_f64 ... ok
 test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
 test linalg::dynamic_tests::with_roots::cholesky_f64 ... ok
-test linalg::matrix::tests::concrete_types ... ok
+test linalg::decomp::tests::with_roots::qr_f64 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
-test linalg::matrix::tests::algebra_f64 ... ok
+test linalg::matrix::tests::concrete_types ... ok
 test linalg::matrix::tests::frobenius_norm ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::vector::tests::algebra_f32 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
 test linalg::vector::tests::concrete_types ... ok
 test linalg::vector::tests::norms::extremes_f32 ... ok
-test linalg::vector::tests::norms::extremes_f64 ... ok
 test linalg::vector::tests::norms::limits_f32 ... ok
+test linalg::vector::tests::norms::extremes_f64 ... ok
 test linalg::vector::tests::norms::limits_f64 ... ok
 test linalg::vector::tests::norms::norms_f32 ... ok
-test linalg::vector::tests::norms::norms_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
+test linalg::vector::tests::norms::norms_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::norm ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
 test number::complex::tests::elementary::elementary_f32 ... ok
 test number::complex::tests::elementary::elementary_f64 ... ok
-test number::complex::tests::algebra_f32 ... ok
-test number::complex::tests::algebra_f64 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
 test number::dual::tests::algebra_f32 ... ok
-test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
+test number::complex::tests::algebra_f64 ... ok
+test number::dual::tests::algebra_f64 ... ok
+test number::complex::tests::algebra_f32 ... ok
 test number::dual::tests::elementary::elementary_f32 ... ok
 test number::dual::tests::elementary::elementary_f64 ... ok
 test number::quaternion::tests::algebra_f32 ... ok
+test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
-test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
 test ode::tests::adaptive_f32 ... ok
+test ode::tests::explicit_f32 ... ok
 test ode::tests::explicit_f64 ... ok
 test ode::tests::adaptive_f64 ... ok
-test ode::tests::explicit_f32 ... ok
-test optim::tests::optim_f32 ... ok
-test ode::tests::implicit_f64 ... ok
 test ode::tests::implicit_f32 ... ok
+test optim::tests::optim_f32 ... ok
 test pde::tests::pde_f32 ... ok
 test poly::tests::evaluation_f32 ... ok
 test poly::tests::evaluation_f64 ... ok
@@ -162,6 +161,7 @@ test poly::tests::roots::complex_f64 ... ok
 test quad::tests::gauss::gauss_f32 ... ok
 test quad::tests::gauss::gauss_f64 ... ok
 test quad::tests::rules_f32 ... ok
+test optim::tests::optim_f64 ... ok
 test quad::tests::rules_f64 ... ok
 test scalar::tests::backend::f32_backend ... ok
 test scalar::tests::backend::f64_backend ... ok
@@ -175,52 +175,52 @@ test solve::iterative::tests::cg_operator_overflow_does_not_report_success ... o
 test solve::iterative::tests::cg_reported_overflow_regression ... ok
 test solve::iterative::tests::gmres_f32 ... ok
 test solve::iterative::tests::gmres_f64 ... ok
-test solve::iterative::tests::iterative_f32 ... ok
 test solve::iterative::tests::iterative_f64 ... ok
+test solve::iterative::tests::iterative_f32 ... ok
 test solve::iterative::tests::preconditioned_f32 ... ok
 test solve::iterative::tests::preconditioned_f64 ... ok
 test solve::tests::extremes_f32 ... ok
 test solve::tests::scalar_f32 ... ok
+test solve::tests::extremes_f64 ... ok
 test solve::tests::scalar_f64 ... ok
 test solve::tests::systems::systems_f32 ... ok
 test solve::tests::systems::systems_f64 ... ok
-test solve::tests::extremes_f64 ... ok
 test special::tests::special_f32 ... ok
 test tensor::tests::tensor_f32 ... ok
 test tensor::tests::tensor_f64 ... ok
 test special::tests::special_f64 ... ok
+test ode::tests::implicit_f64 ... ok
 test pde::tests::pde_f64 ... ok
-test optim::tests::optim_f64 ... ok
 
 test result: ok. 116 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
 
    Doc-tests azmath
 
 running 6 tests
-test crates/azmath/src/../../../README.md - readme::_Readme (line 134) ... ok
-test crates/azmath/src/../../../README.md - readme::_Readme (line 155) ... ok
-test crates/azmath/src/../../../README.md - readme::_Readme (line 344) ... ignored
-test crates/azmath/src/../../../README.md - readme::_Readme (line 178) ... ok
 test crates/azmath/src/../../../README.md - readme::_Readme (line 208) ... ok
+test crates/azmath/src/../../../README.md - readme::_Readme (line 178) ... ok
+test crates/azmath/src/../../../README.md - readme::_Readme (line 344) ... ignored
+test crates/azmath/src/../../../README.md - readme::_Readme (line 155) ... ok
+test crates/azmath/src/../../../README.md - readme::_Readme (line 134) ... ok
 test crates/azmath/src/../../../README.md - readme::_Readme (line 233) ... ok
 
 test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
-all doctests ran in 0.94s; merged doctests compilation took 0.93s
+all doctests ran in 0.61s; merged doctests compilation took 0.60s
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features libm -- -D warnings
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
    OK
 == cargo test -p azmath --no-default-features --features std
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
      Running unittests src/lib.rs (target/debug/deps/azmath-c93ddb1830b67047)
 
 running 124 tests
 test autodiff::reverse_tests::elementary::elementary_f32 ... ok
 test autodiff::reverse_tests::elementary::elementary_f64 ... ok
 test autodiff::reverse_tests::algebra_f32 ... ok
-test autodiff::reverse_tests::algebra_f64 ... ok
 test autodiff::reverse_tests::growing::growing_f32 ... ok
+test autodiff::reverse_tests::algebra_f64 ... ok
 test autodiff::reverse_tests::growing::growing_f64 ... ok
 test autodiff::tests::autodiff_f64 ... ok
 test autodiff::tests::autodiff_f32 ... ok
@@ -228,200 +228,200 @@ test fem::tests::assembled::assembled_f32 ... ok
 test fem::tests::assembled::assembled_f64 ... ok
 test fem::tests::fem_f32 ... ok
 test fem::tests::fem_f64 ... ok
-test fft::tests::fft_f64 ... ok
 test fft::tests::fft_f32 ... ok
+test fft::tests::fft_f64 ... ok
 test interp::tests::basics_f64 ... ok
 test interp::tests::basics_f32 ... ok
 test interp::tests::chebyshev::chebyshev_f32 ... ok
 test interp::tests::chebyshev::chebyshev_f64 ... ok
-test interval::tests::interval_f32 ... ok
-test interval::tests::interval_f64 ... ok
-test lie::tests::groups_f32 ... ok
 test fem::tests::problems::problems_f32 ... ok
-test lie::tests::groups_f64 ... ok
-test linalg::decomp::spectral_tests::magnitudes_f32 ... ok
 test fem::tests::problems::problems_f64 ... ok
+test interval::tests::interval_f64 ... ok
+test interval::tests::interval_f32 ... ok
+test linalg::decomp::spectral_tests::magnitudes_f32 ... ok
+test lie::tests::groups_f32 ... ok
+test lie::tests::groups_f64 ... ok
 test linalg::decomp::spectral_tests::magnitudes_f64 ... ok
 test linalg::decomp::tests::extremes_f32 ... ok
-test linalg::decomp::spectral_tests::spectral_f64 ... ok
-test linalg::decomp::spectral_tests::spectral_f32 ... ok
-test linalg::decomp::tests::lu_f64 ... ok
 test linalg::decomp::tests::extremes_f64 ... ok
+test linalg::decomp::spectral_tests::spectral_f64 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
-test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::lu_f64 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
-test linalg::dynamic_tests::dynamic_f32 ... ok
-test linalg::dynamic_tests::dynamic_f64 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
 test linalg::decomp::tests::with_roots::qr_f64 ... ok
-test linalg::dynamic_tests::owned::owned_f64 ... ok
-test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
-test linalg::decomp::tests::with_roots::qr_f32 ... ok
-test linalg::dynamic_tests::with_roots::cholesky_f64 ... ok
-test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::dynamic_tests::dynamic_f32 ... ok
+test linalg::decomp::spectral_tests::spectral_f32 ... ok
+test linalg::dynamic_tests::dynamic_f64 ... ok
 test linalg::dynamic_tests::owned::owned_f32 ... ok
-test linalg::matrix::tests::algebra_f64 ... ok
+test linalg::decomp::tests::with_roots::qr_f32 ... ok
+test linalg::dynamic_tests::owned::owned_f64 ... ok
+test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
+test linalg::dynamic_tests::with_roots::cholesky_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::frobenius_norm ... ok
-test linalg::vector::tests::concrete_types ... ok
 test linalg::vector::tests::algebra_f64 ... ok
+test linalg::vector::tests::concrete_types ... ok
 test linalg::vector::tests::norms::extremes_f32 ... ok
+test linalg::vector::tests::norms::extremes_f64 ... ok
 test linalg::vector::tests::algebra_f32 ... ok
 test linalg::vector::tests::norms::limits_f32 ... ok
-test linalg::vector::tests::norms::norms_f32 ... ok
 test linalg::vector::tests::norms::limits_f64 ... ok
+test linalg::vector::tests::norms::norms_f32 ... ok
 test linalg::vector::tests::norms::norms_f64 ... ok
-test linalg::vector::tests::norms::extremes_f64 ... ok
-test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
-test number::cayley_dickson::tests::norm ... ok
+test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
 test number::complex::tests::algebra_f32 ... ok
+test number::cayley_dickson::tests::norm ... ok
 test number::complex::tests::algebra_f64 ... ok
 test number::complex::tests::elementary::elementary_f32 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
-test number::complex::tests::elementary::elementary_f64 ... ok
-test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::algebra_f32 ... ok
+test number::complex::tests::elementary::elementary_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
 test number::dual::tests::elementary::elementary_f32 ... ok
 test number::dual::tests::elementary::elementary_f64 ... ok
 test number::quaternion::tests::algebra_f32 ... ok
+test number::dual::tests::algebra_f64 ... ok
+test number::quaternion::tests::left_scalar ... ok
 test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
-test number::quaternion::tests::left_scalar ... ok
 test ode::tests::adaptive_f32 ... ok
-test ode::tests::explicit_f64 ... ok
 test ode::tests::explicit_f32 ... ok
 test ode::tests::adaptive_f64 ... ok
+test ode::tests::explicit_f64 ... ok
 test optim::tests::optim_f32 ... ok
-test optim::tests::optim_f64 ... ok
+test ode::tests::implicit_f32 ... ok
 test ode::tests::implicit_f64 ... ok
-test poly::tests::evaluation_f32 ... ok
 test pde::tests::pde_f32 ... ok
 test poly::tests::evaluation_f64 ... ok
+test poly::tests::evaluation_f32 ... ok
 test poly::tests::isolation_f64 ... ok
 test poly::tests::roots::closed_forms_f32 ... ok
 test poly::tests::roots::closed_forms_f64 ... ok
-test poly::tests::roots::complex_f32 ... ok
 test poly::tests::isolation_f32 ... ok
+test poly::tests::roots::complex_f32 ... ok
 test poly::tests::roots::complex_f64 ... ok
 test quad::tests::gauss::gauss_f32 ... ok
 test quad::tests::gauss::gauss_f64 ... ok
-test quad::tests::rules_f64 ... ok
 test quad::tests::rules_f32 ... ok
-test scalar::tests::backend::f32_backend ... ok
+test quad::tests::rules_f64 ... ok
 test scalar::tests::backend::f64_backend ... ok
+test scalar::tests::backend::f32_backend ... ok
 test scalar::tests::conjugate_is_identity_for_reals ... ok
-test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
+test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
 test solve::iterative::tests::cg_nonfinite_f32 ... ok
 test solve::iterative::tests::cg_nonfinite_f64 ... ok
-test solve::iterative::tests::cg_reported_overflow_regression ... ok
 test solve::iterative::tests::cg_operator_overflow_does_not_report_success ... ok
+test solve::iterative::tests::cg_reported_overflow_regression ... ok
 test solve::iterative::tests::gmres_f32 ... ok
-test solve::iterative::tests::gmres_f64 ... ok
 test solve::iterative::tests::iterative_f32 ... ok
-test solve::iterative::tests::iterative_f64 ... ok
+test solve::iterative::tests::gmres_f64 ... ok
+test optim::tests::optim_f64 ... ok
 test solve::iterative::tests::preconditioned_f32 ... ok
-test solve::iterative::tests::preconditioned_f64 ... ok
 test solve::tests::extremes_f32 ... ok
+test solve::iterative::tests::preconditioned_f64 ... ok
+test solve::tests::extremes_f64 ... ok
 test solve::tests::scalar_f32 ... ok
 test solve::tests::scalar_f64 ... ok
-test solve::tests::extremes_f64 ... ok
 test solve::tests::systems::systems_f32 ... ok
 test solve::tests::systems::systems_f64 ... ok
 test special::tests::special_f32 ... ok
 test tensor::tests::owned::owned_f32 ... ok
-test tensor::tests::owned::owned_f64 ... ok
-test tensor::tests::tensor_f32 ... ok
-test tensor::tests::tensor_f64 ... ok
+test solve::iterative::tests::iterative_f64 ... ok
 test special::tests::special_f64 ... ok
+test tensor::tests::owned::owned_f64 ... ok
+test tensor::tests::tensor_f64 ... ok
+test tensor::tests::tensor_f32 ... ok
 test pde::tests::pde_f64 ... ok
-test ode::tests::implicit_f32 ... ok
 
-test result: ok. 124 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+test result: ok. 124 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
 
    Doc-tests azmath
 
 running 6 tests
-test crates/azmath/src/../../../README.md - readme::_Readme (line 208) ... ok
-test crates/azmath/src/../../../README.md - readme::_Readme (line 178) ... ok
-test crates/azmath/src/../../../README.md - readme::_Readme (line 344) ... ignored
 test crates/azmath/src/../../../README.md - readme::_Readme (line 155) ... ok
 test crates/azmath/src/../../../README.md - readme::_Readme (line 134) ... ok
+test crates/azmath/src/../../../README.md - readme::_Readme (line 344) ... ignored
+test crates/azmath/src/../../../README.md - readme::_Readme (line 208) ... ok
+test crates/azmath/src/../../../README.md - readme::_Readme (line 178) ... ok
 test crates/azmath/src/../../../README.md - readme::_Readme (line 233) ... ok
 
-test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
-all doctests ran in 1.38s; merged doctests compilation took 1.37s
+all doctests ran in 0.42s; merged doctests compilation took 0.41s
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features std -- -D warnings
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s
    OK
 == cargo test -p azmath --no-default-features --features alloc
     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
      Running unittests src/lib.rs (target/debug/deps/azmath-5de7130d244029d2)
 
 running 58 tests
-test autodiff::reverse_tests::algebra_f32 ... ok
-test autodiff::reverse_tests::algebra_f64 ... ok
 test autodiff::reverse_tests::growing::growing_f64 ... ok
 test autodiff::reverse_tests::growing::growing_f32 ... ok
+test autodiff::reverse_tests::algebra_f32 ... ok
+test autodiff::reverse_tests::algebra_f64 ... ok
 test autodiff::tests::autodiff_f64 ... ok
 test autodiff::tests::autodiff_f32 ... ok
-test fem::tests::assembled::assembled_f64 ... ok
 test fem::tests::assembled::assembled_f32 ... ok
-test fem::tests::fem_f64 ... ok
+test fem::tests::assembled::assembled_f64 ... ok
 test fem::tests::fem_f32 ... ok
-test interp::tests::basics_f32 ... ok
-test interval::tests::interval_f32 ... ok
+test fem::tests::fem_f64 ... ok
 test interval::tests::interval_f64 ... ok
-test linalg::decomp::tests::extremes_f32 ... ok
-test linalg::decomp::tests::extremes_f64 ... ok
+test interval::tests::interval_f32 ... ok
+test interp::tests::basics_f32 ... ok
 test interp::tests::basics_f64 ... ok
+test linalg::decomp::tests::extremes_f32 ... ok
 test linalg::dynamic_tests::dynamic_f32 ... ok
+test linalg::decomp::tests::extremes_f64 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
 test linalg::dynamic_tests::dynamic_f64 ... ok
 test linalg::dynamic_tests::owned::owned_f32 ... ok
-test linalg::dynamic_tests::owned::owned_f64 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
+test linalg::dynamic_tests::owned::owned_f64 ... ok
+test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::matrix::tests::concrete_types ... ok
 test linalg::vector::tests::algebra_f32 ... ok
-test linalg::vector::tests::algebra_f64 ... ok
 test linalg::vector::tests::concrete_types ... ok
+test linalg::vector::tests::algebra_f64 ... ok
 test number::cayley_dickson::tests::all_levels_f32 ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
-test number::complex::tests::algebra_f32 ... ok
-test linalg::matrix::tests::algebra_f64 ... ok
 test number::complex::tests::algebra_f64 ... ok
+test number::complex::tests::algebra_f32 ... ok
 test number::complex::tests::left_scalar_and_conversions ... ok
-test number::dual::tests::algebra_f32 ... ok
 test number::dual::tests::algebra_f64 ... ok
 test number::dual::tests::default_is_zero ... ok
 test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
 test number::quaternion::tests::left_scalar ... ok
-test poly::tests::evaluation_f64 ... ok
 test poly::tests::evaluation_f32 ... ok
+test poly::tests::evaluation_f64 ... ok
+test number::dual::tests::algebra_f32 ... ok
 test quad::tests::rules_f32 ... ok
-test poly::tests::isolation_f64 ... ok
+test quad::tests::rules_f64 ... ok
+test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
-test poly::tests::isolation_f32 ... ok
+test poly::tests::isolation_f64 ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
-test scalar::tests::conjugate_is_identity_for_reals ... ok
-test quad::tests::rules_f64 ... ok
 test solve::tests::extremes_f32 ... ok
-test tensor::tests::owned::owned_f32 ... ok
 test solve::tests::extremes_f64 ... ok
 test solve::tests::scalar_f64 ... ok
-test tensor::tests::owned::owned_f64 ... ok
 test solve::tests::scalar_f32 ... ok
+test poly::tests::isolation_f32 ... ok
 test tensor::tests::tensor_f64 ... ok
+test tensor::tests::owned::owned_f32 ... ok
+test tensor::tests::owned::owned_f64 ... ok
 test tensor::tests::tensor_f32 ... ok
 
 test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
@@ -434,7 +434,7 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
    OK
 == cargo clippy -p azmath --all-targets --no-default-features --features alloc -- -D warnings
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
    OK
 == cargo test -p azmath --all-features
     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
@@ -444,55 +444,55 @@ running 124 tests
 test autodiff::reverse_tests::elementary::elementary_f64 ... ok
 test autodiff::reverse_tests::elementary::elementary_f32 ... ok
 test autodiff::reverse_tests::growing::growing_f32 ... ok
-test autodiff::reverse_tests::growing::growing_f64 ... ok
-test autodiff::reverse_tests::algebra_f64 ... ok
 test autodiff::reverse_tests::algebra_f32 ... ok
+test autodiff::reverse_tests::algebra_f64 ... ok
 test autodiff::tests::autodiff_f64 ... ok
+test autodiff::reverse_tests::growing::growing_f64 ... ok
 test autodiff::tests::autodiff_f32 ... ok
-test fem::tests::assembled::assembled_f32 ... ok
-test fem::tests::assembled::assembled_f64 ... ok
 test fem::tests::fem_f32 ... ok
-test fft::tests::fft_f32 ... ok
+test fem::tests::assembled::assembled_f64 ... ok
 test fem::tests::fem_f64 ... ok
+test fem::tests::assembled::assembled_f32 ... ok
+test fft::tests::fft_f32 ... ok
 test fft::tests::fft_f64 ... ok
 test interp::tests::basics_f32 ... ok
 test interp::tests::basics_f64 ... ok
 test interp::tests::chebyshev::chebyshev_f32 ... ok
-test interp::tests::chebyshev::chebyshev_f64 ... ok
 test interval::tests::interval_f32 ... ok
+test interp::tests::chebyshev::chebyshev_f64 ... ok
 test interval::tests::interval_f64 ... ok
-test fem::tests::problems::problems_f32 ... ok
-test linalg::decomp::spectral_tests::magnitudes_f32 ... ok
 test lie::tests::groups_f32 ... ok
+test linalg::decomp::spectral_tests::magnitudes_f32 ... ok
 test linalg::decomp::spectral_tests::magnitudes_f64 ... ok
 test lie::tests::groups_f64 ... ok
-test linalg::decomp::tests::extremes_f32 ... ok
+test linalg::decomp::spectral_tests::spectral_f64 ... ok
+test fem::tests::problems::problems_f32 ... ok
 test fem::tests::problems::problems_f64 ... ok
+test linalg::decomp::spectral_tests::spectral_f32 ... ok
+test linalg::decomp::tests::extremes_f32 ... ok
 test linalg::decomp::tests::extremes_f64 ... ok
 test linalg::decomp::tests::lu_f32 ... ok
 test linalg::decomp::tests::lu_f64 ... ok
-test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
 test linalg::decomp::tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::with_roots::cholesky_f64 ... ok
 test linalg::decomp::tests::with_roots::qr_f32 ... ok
-test linalg::decomp::tests::with_roots::qr_f64 ... ok
 test linalg::dynamic_tests::dynamic_f32 ... ok
 test linalg::dynamic_tests::dynamic_f64 ... ok
-test linalg::decomp::spectral_tests::spectral_f32 ... ok
-test linalg::dynamic_tests::owned::owned_f32 ... ok
-test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
+test linalg::decomp::tests::with_roots::qr_f64 ... ok
 test linalg::dynamic_tests::owned::owned_f64 ... ok
-test linalg::decomp::spectral_tests::spectral_f64 ... ok
+test linalg::dynamic_tests::owned::owned_f32 ... ok
 test linalg::dynamic_tests::with_roots::cholesky_f64 ... ok
-test linalg::matrix::tests::concrete_types ... ok
+test linalg::dynamic_tests::with_roots::cholesky_f32 ... ok
 test linalg::matrix::tests::algebra_f32 ... ok
-test linalg::matrix::tests::frobenius_norm ... ok
+test linalg::matrix::tests::concrete_types ... ok
 test linalg::matrix::tests::algebra_f64 ... ok
 test linalg::vector::tests::algebra_f64 ... ok
+test linalg::matrix::tests::frobenius_norm ... ok
 test linalg::vector::tests::concrete_types ... ok
-test linalg::vector::tests::norms::extremes_f32 ... ok
-test linalg::vector::tests::norms::limits_f64 ... ok
-test linalg::vector::tests::norms::extremes_f64 ... ok
 test linalg::vector::tests::algebra_f32 ... ok
+test linalg::vector::tests::norms::extremes_f32 ... ok
+test linalg::vector::tests::norms::extremes_f64 ... ok
+test linalg::vector::tests::norms::limits_f64 ... ok
 test linalg::vector::tests::norms::limits_f32 ... ok
 test linalg::vector::tests::norms::norms_f32 ... ok
 test linalg::vector::tests::norms::norms_f64 ... ok
@@ -500,18 +500,18 @@ test number::cayley_dickson::tests::all_levels_f32 ... ok
 test number::cayley_dickson::tests::all_levels_f64 ... ok
 test number::cayley_dickson::tests::norm ... ok
 test number::cayley_dickson::tests::trait_levels ... ok
-test number::complex::tests::algebra_f64 ... ok
 test number::complex::tests::algebra_f32 ... ok
-test number::complex::tests::elementary::elementary_f32 ... ok
-test number::complex::tests::elementary::elementary_f64 ... ok
-test number::complex::tests::left_scalar_and_conversions ... ok
+test number::complex::tests::algebra_f64 ... ok
 test number::dual::tests::algebra_f32 ... ok
+test number::complex::tests::left_scalar_and_conversions ... ok
 test number::dual::tests::algebra_f64 ... ok
+test number::complex::tests::elementary::elementary_f64 ... ok
+test number::complex::tests::elementary::elementary_f32 ... ok
 test number::dual::tests::default_is_zero ... ok
 test number::dual::tests::elementary::elementary_f32 ... ok
 test number::dual::tests::elementary::elementary_f64 ... ok
-test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::algebra_f64 ... ok
+test number::quaternion::tests::algebra_f32 ... ok
 test number::quaternion::tests::left_scalar ... ok
 test number::quaternion::tests::rotation::rotation_f32 ... ok
 test number::quaternion::tests::rotation::rotation_f64 ... ok
@@ -519,24 +519,24 @@ test ode::tests::adaptive_f32 ... ok
 test ode::tests::explicit_f32 ... ok
 test ode::tests::explicit_f64 ... ok
 test ode::tests::adaptive_f64 ... ok
-test ode::tests::implicit_f64 ... ok
 test optim::tests::optim_f32 ... ok
+test optim::tests::optim_f64 ... ok
 test pde::tests::pde_f32 ... ok
 test poly::tests::evaluation_f32 ... ok
 test poly::tests::evaluation_f64 ... ok
-test optim::tests::optim_f64 ... ok
+test pde::tests::pde_f64 ... ok
 test poly::tests::isolation_f32 ... ok
-test poly::tests::isolation_f64 ... ok
-test poly::tests::roots::closed_forms_f64 ... ok
 test poly::tests::roots::closed_forms_f32 ... ok
-test poly::tests::roots::complex_f64 ... ok
+test poly::tests::roots::closed_forms_f64 ... ok
+test ode::tests::implicit_f64 ... ok
 test poly::tests::roots::complex_f32 ... ok
-test quad::tests::gauss::gauss_f32 ... ok
+test poly::tests::isolation_f64 ... ok
 test quad::tests::gauss::gauss_f64 ... ok
-test quad::tests::rules_f64 ... ok
+test quad::tests::gauss::gauss_f32 ... ok
+test poly::tests::roots::complex_f64 ... ok
 test scalar::tests::backend::f32_backend ... ok
-test quad::tests::rules_f32 ... ok
-test scalar::tests::backend::f64_backend ... ok
+test quad::tests::rules_f64 ... ok
+test scalar::tests::conjugate_is_identity_for_reals ... ok
 test scalar::tests::powi_uses_repeated_squaring ... ok
 test scalar::tests::real_basics ... ok
 test scalar::tests::ring_works_for_ints_and_floats ... ok
@@ -545,50 +545,48 @@ test solve::iterative::tests::cg_nonfinite_f64 ... ok
 test solve::iterative::tests::cg_operator_overflow_does_not_report_success ... ok
 test solve::iterative::tests::cg_reported_overflow_regression ... ok
 test solve::iterative::tests::gmres_f32 ... ok
+test scalar::tests::backend::f64_backend ... ok
+test quad::tests::rules_f32 ... ok
 test solve::iterative::tests::gmres_f64 ... ok
-test scalar::tests::conjugate_is_identity_for_reals ... ok
 test solve::iterative::tests::iterative_f32 ... ok
-test solve::iterative::tests::preconditioned_f32 ... ok
 test solve::iterative::tests::iterative_f64 ... ok
+test solve::iterative::tests::preconditioned_f32 ... ok
 test solve::iterative::tests::preconditioned_f64 ... ok
 test solve::tests::extremes_f32 ... ok
-test solve::tests::extremes_f64 ... ok
+test ode::tests::implicit_f32 ... ok
 test solve::tests::scalar_f32 ... ok
 test solve::tests::scalar_f64 ... ok
 test solve::tests::systems::systems_f32 ... ok
 test solve::tests::systems::systems_f64 ... ok
+test solve::tests::extremes_f64 ... ok
 test special::tests::special_f32 ... ok
-test tensor::tests::owned::owned_f32 ... ok
 test tensor::tests::owned::owned_f64 ... ok
 test tensor::tests::tensor_f32 ... ok
 test tensor::tests::tensor_f64 ... ok
+test tensor::tests::owned::owned_f32 ... ok
 test special::tests::special_f64 ... ok
-test ode::tests::implicit_f32 ... ok
-test pde::tests::pde_f64 ... ok
 
-test result: ok. 124 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+test result: ok. 124 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
 
    Doc-tests azmath
 
 running 6 tests
 test crates/azmath/src/../../../README.md - readme::_Readme (line 155) ... ok
-test crates/azmath/src/../../../README.md - readme::_Readme (line 134) ... ok
-test crates/azmath/src/../../../README.md - readme::_Readme (line 344) ... ignored
 test crates/azmath/src/../../../README.md - readme::_Readme (line 178) ... ok
 test crates/azmath/src/../../../README.md - readme::_Readme (line 208) ... ok
+test crates/azmath/src/../../../README.md - readme::_Readme (line 344) ... ignored
+test crates/azmath/src/../../../README.md - readme::_Readme (line 134) ... ok
 test crates/azmath/src/../../../README.md - readme::_Readme (line 233) ... ok
 
-test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-all doctests ran in 0.76s; merged doctests compilation took 0.75s
+all doctests ran in 0.48s; merged doctests compilation took 0.47s
    OK
 == cargo clippy -p azmath --all-targets --all-features -- -D warnings
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
    OK
 == cargo test -p azphysics --no-default-features
-   Compiling azviz v0.1.1 (/home/user/azlab/crates/azviz)
-   Compiling azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.96s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
      Running unittests src/lib.rs (target/debug/deps/azphysics-3865ba157d22d7ad)
 
 running 0 tests
@@ -600,34 +598,31 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 running 1 test
 test crates/azphysics/src/lib.rs - (line 25) ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
-all doctests ran in 0.25s; merged doctests compilation took 0.24s
+all doctests ran in 0.26s; merged doctests compilation took 0.24s
    OK
 == cargo clippy -p azphysics --all-targets --no-default-features -- -D warnings
-    Checking azviz v0.1.1 (/home/user/azlab/crates/azviz)
-    Checking azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.80s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.41s
    OK
 == cargo test -p azphysics --no-default-features --features libm
-   Compiling azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.63s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
      Running unittests src/lib.rs (target/debug/deps/azphysics-3f4056b0fb3b57c7)
 
 running 11 tests
 test ccd::tests::edges ... ok
-test ccd::tests::coplanar_and_common_motion ... ok
-test ccd::tests::edge_tolerance_without_plane_crossing ... ok
 test ccd::tests::moving_triangle ... ok
+test ccd::tests::edge_tolerance_without_plane_crossing ... ok
+test ccd::tests::coplanar_and_common_motion ... ok
 test ccd::tests::positive_tolerance_without_plane_crossing ... ok
 test ccd::tests::point_through_triangle ... ok
-test geometry::tests::segments ... ok
 test geometry::tests::intersections_and_boxes ... ok
+test geometry::tests::segments ... ok
 test geometry::tests::triangle_regions ... ok
 test ccd::tests::three_outcomes ... ok
 test ccd::tests::never_misses_a_crossing ... ok
 
-test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
 
    Doc-tests azphysics
 
@@ -636,22 +631,21 @@ test crates/azphysics/src/lib.rs - (line 25) ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-all doctests ran in 0.23s; merged doctests compilation took 0.22s
+all doctests ran in 0.28s; merged doctests compilation took 0.27s
    OK
 == cargo clippy -p azphysics --all-targets --no-default-features --features libm -- -D warnings
-    Checking azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.38s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
    OK
 == cargo test -p azphysics --no-default-features --features std
    Compiling azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.11s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.33s
      Running unittests src/lib.rs (target/debug/deps/azphysics-e4f1d3e311ddf6b4)
 
-running 28 tests
+running 32 tests
 test broadphase::tests::large_and_degenerate ... ok
 test ccd::tests::coplanar_and_common_motion ... ok
-test ccd::tests::edges ... ok
 test broadphase::tests::finds_every_overlap ... ok
+test ccd::tests::edges ... ok
 test ccd::tests::edge_tolerance_without_plane_crossing ... ok
 test ccd::tests::moving_triangle ... ok
 test ccd::tests::point_through_triangle ... ok
@@ -659,44 +653,46 @@ test ccd::tests::positive_tolerance_without_plane_crossing ... ok
 test ccd::tests::three_outcomes ... ok
 test ccd::tests::never_misses_a_crossing ... ok
 test cloth::tests::free_flight_f32 ... ok
+test cloth::tests::free_flight_f64 ... ok
+test cloth::tests::friction_f32 ... ok
+test cloth::tests::friction_f64 ... ok
+test cloth::tests::cloth_f32 ... ok
 test cloth::tests::motion_restore_validates_before_modifying ... ok
 test cloth::tests::observing_does_not_change_cloth ... ok
 test cloth::tests::zero_iterations_free_path_f32 ... ok
 test cloth::tests::zero_iterations_free_path_f64 ... ok
 test fluid::tests::fluid_motion_restore_is_atomic_and_can_continue ... ok
+test cloth::tests::hanging_rest_f32 ... ok
 test fluid::tests::grid_f32 ... ok
-test fluid::tests::grid_f64 ... ok
 test fluid::tests::particle_resolution_and_obstacle_sweep ... ignored, Parametervergleich über 20 simulierte Sekunden; mit --ignored --nocapture starten
-test cloth::tests::free_flight_f64 ... ok
-test cloth::tests::cloth_f32 ... ok
+test cloth::tests::cloth_f64 ... ok
+test fluid::tests::grid_f64 ... ok
 test fluid::tests::small_full_pool_defaults ... ignored, Kleines volles Kontrollbecken, 20 simulierte Sekunden
 test geometry::tests::intersections_and_boxes ... ok
 test geometry::tests::segments ... ok
 test geometry::tests::triangle_regions ... ok
-test cloth::tests::cloth_f64 ... ok
-test fluid::tests::particles_f32 has been running for over 60 seconds
-test fluid::tests::particles_f64 has been running for over 60 seconds
+test cloth::tests::hanging_rest_f64 ... ok
 test fluid::tests::particles_f64 ... ok
 test fluid::tests::particles_f32 ... ok
 
-test result: ok. 26 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 80.45s
+test result: ok. 30 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 80.78s
 
    Doc-tests azphysics
 
 running 1 test
 test crates/azphysics/src/lib.rs - (line 25) ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.96s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.88s
 
-all doctests ran in 3.53s; merged doctests compilation took 0.57s
+all doctests ran in 3.40s; merged doctests compilation took 0.51s
    OK
 == cargo clippy -p azphysics --all-targets --no-default-features --features std -- -D warnings
     Checking azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.52s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.36s
    OK
 == cargo test -p azphysics --no-default-features --features alloc
    Compiling azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.84s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.51s
      Running unittests src/lib.rs (target/debug/deps/azphysics-c81e56090523da30)
 
 running 0 tests
@@ -710,73 +706,73 @@ test crates/azphysics/src/lib.rs - (line 25) ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-all doctests ran in 0.21s; merged doctests compilation took 0.21s
+all doctests ran in 0.23s; merged doctests compilation took 0.22s
    OK
 == cargo clippy -p azphysics --all-targets --no-default-features --features alloc -- -D warnings
     Checking azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.00s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.67s
    OK
 == cargo test -p azphysics --all-features
    Compiling azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.11s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.18s
      Running unittests src/lib.rs (target/debug/deps/azphysics-c424b5a381a9eebc)
 
-running 28 tests
+running 32 tests
+test broadphase::tests::large_and_degenerate ... ok
 test broadphase::tests::finds_every_overlap ... ok
 test ccd::tests::coplanar_and_common_motion ... ok
 test ccd::tests::edge_tolerance_without_plane_crossing ... ok
-test broadphase::tests::large_and_degenerate ... ok
 test ccd::tests::edges ... ok
-test ccd::tests::point_through_triangle ... ok
-test ccd::tests::positive_tolerance_without_plane_crossing ... ok
 test ccd::tests::moving_triangle ... ok
+test ccd::tests::positive_tolerance_without_plane_crossing ... ok
+test ccd::tests::point_through_triangle ... ok
 test ccd::tests::three_outcomes ... ok
 test ccd::tests::never_misses_a_crossing ... ok
 test cloth::tests::free_flight_f32 ... ok
+test cloth::tests::free_flight_f64 ... ok
+test cloth::tests::friction_f32 ... ok
+test cloth::tests::friction_f64 ... ok
+test cloth::tests::cloth_f32 ... ok
 test cloth::tests::motion_restore_validates_before_modifying ... ok
 test cloth::tests::observing_does_not_change_cloth ... ok
 test cloth::tests::zero_iterations_free_path_f32 ... ok
 test cloth::tests::zero_iterations_free_path_f64 ... ok
+test cloth::tests::hanging_rest_f32 ... ok
 test fluid::tests::fluid_motion_restore_is_atomic_and_can_continue ... ok
 test fluid::tests::grid_f32 ... ok
-test fluid::tests::grid_f64 ... ok
 test fluid::tests::particle_resolution_and_obstacle_sweep ... ignored, Parametervergleich über 20 simulierte Sekunden; mit --ignored --nocapture starten
-test cloth::tests::free_flight_f64 ... ok
-test cloth::tests::cloth_f32 ... ok
+test fluid::tests::grid_f64 ... ok
+test cloth::tests::cloth_f64 ... ok
 test fluid::tests::small_full_pool_defaults ... ignored, Kleines volles Kontrollbecken, 20 simulierte Sekunden
 test geometry::tests::intersections_and_boxes ... ok
 test geometry::tests::segments ... ok
 test geometry::tests::triangle_regions ... ok
-test cloth::tests::cloth_f64 ... ok
-test fluid::tests::particles_f32 has been running for over 60 seconds
-test fluid::tests::particles_f64 has been running for over 60 seconds
+test cloth::tests::hanging_rest_f64 ... ok
 test fluid::tests::particles_f64 ... ok
 test fluid::tests::particles_f32 ... ok
 
-test result: ok. 26 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 78.08s
+test result: ok. 30 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 76.46s
 
    Doc-tests azphysics
 
 running 1 test
 test crates/azphysics/src/lib.rs - (line 25) ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.06s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.60s
 
-all doctests ran in 3.54s; merged doctests compilation took 0.47s
+all doctests ran in 3.05s; merged doctests compilation took 0.44s
    OK
 == cargo clippy -p azphysics --all-targets --all-features -- -D warnings
     Checking azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.30s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.17s
    OK
 == cargo check -p azphysics --features std --examples
-    Checking azmath v0.1.0 (/home/user/azlab/crates/azmath)
-    Checking azviz v0.1.1 (/home/user/azlab/crates/azviz)
     Checking azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.28s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.81s
    OK
 == cargo test -p azphysics --features std --release --examples
    Compiling azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `release` profile [optimized] target(s) in 7.60s
+    Finished `release` profile [optimized] target(s) in 4.16s
      Running unittests examples/cloth_drape.rs (target/release/examples/cloth_drape-ef4f49a70e6fd257)
 
 running 0 tests
@@ -792,30 +788,30 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
      Running unittests examples/cloth_free_flight.rs (target/release/examples/cloth_free_flight-7fed0814b186091f)
 
 running 4 tests
-test snapshot::tests::exact_float_roundtrip_and_invalid_input ... ok
 test tests::derivatives_measure_motion_and_preserve_sign ... ok
+test snapshot::tests::exact_float_roundtrip_and_invalid_input ... ok
 test tests::opposing_accelerations_do_not_hide_particle_maximum ... ok
 test tests::unforced_motion_matches_translation ... ok
 
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
 
      Running unittests examples/cloth_free_flight_f64.rs (target/release/examples/cloth_free_flight_f64-e0aae3f1efa529fc)
 
 running 4 tests
 test tests::derivatives_measure_motion_and_preserve_sign ... ok
-test tests::opposing_accelerations_do_not_hide_particle_maximum ... ok
 test tests::comparison_uses_f64_without_collisions ... ok
+test tests::opposing_accelerations_do_not_hide_particle_maximum ... ok
 test tests::unforced_motion_matches_translation ... ok
 
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.51s
 
      Running unittests examples/cloth_free_flight_no_ccd.rs (target/release/examples/cloth_free_flight_no_ccd-0d9f9f397aaca435)
 
 running 5 tests
 test tests::opposing_accelerations_do_not_hide_particle_maximum ... ok
+test snapshot::tests::exact_float_roundtrip_and_invalid_input ... ok
 test tests::derivatives_measure_motion_and_preserve_sign ... ok
 test tests::comparison_disables_only_ccd ... ok
-test snapshot::tests::exact_float_roundtrip_and_invalid_input ... ok
 test tests::unforced_motion_matches_translation ... ok
 
 test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
@@ -823,10 +819,10 @@ test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
      Running unittests examples/cloth_free_flight_no_self_collision.rs (target/release/examples/cloth_free_flight_no_self_collision-8394af7d4f6b8a33)
 
 running 5 tests
-test snapshot::tests::exact_float_roundtrip_and_invalid_input ... ok
 test tests::opposing_accelerations_do_not_hide_particle_maximum ... ok
-test tests::comparison_disables_ccd_and_self_collision ... ok
+test snapshot::tests::exact_float_roundtrip_and_invalid_input ... ok
 test tests::derivatives_measure_motion_and_preserve_sign ... ok
+test tests::comparison_disables_ccd_and_self_collision ... ok
 test tests::unforced_motion_matches_translation ... ok
 
 test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
@@ -834,14 +830,14 @@ test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
      Running unittests examples/cloth_free_flight_unconstrained.rs (target/release/examples/cloth_free_flight_unconstrained-e8d14ce69986f4d3)
 
 running 6 tests
-test snapshot::tests::exact_float_roundtrip_and_invalid_input ... ok
 test tests::comparison_disables_all_constraints ... ok
 test tests::opposing_accelerations_do_not_hide_particle_maximum ... ok
+test snapshot::tests::exact_float_roundtrip_and_invalid_input ... ok
 test tests::derivatives_measure_motion_and_preserve_sign ... ok
 test tests::unforced_motion_matches_translation ... ok
 test tests::unconstrained_long_run_reports_drift ... ok
 
-test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
 
      Running unittests examples/cloth_tunnelling.rs (target/release/examples/cloth_tunnelling-e351fac341423abc)
 
@@ -877,16 +873,15 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
    OK
 == cargo test -p azviz
-   Compiling azviz v0.1.1 (/home/user/azlab/crates/azviz)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
      Running unittests src/lib.rs (target/debug/deps/azviz-be493db8e4ef4d6e)
 
 running 11 tests
-test depth::reuse_tests::reused_frame_matches_fresh_frame ... ok
-test depth::tests::clipping_degenerate_geometry_and_clear ... ok
 test runner::control_tests::pause_and_single_step ... ok
-test tests::colors ... ok
+test depth::tests::clipping_degenerate_geometry_and_clear ... ok
 test depth::tests::crossing_surfaces_are_order_independent ... ok
+test depth::reuse_tests::reused_frame_matches_fresh_frame ... ok
+test tests::colors ... ok
 test tests::camera_orbit_preserves_target_projection ... ok
 test tests::plane ... ok
 test tests::depth_image_composites_over_background ... ok
@@ -894,7 +889,7 @@ test tests::raster ... ok
 test tests::raster_depth_cache_clears_and_reuses_storage ... ok
 test tests::camera ... ok
 
-test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
 
      Running tests/scene_api.rs (target/debug/deps/scene_api-77ab5468051b7a93)
 
@@ -911,37 +906,35 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
    OK
 == cargo clippy -p azviz --all-targets -- -D warnings
-    Checking azviz v0.1.1 (/home/user/azlab/crates/azviz)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.43s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s
    OK
 == cargo doc --workspace --no-deps --all-features
  Documenting azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
- Documenting azviz v0.1.1 (/home/user/azlab/crates/azviz)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.41s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.36s
    Generated /home/user/azlab/target/doc/azmath/index.html and 2 other files
    OK
 == cargo build -p azmath --target thumbv7em-none-eabihf --no-default-features
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
    OK
 == cargo build -p azmath --target thumbv7em-none-eabihf
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
    OK
 == cargo build -p azphysics --target thumbv7em-none-eabihf --no-default-features
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.11s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
    OK
 == cargo build -p azphysics --target thumbv7em-none-eabihf
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
    OK
 == cargo build -p azphysics --target thumbv7em-none-eabihf --features alloc
    Compiling azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.93s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
    OK
 == cargo +1.86 check -p azmath -p azphysics --no-default-features
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.87s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
    OK
 == cargo +1.86 check -p azmath -p azphysics --all-features
     Checking azphysics v0.1.0 (/home/user/azlab/crates/azphysics)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.19s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.79s
    OK
 
 ERGEBNIS: alles OK
