@@ -15,6 +15,13 @@ pub struct ClothParams<T> {
     /// steifer und die Kollisionen genauer.
     pub substeps: u32,
     /// Durchläufe über alle Abstandsbedingungen je Teilschritt.
+    ///
+    /// Sie laufen paarweise, einmal vorwärts und einmal rückwärts durch die
+    /// Verbindungen; eine ungerade Zahl wird deshalb auf die nächste gerade
+    /// aufgerundet. Nur so bleibt die Rechnung stabil (siehe `todo/azphysics.md`).
+    /// Gegen sichtbare Dehnung helfen mehr Teilschritte besser als mehr
+    /// Durchläufe.
+    ///
     /// Null schaltet Dehn-, Scher- und Biegekorrekturen aus, etwa zur Diagnose.
     /// Integration, Hindernisse, Selbstkollision und CCD bleiben davon unabhängig.
     pub iterations: u32,

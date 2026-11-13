@@ -78,8 +78,16 @@ impl<T: RealElementary> Cloth<T> {
 
         // 2. Abstandsbedingungen (XPBD).
         self.lambdas.fill(T::ZERO);
-        for _ in 0..self.params.iterations {
-            self.solve_links(h);
+        // Die Durchläufe gehen abwechselnd vorwärts und rückwärts durch die
+        // Verbindungen, immer paarweise. Läuft man stets in derselben
+        // Richtung, ist die Korrektur als Ganzes unsymmetrisch: Sie dreht
+        // Fehler im Kreis, statt sie nur zu verkleinern, und zusammen mit
+        // der Geschwindigkeit aus der Lageänderung schaukelt sich das auf.
+        // Ein ruhig hängendes Tuch gerät so von selbst in Bewegung. Hin und
+        // zurück zusammen sind symmetrisch und verkleinern jeden Fehler.
+        let sweeps = self.params.iterations.div_ceil(2) * 2;
+        for sweep in 0..sweeps {
+            self.solve_links(h, sweep % 2 == 1);
         }
 
         observe(StepPhase::Links);
@@ -138,9 +146,12 @@ impl<T: RealElementary> Cloth<T> {
     }
 
     /// Ein Durchlauf über alle Abstandsbedingungen.
-    fn solve_links(&mut self, h: T) {
+    fn solve_links(&mut self, h: T, backward: bool) {
         let inverse_h2 = (h * h).recip();
-        for (link, lambda) in self.links.iter().zip(self.lambdas.iter_mut()) {
+        let count = self.links.len();
+        for step in 0..count {
+            let index = if backward { count - 1 - step } else { step };
+            let (link, lambda) = (&self.links[index], &mut self.lambdas[index]);
             let (wi, wj) = (self.inverse_mass[link.i], self.inverse_mass[link.j]);
             if wi + wj <= T::ZERO {
                 continue;

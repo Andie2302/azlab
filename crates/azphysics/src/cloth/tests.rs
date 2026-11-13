@@ -307,6 +307,60 @@ fn free_flight_does_not_drift<T: RealElementary>() {
     assert!(cloth.max_strain() <= grid * f(64.0));
 }
 
+/// Ein feines Tuch hängt senkrecht an seiner oberen Kante, genau in seiner
+/// Ruhelage. Es muss ruhig hängen bleiben.
+///
+/// Solange die Verbindungen stets in derselben Reihenfolge durchlaufen
+/// wurden, schaukelte es sich aus der Ruhe auf: nach einer halben Sekunde
+/// mehrere Meter je Sekunde, dann faltete es sich in der eigenen Ebene
+/// zusammen (Dehnungen über 60 %) oder lief bis zum Überlauf davon. Mit 12
+/// Teilchen je Kante trat das nicht auf, ab 24 mit den Standardwerten immer.
+fn hanging_cloth_stays_at_rest<T: RealElementary>(iterations: u32) {
+    let f = T::from_f64;
+    let n = 24;
+    let spacing = 1.0 / (n - 1) as f64;
+    let mut cloth: Cloth<T> =
+        Cloth::grid(n, n, v(-0.5, 1.5, 0.0), v(spacing, 0.0, 0.0), v(0.0, -spacing, 0.0), f(0.005));
+    cloth.params.iterations = iterations;
+    // Für diese Frage ohne Belang und in der Prüfung nur langsam.
+    cloth.params.self_collision = false;
+    cloth.params.ccd = false;
+    for column in 0..n {
+        let index = cloth.index(column, 0);
+        cloth.pin(index);
+    }
+    let mut fastest = T::ZERO;
+    // Die alte Rechnung war nach 40 Bildern bei mehreren Metern je Sekunde.
+    for _ in 0..60 {
+        cloth.step(f(1.0 / 60.0), &[]);
+        fastest = cloth.velocities().iter().fold(fastest, |fastest, velocity| fastest.max(velocity.norm()));
+        assert!(fastest.is_finite());
+    }
+    // Es sackt beim Loslassen etwas durch und schwingt aus; schnell wird es
+    // dabei nie.
+    assert!(fastest < f(0.5), "bis {:?} m/s schnell", fastest.to_f64());
+    let speed = cloth.velocities().iter().fold(T::ZERO, |fastest, velocity| fastest.max(velocity.norm()));
+    assert!(speed < f(0.1), "am Ende noch {:?} m/s", speed.to_f64());
+    // Mit so wenigen Durchläufen gibt das Tuch etwas nach, aber nur wenig.
+    assert!(cloth.max_strain() < f(0.03), "Dehnung {:?}", cloth.max_strain().to_f64());
+    let lowest = cloth.positions().iter().fold(T::INFINITY, |low, point| low.min(point[1]));
+    assert!(lowest > f(0.49) && lowest < f(0.5));
+    // Es ist in seiner Ebene geblieben.
+    assert!(cloth.positions().iter().all(|point| point[2] == T::ZERO));
+}
+
+#[test]
+fn hanging_rest_f32() {
+    // Eins wird auf ein Paar aufgerundet; ein einzelner Durchlauf wäre
+    // nicht stabil.
+    hanging_cloth_stays_at_rest::<f32>(1);
+}
+
+#[test]
+fn hanging_rest_f64() {
+    hanging_cloth_stays_at_rest::<f64>(2);
+}
+
 #[test]
 fn free_flight_f32() {
     free_flight_does_not_drift::<f32>();
