@@ -503,3 +503,59 @@ impl<T: RealElementary> ParticleFluid<T> {
         }
     }
 }
+
+
+#[cfg(all(test, any(feature = "std", feature = "libm")))]
+mod confinement_tests {
+    use super::*;
+
+    /// Ein Hindernis steht auf dem Beckenboden. Die kürzeste geometrische
+    /// Flucht nach unten ist unzulässig: Das Ergebnis muss gleichzeitig
+    /// innerhalb des Beckens und außerhalb des Hindernisses liegen.
+    ///
+    /// Direkter Test von confine, unabhängig von Dichte, Druck, Zeitschritt
+    /// und Darstellung. Der Eingang darf im Hindernis liegen, denn genau
+    /// solche Lagen muss die Kollisionskorrektur auflösen.
+    fn floor_obstacle_keeps_particles_in_tank<T: RealElementary>() {
+        let f = T::from_f64;
+        let mut fluid = ParticleFluid::<T>::new(
+            Aabb { min: Vector([f(0.0), f(0.0)]), max: Vector([f(4.0), f(2.4)]) },
+            f(0.04),
+        );
+        fluid.add_obstacle(Vector([f(2.2), f(0.0)]), Vector([f(2.4), f(0.4)]));
+        let margin = fluid.spacing() * f(0.25);
+        let low = fluid.bounds().min + Vector::splat(margin);
+        let high = fluid.bounds().max - Vector::splat(margin);
+        let tolerance = T::EPSILON * f(16.0);
+
+        // Zuerst das konkrete Gegenbeispiel, dann Punkte nahe beiden Ecken.
+        for x in [2.3, 2.21, 2.39] {
+            let input = Vector([f(x), margin]);
+            let output = fluid.confine(input);
+            assert!(output.0.iter().all(|v| v.is_finite()));
+            assert!(fluid.bounds().contains(output),
+                "confine schiebt Teilchen unter den Boden: Eingang {:?}, Ergebnis {:?}",
+                input.0.map(|v| v.to_f64()), output.0.map(|v| v.to_f64()));
+            for axis in 0..2 {
+                assert!(output[axis] >= low[axis] - tolerance
+                    && output[axis] <= high[axis] + tolerance,
+                    "Mindestabstand zum Beckenrand verletzt, Achse {axis}");
+            }
+            assert!(!fluid.obstacles()[0].contains(output),
+                "Teilchen blieb im Hindernis");
+            let again = fluid.confine(output);
+            assert!((again - output).norm() <= tolerance,
+                "Wiederholtes confine verschiebt einen bereits gültigen Kontakt");
+        }
+    }
+
+    #[test]
+    fn floor_obstacle_keeps_particles_in_tank_f32() {
+        floor_obstacle_keeps_particles_in_tank::<f32>();
+    }
+
+    #[test]
+    fn floor_obstacle_keeps_particles_in_tank_f64() {
+        floor_obstacle_keeps_particles_in_tank::<f64>();
+    }
+}
