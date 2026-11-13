@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tuchdiagnose · __TITLE__</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font:
+        15px system-ui,
+        sans-serif;
+      background: #101722;
+      color: #e3eaf4;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 1440px;
+      padding: 32px;
+    }
+    header {
+      border-bottom: 1px solid #344052;
+      padding-bottom: 24px;
+    }
+    .eyebrow {
+      color: #71d9c3;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 12px;
+    }
+    h1 {
+      font-size: 34px;
+      margin: 8px 0 12px;
+    }
+    p {
+      line-height: 1.6;
+      color: #aebdd0;
+      max-width: 1050px;
+    }
+    .meta {
+      font:
+        13px ui-monospace,
+        monospace;
+      color: #91a5bd;
+    }
+    .controls {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+    input[type="range"] {
+      width: 180px;
+      accent-color: #71d9c3;
+    }
+    button {
+      background: #213246;
+      border: 1px solid #455873;
+      border-radius: 7px;
+      color: #e3eaf4;
+      padding: 9px 14px;
+      cursor: pointer;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .metric,
+    .chart {
+      background: #182332;
+      border: 1px solid #2b3b50;
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .metric span {
+      display: block;
+      color: #91a5bd;
+      font-size: 12px;
+    }
+    .metric strong {
+      display: block;
+      font:
+        21px ui-monospace,
+        monospace;
+      margin-top: 9px;
+    }
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .chart h2 {
+      font-size: 16px;
+      margin: 0 0 8px;
+    }
+    .chart svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      touch-action: pan-y;
+    }
+    .legend {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      min-height: 25px;
+    }
+    .legend label {
+      cursor: pointer;
+    }
+    .legend input {
+      accent-color: var(--color);
+    }
+    .detail {
+      font:
+        12px ui-monospace,
+        monospace;
+      color: #c9d7e8;
+      min-height: 34px;
+      margin-top: 9px;
+      overflow-wrap: anywhere;
+    }
+    .warning {
+      color: #ff9c85;
+    }
+    .foot {
+      font-size: 13px;
+      margin-top: 24px;
+    }
+    @media (max-width: 850px) {
+      body {
+        padding: 18px;
+      }
+      .charts {
+        grid-template-columns: 1fr;
+      }
+      .summary {
+        grid-template-columns: 1fr 1fr;
+      }
+      h1 {
+        font-size: 27px;
+      }
+    }
+  </style>
+  <header>
+    <div class="eyebrow">azlab / azphysics</div>
+    <h1>Tuchdiagnose · __TITLE__</h1>
+    <div class="meta">__PARAMS__</div>
+    <p>
+      __NOTE__ Die angezeigten Parameter gelten für diesen Lauf; Erhaltung setzt
+      fehlende äußere Kräfte und Kontakte sowie deaktivierte Dämpfung voraus.
+    </p>
+    <div id="status" role="status"></div>
+    <div class="summary" id="summary"></div>
+  </header>
+  <div class="controls">
+    <label
+      >Von
+      <input
+        id="from"
+        type="range"
+        min="0"
+        value="0"
+        aria-label="Start der Zeitspanne"
+    /></label>
+    <label
+      >Bis
+      <input
+        id="to"
+        type="range"
+        min="0"
+        aria-label="Ende der Zeitspanne" /></label
+    ><span id="interval" class="meta"></span>
+    <button id="reset">Gesamter Lauf</button
+    ><button id="download">CSV herunterladen</button>
+  </div>
+  <main class="charts" id="charts"></main>
+  <p class="foot">
+    Messung zu t=0 und nach jedem vollständigen Physikschritt, in SI-Einheiten.
+    Impuls und Energie beziehen sich auf bewegliche Teilchen; festgehaltene
+    Teilchen und Hindernisse sind ausgeschlossen. Drehimpuls wird um den
+    momentanen Schwerpunkt gemessen. E = kinetische + Gravitations- +
+    Federenergie, ohne Kontaktenergie. Gravitationsenergie hat den Weltursprung
+    als Bezugspunkt. Federenergie: C²/(2·Nachgiebigkeit); harte und deaktivierte
+    Bedingungen tragen keine Federenergie bei. Dehnungswerte erfassen Dehn- und
+    Scherverbindungen, der absolute Constraint-Fehler zusätzlich die
+    Biegeverbindungen. Gemessen wird aus den gerundeten Positionen; interne
+    Rundungsreste sind nicht enthalten. CPU-Zeiten schließen die
+    Diagnoseberechnung und Darstellung aus und sind rechnerabhängig. Kurven
+    können einzeln ausgeblendet werden; Zeiger über einer Kurve zeigt die
+    exakten Messwerte. Lücken kennzeichnen ungültige Zustände.
+  </p>
+  <script>
+    "use strict";
+    const data = __DATA__;
+    const csv = __CSV__;
+    const colors = ["#e7eef8", "#ffa958", "#68aaff", "#71d9a2"];
+    const specs = [
+      [
+        "Energie",
+        "J",
+        [
+          [4, "Gesamt", colors[0]],
+          [1, "Kinetisch", colors[1]],
+          [2, "Gravitation", colors[2]],
+          [3, "Elastisch", colors[3]],
+        ],
+      ],
+      [
+        "Linearer Impuls",
+        "kg m/s",
+        [
+          [5, "x", "#ff827e"],
+          [6, "y", colors[3]],
+          [7, "z", colors[2]],
+        ],
+      ],
+      [
+        "Drehimpuls um Schwerpunkt",
+        "kg m²/s",
+        [
+          [8, "x", "#ff827e"],
+          [9, "y", colors[3]],
+          [10, "z", colors[2]],
+        ],
+      ],
+      [
+        "Relative Constraint-Abweichung",
+        "%",
+        [
+          [11, "Maximum", colors[1]],
+          [12, "RMS", colors[2]],
+        ],
+      ],
+      ["Absoluter Constraint-Fehler", "m", [[13, "Maximum", colors[1]]]],
+      ["Physikzeit pro Schritt", "ms", [[14, "CPU", colors[2]]]],
+      [
+        "Kollisionsereignisse pro Schritt",
+        "Anzahl",
+        [
+          [15, "CCD-Treffer", colors[1]],
+          [16, "Rücksetzungen", "#ff827e"],
+        ],
+      ],
+    ];
+    const $ = (id) => document.getElementById(id),
+      fmt = (x) => (Number.isFinite(x) ? x.toExponential(4) : "ungültig");
+    const first = data[0],
+      last = data.at(-1);
+    const summary = [
+      ["Dauer", last[0].toFixed(3) + " s"],
+      ["ΔE seit t=0", fmt(last[4] === null ? NaN : last[4] - first[4]) + " J"],
+      [
+        "Δp (x / y / z)",
+        [5, 6, 7]
+          .map((i) => fmt(last[i] === null ? NaN : last[i] - first[i]))
+          .join(" / "),
+      ],
+      [
+        "ΔL (x / y / z)",
+        [8, 9, 10]
+          .map((i) => fmt(last[i] === null ? NaN : last[i] - first[i]))
+          .join(" / "),
+      ],
+    ];
+    for (const [label, value] of summary) {
+      const el = document.createElement("div");
+      el.className = "metric";
+      const span = document.createElement("span"),
+        strong = document.createElement("strong");
+      span.textContent = label;
+      strong.textContent = value;
+      strong.style.fontSize =
+        label.startsWith("Δp") || label.startsWith("ΔL") ? "13px" : "21px";
+      el.append(span, strong);
+      $("summary").append(el);
+    }
+    const invalid = data.filter((row) => row[17] !== 1).length;
+    $("status").textContent = invalid
+      ? `Angehalten: ${invalid} ungültige Stichprobe(n). Messwerte vor der Interpretation prüfen.`
+      : `${data.length} Stichproben · alle Zustände endlich`;
+    if (invalid) $("status").className = "warning";
+    const charts = specs.map(([title, unit, tracks]) => {
+      const section = document.createElement("section");
+      section.className = "chart";
+      const heading = document.createElement("h2");
+      heading.textContent = `${title} [${unit}]`;
+      const legend = document.createElement("div");
+      legend.className = "legend";
+      const enabled = tracks.map(() => true);
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 620 260");
+      svg.setAttribute("role", "img");
+      svg.setAttribute("aria-label", `${title} über die Simulationszeit`);
+      const detail = document.createElement("div");
+      detail.className = "detail";
+      detail.textContent = "Zeiger über die Kurve bewegen";
+      tracks.forEach(([, name, color], i) => {
+        const label = document.createElement("label");
+        label.style.setProperty("--color", color);
+        label.style.color = color;
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = true;
+        check.addEventListener("change", () => {
+          enabled[i] = check.checked;
+          render();
+        });
+        label.append(check, document.createTextNode(name));
+        legend.append(label);
+      });
+      section.append(heading, legend, svg, detail);
+      $("charts").append(section);
+      const chart = { svg, detail, tracks, enabled, unit };
+      svg.addEventListener("pointermove", (event) => {
+        const r = svg.getBoundingClientRect(),
+          a = +$("from").value,
+          b = +$("to").value;
+        const ratio = Math.max(
+          0,
+          Math.min(1, (((event.clientX - r.left) / r.width) * 620 - 90) / 510),
+        );
+        const row = data[Math.round(a + ratio * (b - a))];
+        detail.textContent =
+          `t=${row[0].toFixed(6)} s | ` +
+          tracks
+            .filter((_, i) => enabled[i])
+            .map(([column, name]) => `${name}=${fmt(row[column])} ${unit}`)
+            .join(" | ");
+      });
+      return chart;
+    });
+    function render() {
+      let a = +$("from").value,
+        b = +$("to").value;
+      if (a > b) {
+        b = a;
+        $("to").value = b;
+      }
+      const rows = data.slice(a, b + 1),
+        start = rows[0][0],
+        end = rows.at(-1)[0];
+      $("interval").textContent = `${start.toFixed(3)} – ${end.toFixed(3)} s`;
+      for (const c of charts) {
+        let lo = Infinity,
+          hi = -Infinity;
+        for (const row of rows) {
+          if (row[17] !== 1) continue;
+          for (let j = 0; j < c.tracks.length; j++) {
+            const v = row[c.tracks[j][0]];
+            if (c.enabled[j] && v !== null && Number.isFinite(v)) {
+              lo = Math.min(lo, v);
+              hi = Math.max(hi, v);
+            }
+          }
+        }
+        if (!Number.isFinite(lo)) {
+          lo = -1;
+          hi = 1;
+        }
+        const pad = Math.max(
+          (hi - lo) * 0.08,
+          Math.max(Math.abs(lo), Math.abs(hi)) * 1e-6,
+          1e-12,
+        );
+        lo -= pad;
+        hi += pad;
+        const px = (t) =>
+            90 + ((t - start) / Math.max(end - start, 1e-12)) * 510,
+          py = (v) => 20 + ((hi - v) / (hi - lo)) * 200;
+        let markup = "";
+        for (let tick = 0; tick < 4; tick++) {
+          const v = lo + ((hi - lo) * tick) / 3,
+            y = py(v);
+          markup += `<line x1="90" y1="${y}" x2="600" y2="${y}" stroke="#304057"/><text x="80" y="${y + 4}" text-anchor="end" fill="#93a7c0" font-size="11">${v.toExponential(2)}</text>`;
+        }
+        for (let tick = 0; tick < 4; tick++) {
+          const t = start + ((end - start) * tick) / 3;
+          markup += `<text x="${px(t)}" y="242" text-anchor="middle" fill="#93a7c0" font-size="11">${t.toFixed(3)} s</text>`;
+        }
+        c.tracks.forEach(([column, , color], i) => {
+          if (!c.enabled[i]) return;
+          let path = "",
+            valid = false;
+          for (const row of rows) {
+            const v = row[column];
+            if (row[17] !== 1 || v === null || !Number.isFinite(v)) {
+              valid = false;
+              continue;
+            }
+            path += `${valid ? "L" : "M"}${px(row[0]).toFixed(2)},${py(v).toFixed(2)} `;
+            valid = true;
+          }
+          markup += `<path d="${path}" fill="none" stroke="${color}" stroke-width="1.8"/>`;
+        });
+        c.svg.innerHTML = markup;
+      }
+    }
+    for (const id of ["from", "to"]) {
+      $(id).max = data.length - 1;
+      $(id).addEventListener("input", render);
+    }
+    $("to").value = data.length - 1;
+    $("reset").addEventListener("click", () => {
+      $("from").value = 0;
+      $("to").value = data.length - 1;
+      render();
+    });
+    $("download").addEventListener("click", () => {
+      const url = URL.createObjectURL(
+        new Blob([csv], { type: "text/csv;charset=utf-8" }),
+      );
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "cloth_diagnostics.csv";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    render();
+  </script>
+</html>

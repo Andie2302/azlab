@@ -120,6 +120,70 @@ Mit `std`-Backend:
 azmath = { git = "https://github.com/Andie2302/azlab.git", default-features = false, features = ["std"] }
 ```
 
+## Tuchdiagnose
+
+```bash
+cargo demo cloth_diagnostics
+```
+
+Das Fenster startet pausiert und zeigt das Tuch zusammen mit Verlaufskurven
+für Energie, linearen Impuls, Drehimpuls um den Schwerpunkt sowie maximale
+und mittlere quadratische relative Constraint-Abweichung (RMS).
+Zusätzlich erscheinen absolute Constraint-Verletzung, CCD-Ereignisse,
+Rücksetzungen und die CPU-Zeit des letzten Physikschritts.
+
+| Taste | Aktion |
+|-------|--------|
+| **1** | Gleichförmiger freier Flug |
+| **2** | Freie Rotation, ohne Schwerkraft und Dämpfung |
+| **3** | Hängendes Tuch mit Haltepunkten und Dämpfung |
+| **4** | Fall auf eine Kugel mit Boden und Reibung |
+| **Leertaste** / **N** | Weiter/Pause / genau ein Physikschritt |
+| **S** | Sichtbare Messhistorie nach `cloth_diagnostics.csv` schreiben (überschreibt die Datei) |
+| **Pfeile** / **Bild auf/ab** | Kamera drehen / zoomen |
+
+Die Tasten **1–4** setzen den Versuch einschließlich Zeit und Referenzwerten
+zurück. Das Fenster hält die letzten 1200 Stichproben; die angezeigten
+Änderungen ΔE, Δp und ΔL beziehen sich weiterhin auf den Versuchsbeginn.
+Die CSV ist eine Messdatei, kein ladbarer Simulationszustand; **L** wird hier
+nicht unterstützt.
+
+Ohne Fenster lässt sich ein vollständiger Lauf als eigenständiger,
+interaktiver HTML-Bericht mit zugehöriger CSV-Datei speichern:
+
+```bash
+cargo demo cloth_diagnostics -- --report rotation.html --scenario rotation --frames 600
+cargo demo cloth_diagnostics -- --report hanging.html --scenario hanging --frames 600
+cargo demo cloth_diagnostics -- --report rotation_16.html --scenario rotation --substeps 16 --frames 600
+cargo demo cloth_diagnostics -- --help
+```
+
+Den Bericht direkt im Browser öffnen: Er benötigt keinen Server und keine
+Internetverbindung. Zeitspanne und sichtbare Kurven lassen sich auswählen;
+der Zeiger zeigt die Messwerte an. HTML und CSV enthalten auch den
+Anfangszustand `t=0`. Vorhandene Berichtsdateien werden nicht überschrieben.
+Weitere Berichtsoptionen sind `--dt SEKUNDEN` (Standard 1/60),
+`--iterations N`, `--damping WERT`, `--no-self-collision` und `--no-ccd`.
+Die Szenarien heißen `flight`, `rotation` (Standard), `hanging` und `sphere`.
+Alle Versuche rechnen mit `f32` wie die üblichen Tuchbeispiele.
+
+**Messwerte richtig einordnen:** Impuls und Teilchenenergie erfassen nur
+bewegliche Massen, keine Haltepunkte oder Hindernisse. Die mechanische
+Energie umfasst kinetische, Gravitations- und Federenergie nachgiebiger
+Verbindungen (`C²/(2 compliance)`), jedoch keine Kontaktenergie. Harte oder
+abgeschaltete Bedingungen tragen keine Federenergie bei. Schwerkraft,
+Haltepunkte und Kontakte können Impuls ändern; Dämpfung, Reibung und
+unelastische Kollisionen dürfen Energie abbauen. Abweichungen sind deshalb
+keine automatische Fehlerbewertung. Gemessen wird aus den öffentlich
+sichtbaren, gerundeten Positionen, ohne interne Rundungsreste.
+Relative Abweichungen erfassen Dehn- und Scherverbindungen; der absolute
+Constraint-Fehler berücksichtigt außerdem Biegeverbindungen.
+NaN/Unendlich stoppt die Messung und wird im Bericht gekennzeichnet.
+
+Die allokationsfreie Momentaufnahme steht auch direkt als
+`Cloth::diagnostics()` zur Verfügung. Die Anzeige und Berichte benötigen
+`std`; die Messfunktion selbst bleibt mit `no_std` und `alloc` verwendbar.
+
 ## Beispiele
 
 Die folgenden Beispiele zeigen die Verwendung in einer normalen Rust-Anwendung.
