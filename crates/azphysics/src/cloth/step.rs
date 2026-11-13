@@ -182,7 +182,7 @@ impl<T: RealElementary> Cloth<T> {
     /// Schiebt Teilchen aus einem Hindernis und bremst ihr Gleiten.
     fn collide(&mut self, collider: &Collider<T>) {
         let thickness = self.params.thickness;
-        let slide = (T::ONE - self.params.friction).max(T::ZERO).min(T::ONE);
+        let friction = self.params.friction.max(T::ZERO);
         for index in 0..self.positions.len() {
             if self.inverse_mass[index] <= T::ZERO {
                 continue;
@@ -214,10 +214,19 @@ impl<T: RealElementary> Cloth<T> {
                 continue;
             };
             let lifted = position + normal * depth;
-            // Reibung: den Anteil der Bewegung längs der Oberfläche kürzen.
+            // Reibung nach Coulomb. Die Eindringtiefe steht für die Kraft,
+            // mit der das Teilchen auf die Oberfläche drückt; das Gleiten
+            // längs der Oberfläche darf um höchstens Reibwert mal Tiefe
+            // gekürzt werden. Gleitet das Teilchen weniger weit, haftet es.
+            // Ruhend auf einer Schräge heißt das: Es bleibt liegen, solange
+            // die Steigung kleiner ist als der Reibwert – unabhängig von der
+            // Schrittweite.
             let movement = lifted - self.previous[index];
             let along = movement - normal * movement.dot(normal);
-            self.positions[index] = lifted - along * (T::ONE - slide);
+            let slip = along.norm();
+            let grip = friction * depth;
+            self.positions[index] =
+                if slip <= grip || slip <= T::ZERO { lifted - along } else { lifted - along * (grip / slip) };
         }
     }
 }

@@ -349,6 +349,59 @@ fn hanging_cloth_stays_at_rest<T: RealElementary>(iterations: u32) {
     assert!(cloth.positions().iter().all(|point| point[2] == T::ZERO));
 }
 
+/// Reibung auf einer schiefen Ebene, gegen die Formel aus dem Lehrbuch.
+///
+/// Unter der Grenzsteigung (Steigung kleiner als der Reibwert) bleibt das
+/// Tuch liegen; darüber rutscht es mit `g·(sin α − µ·cos α)`. Die frühere
+/// Reibung bremste das Gleiten nur um einen festen Anteil je Teilschritt:
+/// Nichts haftete, und ein Tuch kroch auch von flachen Hängen.
+fn friction_on_a_slope<T: RealElementary>() {
+    let f = T::from_f64;
+    let slide = |tangent: f64, friction: f64| {
+        let length = (1.0 + tangent * tangent).sqrt();
+        let normal = v::<T>(-tangent / length, 1.0 / length, 0.0);
+        let along = v::<T>(1.0 / length, tangent / length, 0.0);
+        let spacing = f(0.05);
+        let start = normal * f(0.01);
+        let mut cloth: Cloth<T> = Cloth::grid(4, 4, start, along * spacing, v(0.0, 0.0, 0.05), f(0.005));
+        cloth.params =
+            ClothParams { friction: f(friction), damping: T::ZERO, ccd: false, self_collision: false, ..cloth.params };
+        let plane = [Collider::Plane { point: v(0.0, 0.0, 0.0), normal }];
+        for _ in 0..60 {
+            cloth.step(f(1.0 / 60.0), &plane);
+        }
+        // Weg hangabwärts nach einer Sekunde und der erwartete.
+        let moved = -(cloth.positions()[0] - start).dot(along);
+        let acceleration = 9.81 * (tangent - friction) / length;
+        (moved, f(0.5 * acceleration.max(0.0)))
+    };
+    // Flacher als die Grenze: haftet.
+    for tangent in [0.1, 0.28] {
+        let (moved, _) = slide(tangent, 0.3);
+        assert!(moved.abs() < f(1.0e-4), "Steigung {tangent}: um {:?} m gerutscht", moved.to_f64());
+    }
+    // Steiler: rutscht wie berechnet, auch ganz ohne Reibung.
+    for (tangent, friction) in [(0.5, 0.3), (1.0, 0.3), (0.5, 0.0)] {
+        let (moved, expected) = slide(tangent, friction);
+        assert!(
+            (moved - expected).abs() < expected * f(0.01),
+            "Steigung {tangent}, Reibwert {friction}: {:?} statt {:?} m",
+            moved.to_f64(),
+            expected.to_f64()
+        );
+    }
+}
+
+#[test]
+fn friction_f32() {
+    friction_on_a_slope::<f32>();
+}
+
+#[test]
+fn friction_f64() {
+    friction_on_a_slope::<f64>();
+}
+
 #[test]
 fn hanging_rest_f32() {
     // Eins wird auf ein Paar aufgerundet; ein einzelner Durchlauf wäre
