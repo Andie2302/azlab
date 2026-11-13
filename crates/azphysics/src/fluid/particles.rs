@@ -297,19 +297,30 @@ impl<T: RealElementary> ParticleFluid<T> {
             if !grown.contains(point) {
                 continue;
             }
-            // Auf die nächstgelegene Seite hinausschieben.
+            // Auf die nächstgelegene Seite hinausschieben – aber nur auf
+            // eine, die im Becken liegt. Steht das Hindernis auf dem Boden
+            // oder an einer Wand, wäre der kürzeste Weg sonst oft der durch
+            // die Beckenwand hinaus.
             let exits = [
                 (point[0] - grown.min[0], 0, grown.min[0]),
                 (grown.max[0] - point[0], 0, grown.max[0]),
                 (point[1] - grown.min[1], 1, grown.min[1]),
                 (grown.max[1] - point[1], 1, grown.max[1]),
             ];
-            let mut best = exits[0];
+            let inside = |axis: usize, target: T| {
+                target >= self.bounds.min[axis] + margin && target <= self.bounds.max[axis] - margin
+            };
+            let mut best: Option<(T, usize, T)> = None;
             for exit in exits {
-                if exit.0 < best.0 {
-                    best = exit;
+                if inside(exit.1, exit.2) && best.is_none_or(|chosen| exit.0 < chosen.0) {
+                    best = Some(exit);
                 }
             }
+            // Füllt das Hindernis das Becken in beiden Richtungen aus, gibt
+            // es keinen Ausweg; dann bleibt das Teilchen, wo es ist.
+            let Some(best) = best else {
+                continue;
+            };
             point[best.1] = best.2;
         }
         point
