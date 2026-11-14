@@ -28,6 +28,7 @@ Regeln:
 | `libm` (Standard) | reicht `azmath/libm` durch | |
 | `std` | reicht `azmath/std` durch; schaltet `alloc` mit ein | nötig für die Beispiele |
 | `alloc` | `broadphase`, `cloth`, `fluid` | |
+| `parallel` | Kollisionssuche des Gewebes auf mehreren Kernen; schaltet `std` mit ein | Ergebnis bitgleich mit dem ohne dieses Feature |
 
 azviz hat keine Feature-Schalter und braucht `std`.
 
@@ -40,8 +41,9 @@ azviz hat keine Feature-Schalter und braucht `std`.
 | `macroquad` 0.4 | Fenster für die Beispiele | nur azviz; ohne Standard-Features (kein Ton) |
 | `tiny-skia` 0.11 | Zeichnen in den Speicher, PNG | nur azviz |
 | `gif` 0.13 | Animationen als GIF | nur azviz |
+| `rayon` 1 | Arbeit auf mehrere Kerne verteilen | azphysics, optional, nur mit Feature `parallel` |
 
-azmath und azphysics selbst hängen nur von `libm` ab; azviz ist für
+azmath und azphysics hängen ohne Zusatz-Features nur von `libm` ab; azviz ist für
 azphysics eine reine Entwicklungs-Abhängigkeit (Beispiele). Jede neue Abhängigkeit wird zuerst hier eingetragen, ist
 optional, `no_std`-fähig und wird zentral unter `[workspace.dependencies]`
 versioniert. Keine Abhängigkeit auf `num-traits`, `nalgebra` o. Ä.: die

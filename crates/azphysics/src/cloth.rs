@@ -25,6 +25,7 @@
 mod collide;
 mod diagnostics;
 mod model;
+mod par;
 mod step;
 
 #[cfg(all(test, any(feature = "std", feature = "libm")))]

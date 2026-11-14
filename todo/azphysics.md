@@ -53,6 +53,31 @@ Richtung nur von Teilschritt zu Teilschritt genügt nicht.
 
 Test: `cloth::tests::hanging_cloth_stays_at_rest`.
 
+### Richtung der Korrektur und Drehimpuls
+
+Jede Verbindung wird entlang der Richtung korrigiert, die sie am Anfang des
+Teilschritts hatte – wie beim SHAKE-Verfahren der Molekulardynamik –, nicht
+entlang ihrer aktuellen. Beide Teilchen bekommen gleich große,
+entgegengesetzte Stöße entlang ihrer alten Verbindungslinie; deren
+Drehmomente heben sich genau auf. Der Drehimpuls, gemessen als Summe aus
+Lage kreuz Impuls, bleibt dadurch bis auf Rundung erhalten.
+
+Entlang der aktuellen Richtung korrigiert, dreht sich ein rotierendes Tuch
+in jedem Teilschritt etwas zu wenig weiter. Ohne jede Dämpfung verlor es so
+bei 3 rad/s knapp 2 % Drehimpuls und knapp 4 % Energie je Sekunde,
+proportional zur Schrittweite.
+
+Hat sich eine Verbindung im Teilschritt um mehr als 60° gedreht, taugt die
+alte Richtung nicht mehr; dann gilt die aktuelle.
+
+Bei Drehung um die Tuchnormale bleibt auch die Energie erhalten. Taumelt das
+Tuch um eine andere Achse, sinkt sie weiter, bis es flach um seine Normale
+dreht: Das Tuch ist nicht starr, sein Verformen beim Taumeln wird gedämpft,
+und bei festem Drehimpuls ist die Drehung um die Achse größter Trägheit der
+Zustand kleinster Energie. Der Drehimpuls bleibt dabei erhalten.
+
+Test: `cloth::tests::rotation_keeps_angular_momentum`.
+
 ### Reibung
 
 Coulomb, an Ebene, Kugel, Dreiecken und zwischen Tuchlagen: Die Strecke, um
@@ -78,10 +103,6 @@ Gemessen, kein Fehler, aber gut zu wissen:
   (8 Teilschritte, 2 Durchläufe). Doppelt so viele Teilschritte halbieren
   das etwa; mehr Durchläufe helfen weniger. Beim Aufprall sind kurzzeitig
   30 bis 40 % möglich.
-- **Drehung wird gebremst.** Ein frei rotierendes Tuch verliert Drehimpuls,
-  bei 3 rad/s und 8 Teilschritten 1,8 % je Sekunde. Der Verlust ist
-  proportional zur Schrittweite und unabhängig von Durchläufen und
-  Auflösung; Impuls und Schwerpunkt bleiben exakt.
 - **Symmetrie.** Ein mittig auf die Kugel fallendes Tuch bleibt nicht
   spiegelbildlich: Die Reihenfolge der Korrekturen bricht die Symmetrie, und
   Falten verstärken kleine Unterschiede. Eine bevorzugte Richtung gibt es
@@ -184,6 +205,17 @@ Verbindungen (13 ms), Sicherung (11 ms) und Abstoßung (10 ms). Der
 Sicherheitsabstand von einem Viertel der Maschenweite ist der gemessene
 Bestwert; größer heißt seltener bauen, aber mehr Paare je Teilschritt.
 `StepStats::proximity_rebuilds` zählt die Neubauten.
+
+Mit dem Feature `parallel` (rayon) laufen auf mehreren Kernen: die Suche
+beim Listenbau, die Erkennung der Sicherung und die Erkennung der
+Abstoßung. Erkannt wird jeweils gegen einen festen Stand, behoben danach der
+Reihe nach; so ist das Ergebnis mit und ohne Feature bitgleich. Auf vier
+Kernen: 68 × 68 Teilchen 81 → 49 ms je Bild, `cloth_fold` 15 → 12 ms,
+`cloth_drape` 12 → 10 ms. Die Verbindungen (18 ms bei 68 × 68) laufen
+weiter auf einem Kern, weil sie der Reihe nach gelöst werden.
+
+Die Korrektur entlang der alten Verbindungsrichtung kostet in den
+Verbindungen etwa 40 % mehr Zeit als die frühere Fassung.
 
 Nicht bewährt: die Teilchen statt der Dreiecke ins Gitter zu sortieren. Die
 Zahl der Kandidaten sinkt, die Gesamtzeit nicht, und die Abstoßung wird

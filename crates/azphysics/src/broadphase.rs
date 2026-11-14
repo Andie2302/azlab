@@ -30,6 +30,8 @@ pub struct SpatialHash<T> {
     /// Je Kennnummer die Anfrage, in der sie zuletzt gemeldet wurde.
     seen: Vec<u32>,
     query: u32,
+    /// Eins mehr als die größte Kennnummer.
+    ids: usize,
 }
 
 impl<T: RealElementary> SpatialHash<T> {
@@ -46,6 +48,7 @@ impl<T: RealElementary> SpatialHash<T> {
             large: Vec::new(),
             seen: Vec::new(),
             query: 0,
+            ids: 0,
         };
         // Erst alle Einträge (Zellschlüssel, Kennnummer) sammeln, dann nach
         // Fächern ordnen: Zählsortierung, ohne Vergleiche.
@@ -84,6 +87,7 @@ impl<T: RealElementary> SpatialHash<T> {
             *slot += 1;
         }
         hash.seen.resize(ids, 0);
+        hash.ids = ids;
         hash
     }
 
@@ -109,22 +113,37 @@ impl<T: RealElementary> SpatialHash<T> {
     /// `bounds` berühren könnte; jede einmal, in keiner bestimmten
     /// Reihenfolge.
     pub fn query(&mut self, bounds: Aabb<T, 3>, out: &mut Vec<usize>) {
+        let mut scratch = QueryScratch { seen: core::mem::take(&mut self.seen), query: self.query };
+        self.query_with(&mut scratch, bounds, out);
+        self.seen = scratch.seen;
+        self.query = scratch.query;
+    }
+
+    /// Wie [`query`](Self::query), aber ohne das Gitter zu verändern: Was
+    /// die Suche sich merken muss, steht in `scratch`. So können mehrere
+    /// Suchen zugleich laufen, jede mit ihrem eigenen Merkzettel. Die
+    /// Reihenfolge der Ergebnisse hängt nur vom Gitter und von `bounds` ab.
+    pub fn query_with(&self, scratch: &mut QueryScratch, bounds: Aabb<T, 3>, out: &mut Vec<usize>) {
         out.clear();
         out.extend_from_slice(&self.large);
-        // Neue Anfragenummer; beim Überlauf die Merkliste leeren.
-        self.query = self.query.wrapping_add(1);
-        if self.query == 0 {
-            self.seen.fill(0);
-            self.query = 1;
+        if scratch.seen.len() < self.ids {
+            scratch.seen.resize(self.ids, 0);
         }
+        // Neue Anfragenummer; beim Überlauf die Merkliste leeren.
+        scratch.query = scratch.query.wrapping_add(1);
+        if scratch.query == 0 {
+            scratch.seen.fill(0);
+            scratch.query = 1;
+        }
+        let (seen, query) = (&mut scratch.seen, scratch.query);
         let buckets = self.starts.len() - 1;
         let range = match self.cells(bounds) {
             Some(range) => range,
             // Riesiger Suchbereich: alles melden.
             None => {
                 for &id in &self.items {
-                    if self.seen[id] != self.query {
-                        self.seen[id] = self.query;
+                    if seen[id] != query {
+                        seen[id] = query;
                         out.push(id);
                     }
                 }
@@ -139,8 +158,8 @@ impl<T: RealElementary> SpatialHash<T> {
                     let bucket = wanted as usize & (buckets - 1);
                     for slot in self.starts[bucket]..self.starts[bucket + 1] {
                         let id = self.items[slot];
-                        if self.keys[slot] == wanted && self.seen[id] != self.query {
-                            self.seen[id] = self.query;
+                        if self.keys[slot] == wanted && seen[id] != query {
+                            seen[id] = query;
                             out.push(id);
                         }
                     }
@@ -148,6 +167,15 @@ impl<T: RealElementary> SpatialHash<T> {
             }
         }
     }
+}
+
+/// Merkzettel einer Suche im [`SpatialHash`]: welche Kennnummern die
+/// laufende Anfrage schon gemeldet hat. Für [`SpatialHash::query_with`];
+/// ein leerer Merkzettel genügt als Anfang.
+#[derive(Clone, Debug, Default)]
+pub struct QueryScratch {
+    seen: Vec<u32>,
+    query: u32,
 }
 
 /// Schlüssel einer Zelle. Verschiedene Zellen können denselben Schlüssel

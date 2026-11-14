@@ -15,9 +15,13 @@ libm = ["azmath/libm"]
 std = ["azmath/std", "alloc"]
 # Simulationen mit eigenem Speicher: Gewebe, Strömung, Suchstruktur.
 alloc = ["azmath/alloc"]
+# Verteilt die Kollisionssuche des Gewebes auf mehrere Prozessorkerne. Das
+# Ergebnis ist bitgleich mit dem ohne dieses Feature.
+parallel = ["std", "dep:rayon"]
 
 [dependencies]
 azmath = { workspace = true }
+rayon = { workspace = true, optional = true }
 
 [dev-dependencies]
 azviz = { path = "../azviz", version = "=0.1.1" }

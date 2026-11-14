@@ -334,6 +334,14 @@ Simulationen verwalten viele Teilchen und stehen deshalb hinter dem Feature
 | `cloth` | Gewebe mit XPBD, Hindernissen, Selbstkollision und Sicherung gegen Durchdringung | `alloc` |
 | `fluid` | Navier-Stokes auf dem Gitter (Rauch, Umströmung) und Flüssigkeit aus Teilchen | `alloc` |
 
+Mit dem Feature `parallel` verteilt das Gewebe seine Kollisionssuche über
+[rayon](https://crates.io/crates/rayon) auf mehrere Prozessorkerne. Das
+Ergebnis ist bitgleich mit dem ohne dieses Feature; es braucht `std`:
+
+```bash
+cargo run --release -p azphysics --features parallel --example cloth_drape
+```
+
 ### Gewebe ohne Durchdringung
 
 Das Tuch besteht aus Teilchen mit Abstandsbedingungen (XPBD). Gegen

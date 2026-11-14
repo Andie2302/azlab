@@ -2,7 +2,8 @@
 //! Durchdringung.
 
 use super::model::{Cloth, StepStats, StepPhase};
-use crate::broadphase::SpatialHash;
+use super::par::gather;
+use crate::broadphase::{QueryScratch, SpatialHash};
 use crate::ccd::{Contact, edge_edge, vertex_triangle};
 use crate::geometry::{
     Aabb, Vec3, closest_point_on_triangle, point_triangle_distance, segment_intersects_triangle,
@@ -18,7 +19,7 @@ const MAX_PASSES: usize = 8;
 /// heißt seltener neu bauen, aber mehr Paare in jedem Teilschritt.
 const SLACK: f64 = 0.25;
 
-impl<T: RealElementary> Cloth<T> {
+impl<T: RealElementary + Send + Sync> Cloth<T> {
     /// Kantenlänge der Suchzellen: etwa eine Maschenweite.
     fn cell_size(&self) -> T {
         let (sum, count) = self.links.iter().filter(|link| !link.bend).fold(
@@ -114,22 +115,25 @@ impl<T: RealElementary> Cloth<T> {
         // Zellen so groß wie die Quader, die hineinsortiert werden: Jeder
         // fällt dann in wenige Zellen. Kleinere Zellen vervielfachen die
         // Einträge und machen den Bau um ein Vielfaches teurer.
-        let mut hash = SpatialHash::build(mesh + reach * two, triangle_boxes.iter().copied().enumerate());
-        let mut candidates = Vec::new();
-        near.vertex_triangle.clear();
-        for vertex in 0..self.positions.len() {
-            let bounds = hull(&[vertex], slack);
-            hash.query(bounds, &mut candidates);
-            for &id in &candidates {
-                let triangle = self.triangles[id];
-                if !triangle.contains(&vertex)
-                    && triangle_boxes[id].overlaps(bounds)
-                    && !(self.all_fixed(&[vertex]) && self.all_fixed(&triangle))
-                {
-                    near.vertex_triangle.push((vertex, id));
+        let hash = SpatialHash::build(mesh + reach * two, triangle_boxes.iter().copied().enumerate());
+        // Die Suche je Teilchen ist unabhängig von der der anderen und
+        // lässt sich auf mehrere Kerne verteilen.
+        near.vertex_triangle = gather(self.positions.len(), |vertices, found| {
+            let (mut scratch, mut candidates) = (QueryScratch::default(), Vec::new());
+            for vertex in vertices {
+                let bounds = hull(&[vertex], slack);
+                hash.query_with(&mut scratch, bounds, &mut candidates);
+                for &id in &candidates {
+                    let triangle = self.triangles[id];
+                    if !triangle.contains(&vertex)
+                        && triangle_boxes[id].overlaps(bounds)
+                        && !(self.all_fixed(&[vertex]) && self.all_fixed(&triangle))
+                    {
+                        found.push((vertex, id));
+                    }
                 }
             }
-        }
+        });
 
         // Kante gegen Kante: nur von der Sicherung gebraucht, deshalb mit
         // der kleineren Reichweite. Beide Kanten bekommen die halbe
@@ -137,33 +141,48 @@ impl<T: RealElementary> Cloth<T> {
         // und jedes Paar wird nur einmal betrachtet.
         let reach = slack + self.ccd_tolerance() * T::from_f64(0.5);
         let edge_boxes: Vec<Aabb<T, 3>> = self.edges.iter().map(|edge| hull(edge, reach)).collect();
-        let mut hash = SpatialHash::build(mesh + reach * two, edge_boxes.iter().copied().enumerate());
-        near.edge_edge.clear();
-        for first in 0..self.edges.len() {
-            let [a, b] = self.edges[first];
-            hash.query(edge_boxes[first], &mut candidates);
-            for &second in &candidates {
-                let [c, d] = self.edges[second];
-                // Kanten mit gemeinsamem Teilchen können sich nicht
-                // durchdringen.
-                if second > first
-                    && a != c
-                    && a != d
-                    && b != c
-                    && b != d
-                    && edge_boxes[first].overlaps(edge_boxes[second])
-                    && !self.all_fixed(&[a, b, c, d])
-                {
-                    near.edge_edge.push((first, second));
+        let hash = SpatialHash::build(mesh + reach * two, edge_boxes.iter().copied().enumerate());
+        near.edge_edge = gather(self.edges.len(), |edges, found| {
+            let (mut scratch, mut candidates) = (QueryScratch::default(), Vec::new());
+            for first in edges {
+                let [a, b] = self.edges[first];
+                hash.query_with(&mut scratch, edge_boxes[first], &mut candidates);
+                for &second in &candidates {
+                    let [c, d] = self.edges[second];
+                    // Kanten mit gemeinsamem Teilchen können sich nicht
+                    // durchdringen.
+                    if second > first
+                        && a != c
+                        && a != d
+                        && b != c
+                        && b != d
+                        && edge_boxes[first].overlaps(edge_boxes[second])
+                        && !self.all_fixed(&[a, b, c, d])
+                    {
+                        found.push((first, second));
+                    }
                 }
             }
-        }
+        });
         stats.proximity_rebuilds += 1;
         near.slack = slack;
         near.thickness = thickness;
         near.all_movable = self.inverse_mass.iter().all(|&inverse| inverse > T::ZERO);
         near.valid = true;
         self.proximity = near;
+    }
+
+    /// `true`, wenn das Teilchen dem Dreieck näher ist als `distance`.
+    fn closer_than(&self, vertex: usize, id: usize, distance: T) -> bool {
+        let [a, b, c] = self.triangles[id].map(|index| self.positions[index]);
+        let point = self.positions[vertex];
+        // Schnelle Vorprüfung: außerhalb des Hüllquaders ist das Teilchen
+        // weiter weg.
+        let inside = (0..3).all(|axis| {
+            let (low, high) = (a[axis].min(b[axis]).min(c[axis]), a[axis].max(b[axis]).max(c[axis]));
+            point[axis] >= low - distance && point[axis] <= high + distance
+        });
+        inside && (point - closest_point_on_triangle(point, a, b, c).0).norm() < distance
     }
 
     /// Schiebt Teilchen und Dreiecke auseinander, die sich näher kommen als
@@ -173,22 +192,24 @@ impl<T: RealElementary> Cloth<T> {
         self.refresh_proximity(stats);
         observe(StepPhase::Proximity);
         let near = core::mem::take(&mut self.proximity);
-        for &(vertex, id) in &near.vertex_triangle {
+        // Erkennen: welche Paare sind sich zu Beginn näher als die Dicke?
+        // Das ändert nichts und lässt sich auf mehrere Kerne verteilen;
+        // meist sind es wenige.
+        let close = gather(near.vertex_triangle.len(), |pairs, found| {
+            for pair in pairs {
+                let (vertex, id) = near.vertex_triangle[pair];
+                if self.closer_than(vertex, id, thickness) {
+                    found.push(pair);
+                }
+            }
+        });
+        // Auseinanderschieben: der Reihe nach, jedes Paar gegen den
+        // aktuellen Stand. Was dabei erst zu nahe gerät, ist im nächsten
+        // Teilschritt an der Reihe.
+        for pair in close {
+            let (vertex, id) = near.vertex_triangle[pair];
             let [a, b, c] = self.triangles[id];
             let point = self.positions[vertex];
-            // Schnelle Vorprüfung: außerhalb des Hüllquaders ist das
-            // Teilchen weiter weg als die Dicke.
-            let bounds = Aabb {
-                min: self.positions[a].zip_map(self.positions[b], |x, y| x.min(y)),
-                max: self.positions[a].zip_map(self.positions[b], |x, y| x.max(y)),
-            };
-            let bounds = Aabb {
-                min: bounds.min.zip_map(self.positions[c], |x, y| x.min(y)),
-                max: bounds.max.zip_map(self.positions[c], |x, y| x.max(y)),
-            };
-            if !bounds.expanded(thickness).contains(point) {
-                continue;
-            }
             let (closest, weights) =
                 closest_point_on_triangle(point, self.positions[a], self.positions[b], self.positions[c]);
             let offset = point - closest;
@@ -295,6 +316,25 @@ impl<T: RealElementary> Cloth<T> {
         [self.previous[index], self.positions[index]]
     }
 
+    /// Prüft die Bewegung eines Teilchens gegen die eines Dreiecks.
+    fn vertex_contact(&self, vertex: usize, id: usize, tolerance: T) -> Contact<T> {
+        let [a, b, c] = self.triangles[id];
+        if [vertex, a, b, c].iter().all(|&i| self.positions[i] == self.previous[i]) {
+            // Nichts bewegt sich: keine neue Berührung.
+            return Contact::Free;
+        }
+        vertex_triangle(self.motion(vertex), self.motion(a), self.motion(b), self.motion(c), tolerance)
+    }
+
+    /// Prüft die Bewegungen zweier Kanten gegeneinander.
+    fn edge_contact(&self, first: usize, second: usize, tolerance: T) -> Contact<T> {
+        let ([a, b], [c, d]) = (self.edges[first], self.edges[second]);
+        if [a, b, c, d].iter().all(|&i| self.positions[i] == self.previous[i]) {
+            return Contact::Free;
+        }
+        edge_edge(self.motion(a), self.motion(b), self.motion(c), self.motion(d), tolerance)
+    }
+
     /// Sicherung gegen Durchdringung.
     ///
     /// Prüft jede Bewegung Punkt gegen Dreieck und Kante gegen Kante. Wo
@@ -324,53 +364,62 @@ impl<T: RealElementary> Cloth<T> {
             // Erst behutsam kürzen, in späteren Durchläufen hart
             // zurücksetzen: Das kommt sicher zur Ruhe.
             let gentle = pass < MAX_PASSES / 2;
-            let mut clean = true;
-            for &(vertex, id) in &near.vertex_triangle {
-                if !triangle_boxes[id].overlaps(paths[vertex]) {
-                    continue;
+            // Erkennen: alle Paare gegen den Stand zu Beginn des Durchlaufs
+            // prüfen. Das ändert nichts und lässt sich auf mehrere Kerne
+            // verteilen; meist findet es nichts.
+            let touching_triangles = gather(near.vertex_triangle.len(), |pairs, found| {
+                for pair in pairs {
+                    let (vertex, id) = near.vertex_triangle[pair];
+                    if triangle_boxes[id].overlaps(paths[vertex]) && !self.vertex_contact(vertex, id, tolerance).is_free() {
+                        found.push(pair);
+                    }
                 }
-                let [a, b, c] = self.triangles[id];
-                let involved = [vertex, a, b, c];
-                if involved.iter().all(|&i| self.positions[i] == self.previous[i]) {
-                    continue;
+            });
+            let touching_edges = gather(near.edge_edge.len(), |pairs, found| {
+                for pair in pairs {
+                    let (first, second) = near.edge_edge[pair];
+                    if edge_boxes[first].overlaps(edge_boxes[second])
+                        && !self.edge_contact(first, second, tolerance).is_free()
+                    {
+                        found.push(pair);
+                    }
                 }
-                let hit =
-                    vertex_triangle(self.motion(vertex), self.motion(a), self.motion(b), self.motion(c), tolerance);
+            });
+            if touching_triangles.is_empty() && touching_edges.is_empty() {
+                settled = true;
+                break;
+            }
+            // Beheben: der Reihe nach. Jede Kürzung ändert die Bewegung der
+            // Nachbarn, deshalb wird jedes gemeldete Paar hier noch einmal
+            // gegen den aktuellen Stand geprüft. Was eine Kürzung an neuen
+            // Berührungen auslöst, findet der nächste Durchlauf.
+            for pair in touching_triangles {
+                let (vertex, id) = near.vertex_triangle[pair];
+                let hit = self.vertex_contact(vertex, id, tolerance);
                 // Unentschieden zählt wie eine Berührung: Die Bewegung endet
                 // vor dem Zeitpunkt, bis zu dem sie nachweislich frei ist.
                 if let Some(contact) = hit.safe_until() {
-                    self.retreat(&involved, contact, tolerance, gentle, |cloth| {
+                    let [a, b, c] = self.triangles[id];
+                    self.retreat(&[vertex, a, b, c], contact, tolerance, gentle, |cloth| {
                         let at = |index: usize| cloth.positions[index];
                         point_triangle_distance(at(vertex), at(a), at(b), at(c))
                     });
                     stats.ccd_hits += 1;
                     stats.ccd_undecided += u32::from(matches!(hit, Contact::Undecided(_)));
-                    clean = false;
                 }
             }
-            for &(first, second) in &near.edge_edge {
-                if !edge_boxes[first].overlaps(edge_boxes[second]) {
-                    continue;
-                }
-                let ([a, b], [c, d]) = (self.edges[first], self.edges[second]);
-                let involved = [a, b, c, d];
-                if involved.iter().all(|&i| self.positions[i] == self.previous[i]) {
-                    continue;
-                }
-                let hit = edge_edge(self.motion(a), self.motion(b), self.motion(c), self.motion(d), tolerance);
+            for pair in touching_edges {
+                let (first, second) = near.edge_edge[pair];
+                let hit = self.edge_contact(first, second, tolerance);
                 if let Some(contact) = hit.safe_until() {
-                    self.retreat(&involved, contact, tolerance, gentle, |cloth| {
+                    let ([a, b], [c, d]) = (self.edges[first], self.edges[second]);
+                    self.retreat(&[a, b, c, d], contact, tolerance, gentle, |cloth| {
                         let at = |index: usize| cloth.positions[index];
                         segment_segment_distance(at(a), at(b), at(c), at(d))
                     });
                     stats.ccd_hits += 1;
                     stats.ccd_undecided += u32::from(matches!(hit, Contact::Undecided(_)));
-                    clean = false;
                 }
-            }
-            if clean {
-                settled = true;
-                break;
             }
         }
         self.proximity = near;

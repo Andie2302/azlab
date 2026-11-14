@@ -190,6 +190,9 @@ pub struct Cloth<T> {
     pub(super) predicted_carry: Vec<Vec3<T>>,
     /// Rest zur Lage am Anfang des Teilschritts.
     pub(super) previous_carry: Vec<Vec3<T>>,
+    /// Je Verbindung ihre Richtung am Anfang des Teilschritts (Länge eins);
+    /// null, wenn die beiden Teilchen aufeinanderliegen.
+    pub(super) link_directions: Vec<Vec3<T>>,
     /// Teilchen, die die Sicherung im laufenden Teilschritt an dessen Anfang
     /// zurückgesetzt hat.
     pub(super) halted: Vec<bool>,
@@ -273,6 +276,7 @@ impl<T: RealElementary> Cloth<T> {
             predicted: Vec::new(),
             predicted_carry: Vec::new(),
             previous_carry: Vec::new(),
+            link_directions: Vec::new(),
             halted: Vec::new(),
             columns,
             params: ClothParams::default(),

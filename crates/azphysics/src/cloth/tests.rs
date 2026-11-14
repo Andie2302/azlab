@@ -5,17 +5,17 @@ use super::{Cloth, ClothParams, Collider};
 use azmath::Vector;
 use azmath::scalar::RealElementary;
 
-fn v<T: RealElementary>(x: f64, y: f64, z: f64) -> Vector<T, 3> {
+fn v<T: RealElementary + Send + Sync>(x: f64, y: f64, z: f64) -> Vector<T, 3> {
     Vector([T::from_f64(x), T::from_f64(y), T::from_f64(z)])
 }
 
 /// Tuch in der Ebene y = `height`, 1 m × 1 m, `n × n` Teilchen.
-fn sheet<T: RealElementary>(n: usize, height: f64) -> Cloth<T> {
+fn sheet<T: RealElementary + Send + Sync>(n: usize, height: f64) -> Cloth<T> {
     let spacing = 1.0 / (n - 1) as f64;
     Cloth::grid(n, n, v(-0.5, height, -0.5), v(spacing, 0.0, 0.0), v(0.0, 0.0, spacing), T::from_f64(0.01))
 }
 
-fn hanging<T: RealElementary>() {
+fn hanging<T: RealElementary + Send + Sync>() {
     let f = T::from_f64;
     // An der oberen Kante aufgehängt, hängt senkrecht nach unten.
     let n = 9;
@@ -44,7 +44,7 @@ fn hanging<T: RealElementary>() {
     assert_eq!(cloth.intersections(), 0);
 }
 
-fn drape<T: RealElementary>() {
+fn drape<T: RealElementary + Send + Sync>() {
     let f = T::from_f64;
     // Tuch fällt auf eine Kugel über dem Boden.
     let mut cloth = sheet::<T>(11, 1.0);
@@ -74,7 +74,7 @@ fn drape<T: RealElementary>() {
 /// Kern der Sache: Ein Tuch wird mit sehr hoher Geschwindigkeit auf ein
 /// dünnes Hindernis geschossen. Je Teilschritt legt es ein Vielfaches seiner
 /// Dicke zurück.
-fn tunnelling<T: RealElementary>() {
+fn tunnelling<T: RealElementary + Send + Sync>() {
     let f = T::from_f64;
     let launch = |ccd: bool| {
         let mut cloth = sheet::<T>(5, 0.5);
@@ -124,7 +124,7 @@ fn tunnelling<T: RealElementary>() {
 
 /// Das Tuch wird in sich selbst gefaltet: eine Hälfte fliegt schnell durch
 /// die Ebene der anderen.
-fn folding<T: RealElementary>() {
+fn folding<T: RealElementary + Send + Sync>() {
     let f = T::from_f64;
     let n = 9;
     let mut cloth = sheet::<T>(n, 0.5);
@@ -150,7 +150,7 @@ fn folding<T: RealElementary>() {
     let _ = hits;
 }
 
-fn editing<T: RealElementary>() {
+fn editing<T: RealElementary + Send + Sync>() {
     let f = T::from_f64;
     let mut cloth = sheet::<T>(3, 1.0);
     // Zu kleine Gitter werden auf 2 × 2 angehoben.
@@ -241,7 +241,7 @@ fn motion_restore_validates_before_modifying() {
 /// darf bei null Iterationen keine versteckte Mindestiteration ausführen.
 /// Jedes freie Teilchen behält seine Geschwindigkeit bitgenau und liegt bis
 /// auf Rundung bei Anfangslage plus Geschwindigkeit mal Zeit.
-fn zero_iterations_preserves_free_particle_path<T: RealElementary>() {
+fn zero_iterations_preserves_free_particle_path<T: RealElementary + Send + Sync>() {
     let mut cloth = sheet::<T>(3, 0.0);
     cloth.params.iterations = 0;
     cloth.params.ccd = false;
@@ -275,7 +275,7 @@ fn zero_iterations_preserves_free_particle_path<T: RealElementary>() {
 /// Verbindungen verteilten Stöße in Rastergröße. Das Tuch trieb stetig ab –
 /// in jeder Richtung, in der es sich bewegte, und umso stärker, je weiter
 /// es vom Ursprung entfernt war.
-fn free_flight_does_not_drift<T: RealElementary>() {
+fn free_flight_does_not_drift<T: RealElementary + Send + Sync>() {
     let f = T::from_f64;
     let n = 8;
     let spacing = 1.0 / (n - 1) as f64;
@@ -315,7 +315,7 @@ fn free_flight_does_not_drift<T: RealElementary>() {
 /// mehrere Meter je Sekunde, dann faltete es sich in der eigenen Ebene
 /// zusammen (Dehnungen über 60 %) oder lief bis zum Überlauf davon. Mit 12
 /// Teilchen je Kante trat das nicht auf, ab 24 mit den Standardwerten immer.
-fn hanging_cloth_stays_at_rest<T: RealElementary>(iterations: u32) {
+fn hanging_cloth_stays_at_rest<T: RealElementary + Send + Sync>(iterations: u32) {
     let f = T::from_f64;
     let n = 24;
     let spacing = 1.0 / (n - 1) as f64;
@@ -355,7 +355,7 @@ fn hanging_cloth_stays_at_rest<T: RealElementary>(iterations: u32) {
 /// Tuch liegen; darüber rutscht es mit `g·(sin α − µ·cos α)`. Die frühere
 /// Reibung bremste das Gleiten nur um einen festen Anteil je Teilschritt:
 /// Nichts haftete, und ein Tuch kroch auch von flachen Hängen.
-fn friction_on_a_slope<T: RealElementary>() {
+fn friction_on_a_slope<T: RealElementary + Send + Sync>() {
     let f = T::from_f64;
     let slide = |tangent: f64, friction: f64| {
         let length = (1.0 + tangent * tangent).sqrt();
@@ -395,7 +395,7 @@ fn friction_on_a_slope<T: RealElementary>() {
 /// Dasselbe auf einer geneigten Platte aus Dreiecken: Unter der
 /// Grenzsteigung bleibt das Tuch liegen, darüber rutscht es. Früher gab es
 /// an Dreiecken und zwischen Tuchlagen gar keine Reibung.
-fn friction_on_triangles<T: RealElementary>() {
+fn friction_on_triangles<T: RealElementary + Send + Sync>() {
     let f = T::from_f64;
     let slide = |tangent: f64| {
         let length = (1.0 + tangent * tangent).sqrt();
@@ -473,7 +473,7 @@ fn hanging_rest_f64() {
 
 /// Schwerpunktsgeschwindigkeit, Drehimpuls um den Schwerpunkt und
 /// Bewegungsenergie gegenüber dem Schwerpunkt, je Masseneinheit.
-fn rotation_state<T: RealElementary>(cloth: &Cloth<T>) -> (Vector<T, 3>, Vector<T, 3>, T) {
+fn rotation_state<T: RealElementary + Send + Sync>(cloth: &Cloth<T>) -> (Vector<T, 3>, Vector<T, 3>, T) {
     let share = T::from_f64(cloth.positions().len() as f64).recip();
     let centre = cloth.positions().iter().fold(Vector::ZERO, |sum, &point| sum + point) * share;
     let drift = cloth.velocities().iter().fold(Vector::ZERO, |sum, &velocity| sum + velocity) * share;
@@ -493,7 +493,7 @@ fn rotation_state<T: RealElementary>(cloth: &Cloth<T>) -> (Vector<T, 3>, Vector<
 /// etwas zu wenig weiter und verlor bei 3 rad/s knapp 2 % Drehimpuls je
 /// Sekunde, ohne jede Dämpfung. Entlang der Richtung vom Anfang des
 /// Teilschritts heben sich die Drehmomente jedes Paars genau auf.
-fn rotation_keeps_angular_momentum<T: RealElementary>(axis: [f64; 3], exact: f64) {
+fn rotation_keeps_angular_momentum<T: RealElementary + Send + Sync>(axis: [f64; 3], exact: f64) {
     let f = T::from_f64;
     let n = 10;
     let spacing = 1.0 / (n - 1) as f64;

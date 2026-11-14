@@ -22,7 +22,7 @@ fn shift<T: RealElementary>(position: &mut Vec3<T>, carry: &mut Vec3<T>, amount:
     *position = end;
 }
 
-impl<T: RealElementary> Cloth<T> {
+impl<T: RealElementary + Send + Sync> Cloth<T> {
     /// Rechnet die Simulation um `dt` Sekunden weiter.
     ///
     /// Der Schritt wird in `params.substeps` Teilschritte zerlegt. Für eine
@@ -82,6 +82,16 @@ impl<T: RealElementary> Cloth<T> {
 
         // 2. Abstandsbedingungen (XPBD).
         self.lambdas.fill(T::ZERO);
+        // Die Richtung jeder Verbindung am Anfang des Teilschritts; alle
+        // Durchläufe korrigieren entlang dieser Richtung.
+        if self.params.iterations > 0 {
+            self.link_directions.clear();
+            self.link_directions.extend(self.links.iter().map(|link| {
+                let before = (self.previous[link.i] - self.previous[link.j])
+                    + (self.previous_carry[link.i] - self.previous_carry[link.j]);
+                before.normalize().unwrap_or(Vector::ZERO)
+            }));
+        }
         // Die Durchläufe gehen abwechselnd vorwärts und rückwärts durch die
         // Verbindungen, immer paarweise. Läuft man stets in derselben
         // Richtung, ist die Korrektur als Ganzes unsymmetrisch: Sie dreht
@@ -185,16 +195,13 @@ impl<T: RealElementary> Cloth<T> {
             // bleibt erhalten. Entlang der aktuellen Linie korrigiert, dreht
             // sich ein rotierendes Tuch in jedem Teilschritt etwas zu wenig
             // weiter und wird stetig langsamer.
-            let before = (self.previous[link.i] - self.previous[link.j])
-                + (self.previous_carry[link.i] - self.previous_carry[link.j]);
             let current = delta / length;
-            let (direction, along) = match before.normalize() {
-                // Anteil der Korrektur, der die Länge ändert. Hat sich die
-                // Verbindung im Teilschritt um mehr als 60° gedreht, taugt
-                // die alte Richtung nicht mehr.
-                Some(old) if old.dot(current) > T::from_f64(0.5) => (old, old.dot(current)),
-                _ => (current, T::ONE),
-            };
+            let old = self.link_directions[index];
+            // Anteil der Korrektur, der die Länge ändert. Hat sich die
+            // Verbindung im Teilschritt um mehr als 60° gedreht (oder lagen
+            // die Teilchen aufeinander), taugt die alte Richtung nicht.
+            let along = old.dot(current);
+            let (direction, along) = if along > T::from_f64(0.5) { (old, along) } else { (current, T::ONE) };
             let alpha = compliance * inverse_h2;
             let change = (link.rest - length - alpha * *lambda) / ((wi + wj) * along + alpha);
             *lambda += change;
