@@ -258,6 +258,8 @@ impl<T: RealElementary> Cloth<T> {
     fn roll_back(&mut self, indices: &[usize]) {
         for &index in indices {
             self.positions[index] = self.previous[index];
+            self.carry[index] = self.previous_carry[index];
+            self.halted[index] = true;
         }
     }
 

@@ -471,6 +471,103 @@ fn hanging_rest_f64() {
     hanging_cloth_stays_at_rest::<f64>(2);
 }
 
+/// Schwerpunktsgeschwindigkeit, Drehimpuls um den Schwerpunkt und
+/// Bewegungsenergie gegenüber dem Schwerpunkt, je Masseneinheit.
+fn rotation_state<T: RealElementary>(cloth: &Cloth<T>) -> (Vector<T, 3>, Vector<T, 3>, T) {
+    let share = T::from_f64(cloth.positions().len() as f64).recip();
+    let centre = cloth.positions().iter().fold(Vector::ZERO, |sum, &point| sum + point) * share;
+    let drift = cloth.velocities().iter().fold(Vector::ZERO, |sum, &velocity| sum + velocity) * share;
+    let mut spin = Vector::ZERO;
+    let mut energy = T::ZERO;
+    for (&point, &velocity) in cloth.positions().iter().zip(cloth.velocities()) {
+        spin += (point - centre).cross(velocity - drift);
+        energy += (velocity - drift).norm_sqr() * T::from_f64(0.5);
+    }
+    (drift, spin, energy)
+}
+
+/// Ein frei rotierendes Tuch behält seinen Drehimpuls.
+///
+/// Früher wirkten die Korrekturen der Verbindungen entlang ihrer aktuellen
+/// Richtung. Ein rotierendes Tuch drehte sich dadurch in jedem Teilschritt
+/// etwas zu wenig weiter und verlor bei 3 rad/s knapp 2 % Drehimpuls je
+/// Sekunde, ohne jede Dämpfung. Entlang der Richtung vom Anfang des
+/// Teilschritts heben sich die Drehmomente jedes Paars genau auf.
+fn rotation_keeps_angular_momentum<T: RealElementary>(axis: [f64; 3], exact: f64) {
+    let f = T::from_f64;
+    let n = 10;
+    let spacing = 1.0 / (n - 1) as f64;
+    let mut cloth: Cloth<T> =
+        Cloth::grid(n, n, v(-0.5, 0.0, -0.5), v(spacing, 0.0, 0.0), v(0.0, 0.0, spacing), f(0.01));
+    cloth.params.damping = T::ZERO;
+    // Mit Schwerkraft: Sie greift im Schwerpunkt an und dreht nichts.
+    let rate = v::<T>(axis[0], axis[1], axis[2]) * f(3.0);
+    for index in 0..n * n {
+        let velocity = rate.cross(cloth.positions()[index]) + v(0.3, 0.1, -0.2);
+        cloth.set_velocity(index, velocity);
+    }
+    let (_, spin, energy) = rotation_state(&cloth);
+    let mut hits = 0;
+    for _ in 0..120 {
+        hits += cloth.step(f(1.0 / 60.0), &[]).ccd_hits;
+    }
+    let (_, after, left) = rotation_state(&cloth);
+    assert_eq!(hits, 0);
+    let change = (after - spin).norm() / spin.norm();
+    assert!(change < f(exact), "Drehimpuls um {:?} geändert", change.to_f64());
+    // Nichts schaukelt sich auf, und das Tuch bleibt in Form.
+    assert!(left <= energy * f(1.0 + 1.0e-4));
+    assert!(cloth.max_strain() < f(0.01));
+    if axis == [0.0, 1.0, 0.0] {
+        // Drehung um die Tuchnormale: starr, also bleibt auch die Energie.
+        assert!((left / energy - T::ONE).abs() < f(1.0e-3), "Energie {:?}", (left / energy).to_f64());
+    }
+}
+
+#[test]
+fn rotation_f32() {
+    rotation_keeps_angular_momentum::<f32>([0.0, 1.0, 0.0], 1.0e-4);
+    rotation_keeps_angular_momentum::<f32>([0.6, 0.3, 0.74], 1.0e-4);
+}
+
+#[test]
+fn rotation_f64() {
+    rotation_keeps_angular_momentum::<f64>([0.0, 1.0, 0.0], 1.0e-11);
+    rotation_keeps_angular_momentum::<f64>([0.6, 0.3, 0.74], 1.0e-11);
+}
+
+/// Sehr langsamer Flug weit weg vom Ursprung: Der Weg eines Teilschritts
+/// ist kleiner als ein Rasterschritt der Lage. Die gerundete Lage bleibt
+/// dann viele Teilschritte lang stehen, während der Rest weiterläuft. Das
+/// ist kein Stillstand – die Geschwindigkeit darf nicht gelöscht werden.
+#[test]
+fn very_slow_flight_keeps_its_velocity() {
+    let mut cloth: Cloth<f32> =
+        Cloth::grid(3, 3, v(250.0, 0.0, 0.0), v(0.1, 0.0, 0.0), v(0.0, 0.0, 0.1), 0.005);
+    cloth.params.gravity = v(0.0, 0.0, 0.0);
+    cloth.params.damping = 0.0;
+    let velocity = v::<f32>(1.0e-4, 0.0, 0.0);
+    cloth.set_all_velocities(velocity);
+    let start = cloth.positions().to_vec();
+    // Erster Schritt: Die Lage rührt sich nicht, die Geschwindigkeit bleibt.
+    cloth.step(1.0 / 60.0, &[]);
+    assert_eq!(cloth.positions(), start.as_slice());
+    assert!(cloth.velocities().iter().all(|&now| now == velocity));
+    // Nach einer Minute ist das Tuch 6 mm weiter, auf einen Rasterschritt.
+    // Die Kollision spielt hier keine Rolle und würde die Prüfung nur
+    // verlangsamen.
+    cloth.params.ccd = false;
+    cloth.params.self_collision = false;
+    for _ in 1..3_600 {
+        cloth.step(1.0 / 60.0, &[]);
+    }
+    for (index, (&position, &began)) in cloth.positions().iter().zip(&start).enumerate() {
+        assert_eq!(cloth.velocities()[index], velocity);
+        let moved = position[0] - began[0];
+        assert!((moved - 0.006).abs() < 4.0e-5, "Teilchen {index}: {moved} m");
+    }
+}
+
 #[test]
 fn free_flight_f32() {
     free_flight_does_not_drift::<f32>();

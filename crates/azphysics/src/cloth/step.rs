@@ -62,9 +62,13 @@ impl<T: RealElementary> Cloth<T> {
         self.carry.resize(count, Vector::ZERO);
         self.predicted.resize(count, Vector::ZERO);
         self.predicted_carry.resize(count, Vector::ZERO);
+        self.previous_carry.resize(count, Vector::ZERO);
+        self.halted.clear();
+        self.halted.resize(count, false);
         let keep = (T::ONE - self.params.damping * h).max(T::ZERO);
         for index in 0..count {
             self.previous[index] = self.positions[index];
+            self.previous_carry[index] = self.carry[index];
             if self.inverse_mass[index] > T::ZERO {
                 let velocity = (self.velocities[index] + self.params.gravity * h) * keep;
                 self.velocities[index] = velocity;
@@ -121,8 +125,11 @@ impl<T: RealElementary> Cloth<T> {
             if self.inverse_mass[index] <= T::ZERO {
                 continue;
             }
-            let mut velocity = if self.positions[index] == self.previous[index] {
-                // An den Anfang des Teilschritts zurückgesetzt: steht.
+            let mut velocity = if self.halted[index] {
+                // Von der Sicherung an den Anfang des Teilschritts
+                // zurückgesetzt: steht. (Eine unveränderte gerundete Lage
+                // allein heißt das nicht – ein sehr langsames Teilchen rückt
+                // nur seinen Rest weiter.)
                 Vector::ZERO
             } else {
                 let moved = (self.positions[index] - self.predicted[index])
@@ -170,10 +177,27 @@ impl<T: RealElementary> Cloth<T> {
             } else {
                 self.params.stretch_compliance
             };
+            // Richtung der Korrektur: die Verbindung, wie sie am Anfang des
+            // Teilschritts lag (wie beim SHAKE-Verfahren), nicht wie sie
+            // gerade liegt. Beide Teilchen bekommen gleich große,
+            // entgegengesetzte Stöße entlang ihrer alten Verbindungslinie;
+            // deren Drehmomente heben sich genau auf, und der Drehimpuls
+            // bleibt erhalten. Entlang der aktuellen Linie korrigiert, dreht
+            // sich ein rotierendes Tuch in jedem Teilschritt etwas zu wenig
+            // weiter und wird stetig langsamer.
+            let before = (self.previous[link.i] - self.previous[link.j])
+                + (self.previous_carry[link.i] - self.previous_carry[link.j]);
+            let current = delta / length;
+            let (direction, along) = match before.normalize() {
+                // Anteil der Korrektur, der die Länge ändert. Hat sich die
+                // Verbindung im Teilschritt um mehr als 60° gedreht, taugt
+                // die alte Richtung nicht mehr.
+                Some(old) if old.dot(current) > T::from_f64(0.5) => (old, old.dot(current)),
+                _ => (current, T::ONE),
+            };
             let alpha = compliance * inverse_h2;
-            let change = (link.rest - length - alpha * *lambda) / (wi + wj + alpha);
+            let change = (link.rest - length - alpha * *lambda) / ((wi + wj) * along + alpha);
             *lambda += change;
-            let direction = delta / length;
             shift(&mut self.positions[link.i], &mut self.carry[link.i], direction * (change * wi));
             shift(&mut self.positions[link.j], &mut self.carry[link.j], -direction * (change * wj));
         }
